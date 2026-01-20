@@ -23,13 +23,102 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 ## [Unreleased]
 
 ### Added
-- None
+
+**UI Component Library: Dropdown Menu (Phase 01 - Sidebar User Menu)**
+- ✅ shadcn/ui dropdown-menu component installed at `apps/frontend/src/components/ui/dropdown-menu.tsx`
+- ✅ Radix UI @radix-ui/react-dropdown-menu integration
+- ✅ 11 dropdown menu primitives exported:
+  - DropdownMenu (root)
+  - DropdownMenuTrigger
+  - DropdownMenuContent
+  - DropdownMenuItem
+  - DropdownMenuLabel
+  - DropdownMenuSeparator
+  - DropdownMenuCheckboxItem
+  - DropdownMenuRadioItem
+  - DropdownMenuSub (nested menus)
+  - DropdownMenuSubTrigger
+  - DropdownMenuSubContent
+- ✅ Full keyboard navigation support (Tab, Enter, Arrow keys, Esc)
+- ✅ ARIA accessibility attributes
+- ✅ Mobile touch interaction support
+- ✅ Smooth animations with data-state transitions
+- ✅ Tailwind CSS styling with customization support
+
+**Component Features:**
+- Animated menu content (fade-in/zoom-in on open)
+- Customizable positioning (top/bottom/left/right)
+- Sub-menu nesting support
+- Checkbox and radio item variants
+- Menu separator and label components
+- Keyboard shortcut display via DropdownMenuShortcut
 
 ### Changed
-- None
+- Updated code-standards.md with UI Component Standards section
+- Enhanced theme-toggle.tsx TypeScript compliance (fixed eslint-disable comments)
 
 ### Fixed
 - None
+
+### Security
+- ✅ Maintained accessibility standards
+- ✅ No new security vulnerabilities introduced
+
+---
+
+## [0.3.0] - 2026-01-20
+
+### Added
+
+**Frontend Theme Provider System (Phase 03 - User Preferences):**
+- ✅ FOUC (Flash of Unstyled Content) prevention script
+  - Runs in `<head>` before React hydration
+  - Applies theme immediately from localStorage
+  - Fallback to system preference detection
+  - Error handling for private browsing/quota exceeded
+- ✅ Theme system with three modes: light, dark, system
+- ✅ System preference detection (prefers-color-scheme media query)
+- ✅ localStorage persistence with quota handling
+  - Safe wrapper handles quota exceeded errors
+  - Graceful fallback when localStorage unavailable
+  - Automatic cache clearing on quota exceeded
+- ✅ Theme synchronization across browser tabs
+- ✅ Error boundary for theme system resilience
+- ✅ Custom hook (useTheme) for theme management
+  - Returns current theme, resolved theme, setter, and isDark flag
+  - Listens for system preference changes
+- ✅ Theme Provider component for app initialization
+- ✅ Zustand state management with persist middleware
+- ✅ Comprehensive test coverage (83.33%)
+
+**Implementation Details:**
+- theme-script.ts: FOUC prevention inline script
+- ui-store.ts: Enhanced with theme state and safe localStorage
+- use-theme.ts: Custom hook for theme consumption
+- theme-provider.tsx: Provider component for theme initialization
+- theme-error-boundary.tsx: Error boundary for resilience
+- app/layout.tsx: Integration with main layout
+- app/providers.tsx: Provider setup in main providers
+
+### Technical Decisions
+- In-memory theme resolution with system preference detection
+- localStorage with safe error handling (quota exceeded, private browsing)
+- Zustand persist middleware for automatic hydration
+- Inline script for FOUC prevention (no layout shift)
+- System preference listening via media query listener
+
+### Changed
+- Updated useUIStore with theme state management
+- Updated app layout to include theme provider
+- Updated providers setup to include theme system
+
+### Fixed
+- None
+
+### Security
+- ✅ No sensitive data in localStorage
+- ✅ Safe error handling for quota exceeded
+- ✅ XSS protection via Zustand serialization
 
 ---
 
@@ -304,10 +393,11 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 | 0.1.0 | 2026-01-16 | Released | Initial project foundation and scaffolding |
 | 0.2.0 | 2026-01-16 | Released | Frontend authentication system (complete) |
 | 0.2.1 | 2026-01-20 | Released | Login page UX enhancements (Motion, animations, accessibility) |
-| 0.3.0 | TBD | Planned | Backend core implementation (entities, auth, gateway) |
-| 0.4.0 | TBD | Planned | Domain modules (transactions, banking, budgets, notifications) |
-| 0.5.0 | TBD | Planned | Analytics service (LLM integration, caching) |
-| 0.6.0 | TBD | Planned | Frontend MVP (auth, dashboard, transactions, budgets) |
+| 0.3.0 | 2026-01-20 | Released | Frontend theme provider system (dark mode, localStorage persistence) |
+| 0.4.0 | TBD | Planned | Backend core implementation (entities, auth, gateway) |
+| 0.5.0 | TBD | Planned | Domain modules (transactions, banking, budgets, notifications) |
+| 0.6.0 | TBD | Planned | Analytics service (LLM integration, caching) |
+| 0.7.0 | TBD | Planned | Frontend MVP (auth, dashboard, transactions, budgets) |
 | 1.0.0 | TBD | Planned | Production launch |
 
 ---
@@ -516,7 +606,7 @@ Currently no deprecated features.
 
 ---
 
-**Last Updated:** 2026-01-16
+**Last Updated:** 2026-01-20
 **Maintained By:** Development Team
 
 ---

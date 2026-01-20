@@ -1,0 +1,850 @@
+{
+  "categories": [
+    {
+      "id": "10000000-0000-0000-0000-000000000001",
+      "userId": "mock-user-id",
+      "name": "Food & Dining",
+      "color": "#FF6B6B",
+      "icon": "utensils",
+      "description": "Restaurants, groceries, and food delivery",
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000002",
+      "userId": "mock-user-id",
+      "name": "Transportation",
+      "color": "#4ECDC4",
+      "icon": "car",
+      "description": "Gas, public transit, ride shares, and car maintenance",
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000003",
+      "userId": "mock-user-id",
+      "name": "Entertainment",
+      "color": "#95E1D3",
+      "icon": "film",
+      "description": "Movies, games, streaming services, and hobbies",
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000004",
+      "userId": "mock-user-id",
+      "name": "Shopping",
+      "color": "#F38181",
+      "icon": "shopping-bag",
+      "description": "Clothing, electronics, and general shopping",
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000005",
+      "userId": "mock-user-id",
+      "name": "Healthcare",
+      "color": "#AA96DA",
+      "icon": "heart-pulse",
+      "description": "Medical expenses, pharmacy, and health insurance",
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000006",
+      "userId": "mock-user-id",
+      "name": "Utilities",
+      "color": "#FCBAD3",
+      "icon": "zap",
+      "description": "Electricity, water, internet, and phone bills",
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000007",
+      "userId": "mock-user-id",
+      "name": "Salary",
+      "color": "#A8E6CF",
+      "icon": "briefcase",
+      "description": "Monthly salary and wages",
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000008",
+      "userId": "mock-user-id",
+      "name": "Freelance",
+      "color": "#FFD93D",
+      "icon": "laptop",
+      "description": "Freelance projects and side income",
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000009",
+      "userId": "mock-user-id",
+      "name": "Housing",
+      "color": "#6C5CE7",
+      "icon": "home",
+      "description": "Rent, mortgage, and property maintenance",
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000010",
+      "userId": "mock-user-id",
+      "name": "Education",
+      "color": "#74B9FF",
+      "icon": "book",
+      "description": "Courses, books, and learning materials",
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    }
+  ],
+  "transactions": [
+    {
+      "id": "20000000-0000-0000-0000-000000000001",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000001",
+      "amount": 45.5,
+      "type": "expense",
+      "description": "Dinner at Italian Restaurant",
+      "date": "2026-01-19",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000001",
+        "name": "Food & Dining",
+        "color": "#FF6B6B",
+        "icon": "utensils"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000002",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000001",
+      "amount": 85.2,
+      "type": "expense",
+      "description": "Weekly grocery shopping",
+      "date": "2026-01-17",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000001",
+        "name": "Food & Dining",
+        "color": "#FF6B6B",
+        "icon": "utensils"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000003",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000001",
+      "amount": 25.0,
+      "type": "expense",
+      "description": "Lunch with colleagues",
+      "date": "2026-01-15",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000001",
+        "name": "Food & Dining",
+        "color": "#FF6B6B",
+        "icon": "utensils"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000004",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000001",
+      "amount": 12.5,
+      "type": "expense",
+      "description": "Coffee shop",
+      "date": "2026-01-13",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000001",
+        "name": "Food & Dining",
+        "color": "#FF6B6B",
+        "icon": "utensils"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000005",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000001",
+      "amount": 92.3,
+      "type": "expense",
+      "description": "Grocery store",
+      "date": "2026-01-10",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000001",
+        "name": "Food & Dining",
+        "color": "#FF6B6B",
+        "icon": "utensils"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000006",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000001",
+      "amount": 38.75,
+      "type": "expense",
+      "description": "Thai takeout",
+      "date": "2026-01-08",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000001",
+        "name": "Food & Dining",
+        "color": "#FF6B6B",
+        "icon": "utensils"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000007",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000001",
+      "amount": 67.4,
+      "type": "expense",
+      "description": "Family dinner",
+      "date": "2026-01-05",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000001",
+        "name": "Food & Dining",
+        "color": "#FF6B6B",
+        "icon": "utensils"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000008",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000001",
+      "amount": 15.8,
+      "type": "expense",
+      "description": "Breakfast cafe",
+      "date": "2026-01-02",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000001",
+        "name": "Food & Dining",
+        "color": "#FF6B6B",
+        "icon": "utensils"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000009",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000002",
+      "amount": 60.0,
+      "type": "expense",
+      "description": "Gas station fill-up",
+      "date": "2026-01-18",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000002",
+        "name": "Transportation",
+        "color": "#4ECDC4",
+        "icon": "car"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000010",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000002",
+      "amount": 15.5,
+      "type": "expense",
+      "description": "Uber to airport",
+      "date": "2026-01-14",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000002",
+        "name": "Transportation",
+        "color": "#4ECDC4",
+        "icon": "car"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000011",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000002",
+      "amount": 45.0,
+      "type": "expense",
+      "description": "Monthly parking pass",
+      "date": "2026-01-11",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000002",
+        "name": "Transportation",
+        "color": "#4ECDC4",
+        "icon": "car"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000012",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000002",
+      "amount": 25.0,
+      "type": "expense",
+      "description": "Car wash",
+      "date": "2026-01-06",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000002",
+        "name": "Transportation",
+        "color": "#4ECDC4",
+        "icon": "car"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000013",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000002",
+      "amount": 120.0,
+      "type": "expense",
+      "description": "Oil change and maintenance",
+      "date": "2025-12-31",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000002",
+        "name": "Transportation",
+        "color": "#4ECDC4",
+        "icon": "car"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000014",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000003",
+      "amount": 15.99,
+      "type": "expense",
+      "description": "Netflix subscription",
+      "date": "2026-01-19",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000003",
+        "name": "Entertainment",
+        "color": "#95E1D3",
+        "icon": "film"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000015",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000003",
+      "amount": 45.0,
+      "type": "expense",
+      "description": "Concert tickets",
+      "date": "2026-01-12",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000003",
+        "name": "Entertainment",
+        "color": "#95E1D3",
+        "icon": "film"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000016",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000003",
+      "amount": 29.99,
+      "type": "expense",
+      "description": "New video game",
+      "date": "2026-01-09",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000003",
+        "name": "Entertainment",
+        "color": "#95E1D3",
+        "icon": "film"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000017",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000003",
+      "amount": 22.5,
+      "type": "expense",
+      "description": "Movie theater",
+      "date": "2026-01-04",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000003",
+        "name": "Entertainment",
+        "color": "#95E1D3",
+        "icon": "film"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000018",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000003",
+      "amount": 18.0,
+      "type": "expense",
+      "description": "Spotify Premium",
+      "date": "2026-01-01",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000003",
+        "name": "Entertainment",
+        "color": "#95E1D3",
+        "icon": "film"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000019",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000004",
+      "amount": 89.99,
+      "type": "expense",
+      "description": "New running shoes",
+      "date": "2026-01-16",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000004",
+        "name": "Shopping",
+        "color": "#F38181",
+        "icon": "shopping-bag"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000020",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000004",
+      "amount": 156.5,
+      "type": "expense",
+      "description": "Winter jacket",
+      "date": "2026-01-07",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000004",
+        "name": "Shopping",
+        "color": "#F38181",
+        "icon": "shopping-bag"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000021",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000004",
+      "amount": 34.99,
+      "type": "expense",
+      "description": "Wireless earbuds",
+      "date": "2026-01-03",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000004",
+        "name": "Shopping",
+        "color": "#F38181",
+        "icon": "shopping-bag"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000022",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000004",
+      "amount": 42.0,
+      "type": "expense",
+      "description": "Clothing store",
+      "date": "2025-12-29",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000004",
+        "name": "Shopping",
+        "color": "#F38181",
+        "icon": "shopping-bag"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000023",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000005",
+      "amount": 25.0,
+      "type": "expense",
+      "description": "Pharmacy prescription",
+      "date": "2026-01-13",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000005",
+        "name": "Healthcare",
+        "color": "#AA96DA",
+        "icon": "heart-pulse"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000024",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000005",
+      "amount": 150.0,
+      "type": "expense",
+      "description": "Dental checkup",
+      "date": "2025-12-30",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000005",
+        "name": "Healthcare",
+        "color": "#AA96DA",
+        "icon": "heart-pulse"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000025",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000005",
+      "amount": 40.0,
+      "type": "expense",
+      "description": "Vitamins and supplements",
+      "date": "2025-12-26",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000005",
+        "name": "Healthcare",
+        "color": "#AA96DA",
+        "icon": "heart-pulse"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000026",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000006",
+      "amount": 85.0,
+      "type": "expense",
+      "description": "Electric bill",
+      "date": "2026-01-15",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000006",
+        "name": "Utilities",
+        "color": "#FCBAD3",
+        "icon": "zap"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000027",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000006",
+      "amount": 65.0,
+      "type": "expense",
+      "description": "Internet service",
+      "date": "2026-01-10",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000006",
+        "name": "Utilities",
+        "color": "#FCBAD3",
+        "icon": "zap"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000028",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000006",
+      "amount": 45.0,
+      "type": "expense",
+      "description": "Water bill",
+      "date": "2026-01-05",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000006",
+        "name": "Utilities",
+        "color": "#FCBAD3",
+        "icon": "zap"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000029",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000006",
+      "amount": 55.0,
+      "type": "expense",
+      "description": "Phone bill",
+      "date": "2025-12-31",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000006",
+        "name": "Utilities",
+        "color": "#FCBAD3",
+        "icon": "zap"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000030",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000009",
+      "amount": 1200.0,
+      "type": "expense",
+      "description": "Monthly rent",
+      "date": "2026-01-19",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000009",
+        "name": "Housing",
+        "color": "#6C5CE7",
+        "icon": "home"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000031",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000009",
+      "amount": 150.0,
+      "type": "expense",
+      "description": "Home insurance",
+      "date": "2026-01-05",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000009",
+        "name": "Housing",
+        "color": "#6C5CE7",
+        "icon": "home"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000032",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000010",
+      "amount": 49.99,
+      "type": "expense",
+      "description": "Online course subscription",
+      "date": "2026-01-17",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000010",
+        "name": "Education",
+        "color": "#74B9FF",
+        "icon": "book"
+      }
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000033",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000010",
+      "amount": 35.0,
+      "type": "expense",
+      "description": "Technical books",
+      "date": "2026-01-08",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000010",
+        "name": "Education",
+        "color": "#74B9FF",
+        "icon": "book"
+      }
+    },
+    {
+      "id": "30000000-0000-0000-0000-000000000001",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000007",
+      "amount": 4500.0,
+      "type": "income",
+      "description": "Monthly salary",
+      "date": "2026-01-19",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000007",
+        "name": "Salary",
+        "color": "#A8E6CF",
+        "icon": "briefcase"
+      }
+    },
+    {
+      "id": "30000000-0000-0000-0000-000000000002",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000008",
+      "amount": 850.0,
+      "type": "income",
+      "description": "Freelance project payment",
+      "date": "2026-01-12",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000008",
+        "name": "Freelance",
+        "color": "#FFD93D",
+        "icon": "laptop"
+      }
+    },
+    {
+      "id": "30000000-0000-0000-0000-000000000003",
+      "userId": "mock-user-id",
+      "categoryId": "10000000-0000-0000-0000-000000000008",
+      "amount": 600.0,
+      "type": "income",
+      "description": "Consulting work",
+      "date": "2026-01-06",
+      "currency": "USD",
+      "notes": null,
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "category": {
+        "id": "10000000-0000-0000-0000-000000000008",
+        "name": "Freelance",
+        "color": "#FFD93D",
+        "icon": "laptop"
+      }
+    }
+  ],
+  "summary": {
+    "totalTransactions": 36,
+    "totalExpense": 3334.94,
+    "totalIncome": 5950.0,
+    "netBalance": 2615.06,
+    "dateRange": {
+      "start": "2025-12-26",
+      "end": "2026-01-20"
+    },
+    "categoryBreakdown": [
+      {
+        "categoryId": "10000000-0000-0000-0000-000000000001",
+        "categoryName": "Food & Dining",
+        "totalExpense": 382.45,
+        "transactionCount": 8
+      },
+      {
+        "categoryId": "10000000-0000-0000-0000-000000000002",
+        "categoryName": "Transportation",
+        "totalExpense": 265.5,
+        "transactionCount": 5
+      },
+      {
+        "categoryId": "10000000-0000-0000-0000-000000000003",
+        "categoryName": "Entertainment",
+        "totalExpense": 131.48,
+        "transactionCount": 5
+      },
+      {
+        "categoryId": "10000000-0000-0000-0000-000000000004",
+        "categoryName": "Shopping",
+        "totalExpense": 323.48,
+        "transactionCount": 4
+      },
+      {
+        "categoryId": "10000000-0000-0000-0000-000000000005",
+        "categoryName": "Healthcare",
+        "totalExpense": 215.0,
+        "transactionCount": 3
+      },
+      {
+        "categoryId": "10000000-0000-0000-0000-000000000006",
+        "categoryName": "Utilities",
+        "totalExpense": 250.0,
+        "transactionCount": 4
+      },
+      {
+        "categoryId": "10000000-0000-0000-0000-000000000009",
+        "categoryName": "Housing",
+        "totalExpense": 1350.0,
+        "transactionCount": 2
+      },
+      {
+        "categoryId": "10000000-0000-0000-0000-000000000010",
+        "categoryName": "Education",
+        "totalExpense": 84.99,
+        "transactionCount": 2
+      }
+    ]
+  }
+}

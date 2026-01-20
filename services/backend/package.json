@@ -19,6 +19,10 @@
     "migration:show": "typeorm-ts-node-commonjs migration:show -d ormconfig.ts"
   },
   "dependencies": {
+    "@m-tracking/common": "workspace:*",
+    "@m-tracking/types": "workspace:*",
+    "@m-tracking/constants": "workspace:*",
+    "@m-tracking/utils": "workspace:*",
     "@nestjs/common": "^11.1.11",
     "@nestjs/config": "^3.3.0",
     "@nestjs/core": "^11.1.11",

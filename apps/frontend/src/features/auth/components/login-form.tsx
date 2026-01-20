@@ -13,8 +13,6 @@ import { AnimatedInput } from './animated-input'
 import { AnimatedPasswordInput } from './animated-password-input'
 import { OAuthButtons } from './oauth-buttons'
 import { FormField } from './form-field'
-import { Divider } from './divider'
-import { PasswordlessLinks } from './passwordless-links'
 import { AnimatedFormWrapper } from './animated-form-wrapper'
 import { loginSchema, type LoginInput } from '../validations/auth-schemas'
 import { useLogin } from '../hooks/use-login'
@@ -72,13 +70,13 @@ export function LoginForm() {
           transition={{ type: 'spring', stiffness: 200, delay: 0.1 }}
           className="inline-block"
         >
-          <div className="rounded-full bg-success/10 p-4">
-            <Check className="h-12 w-12 text-success" />
+          <div className="rounded-full bg-green-100 p-4">
+            <Check className="h-12 w-12 text-green-600" />
           </div>
         </m.div>
         <div>
-          <p className="text-lg font-medium text-foreground">Welcome back!</p>
-          <p className="text-sm text-muted-foreground mt-1">Redirecting to your dashboard...</p>
+          <p className="text-lg font-medium text-gray-900">Welcome back!</p>
+          <p className="text-sm text-gray-600 mt-1">Redirecting to your dashboard...</p>
         </div>
       </m.div>
     )
@@ -86,7 +84,15 @@ export function LoginForm() {
 
   return (
     <AnimatedFormWrapper>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <m.form
+        onSubmit={handleSubmit(onSubmit)}
+        animate={error ? { x: [-4, 4, -4, 4, 0] } : {}}
+        transition={{
+          duration: prefersReducedMotion ? 0 : 0.4,
+          ease: 'easeInOut'
+        }}
+        className="space-y-6"
+      >
         {/* Global Error Banner */}
         <AnimatePresence mode="wait">
           {error && (
@@ -97,7 +103,7 @@ export function LoginForm() {
               transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
             >
               <div
-                className="flex items-center gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+                className="flex items-center gap-2 rounded-md bg-red-500/10 p-3 text-sm text-red-400 border border-red-500/20"
                 role="alert"
                 aria-live="assertive"
               >
@@ -154,51 +160,53 @@ export function LoginForm() {
             checked={rememberMe}
             onCheckedChange={(checked) => setValue('rememberMe', checked as boolean)}
           />
-          <Label htmlFor="rememberMe" className="text-sm font-normal cursor-pointer">
-            Remember me
+          <Label htmlFor="rememberMe" className="text-sm font-normal cursor-pointer text-gray-700">
+            Remember Me
           </Label>
         </div>
         <Link
           href="/auth/forgot-password"
-          className="text-sm font-medium text-primary hover:underline transition-colors"
+          className="text-sm font-medium text-[#5046E5] hover:text-[#4338CA] hover:underline transition-colors"
         >
-          Forgot password?
+          Forgot Your Password?
         </Link>
       </div>
 
       {/* Submit Button */}
       <Button
         type="submit"
-        className="w-full h-12 text-base font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] shadow-lg hover:shadow-xl"
+        className="w-full h-12 text-base"
         isLoading={isLoading}
         loadingText="Signing in..."
         disabled={isLoading}
       >
-        Sign In
+        Log In
       </Button>
 
-      {/* Sign Up Link */}
-      <p className="text-center text-sm text-muted-foreground">
-        Don't have an account?{' '}
-        <Link
-          href="/auth/register"
-          className="font-semibold text-blue-600 hover:text-blue-700 hover:underline transition-colors"
-        >
-          Sign up
-        </Link>
-      </p>
-
       {/* Divider */}
-      <Divider text="or continue with" />
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-300"></div>
+        </div>
+        <div className="relative flex justify-center text-sm">
+          <span className="px-2 bg-white text-gray-500">Or Login With</span>
+        </div>
+      </div>
 
       {/* OAuth Buttons */}
       <OAuthButtons />
 
-        {/* Passwordless Options */}
-        <div className="pt-2">
-          <PasswordlessLinks />
-        </div>
-      </form>
+      {/* Sign Up Link */}
+      <p className="text-center text-sm text-gray-600">
+        Don't Have An Account?{' '}
+        <Link
+          href="/auth/register"
+          className="font-semibold text-[#5046E5] hover:text-[#4338CA] hover:underline transition-colors"
+        >
+          Register Now.
+        </Link>
+      </p>
+      </m.form>
     </AnimatedFormWrapper>
   )
 }

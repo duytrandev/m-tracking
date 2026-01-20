@@ -47,7 +47,7 @@ export default function MagicLinkPage(): React.ReactElement {
 
   if (isSuccess && email) {
     return (
-      <AuthCard title="Check your email" showLogo>
+      <AuthCard title="Check your email">
         <div className="text-center space-y-6">
           <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-primary/10">
             <Mail className="h-12 w-12 text-primary" />

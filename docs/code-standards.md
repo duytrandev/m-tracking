@@ -880,6 +880,224 @@ Brief description of changes
 
 ---
 
+## UI Component Standards (shadcn/ui)
+
+### Component Installation & Usage
+
+**All UI components must use shadcn/ui (Radix UI + Tailwind):**
+
+```tsx
+// ✅ Good - Using shadcn/ui component
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu'
+
+export function MyComponent() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline">Actions</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem>Profile</DropdownMenuItem>
+        <DropdownMenuItem>Settings</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+// ❌ Bad - Custom dropdown implementation
+export function MyComponent() {
+  return (
+    <div className="relative">
+      {/* Custom dropdown logic */}
+    </div>
+  )
+}
+```
+
+### Available Components
+
+Installed shadcn/ui components in `apps/frontend/src/components/ui/`:
+
+- **Button** - Reusable button component with variants
+- **Input** - Form input with validation styling
+- **Dropdown Menu** - Accessible dropdown menu (Radix UI)
+  - DropdownMenuTrigger
+  - DropdownMenuContent
+  - DropdownMenuItem
+  - DropdownMenuLabel
+  - DropdownMenuSeparator
+  - DropdownMenuCheckboxItem
+  - DropdownMenuRadioItem
+  - DropdownMenuSub (nested menus)
+- **Theme Toggle** - Dark mode toggle button (4 variants)
+
+### Dropdown Menu Patterns
+
+**Basic Menu:**
+
+```tsx
+<DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Button variant="ghost" size="icon">
+      <MoreVertical />
+    </Button>
+  </DropdownMenuTrigger>
+  <DropdownMenuContent>
+    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+    <DropdownMenuSeparator />
+    <DropdownMenuItem>Edit</DropdownMenuItem>
+    <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
+
+**Nested Submenu:**
+
+```tsx
+<DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Button>Menu</Button>
+  </DropdownMenuTrigger>
+  <DropdownMenuContent>
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger>Export</DropdownMenuSubTrigger>
+      <DropdownMenuSubContent>
+        <DropdownMenuItem>PDF</DropdownMenuItem>
+        <DropdownMenuItem>CSV</DropdownMenuItem>
+      </DropdownMenuSubContent>
+    </DropdownMenuSub>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
+
+**Checkbox Group:**
+
+```tsx
+<DropdownMenu>
+  <DropdownMenuTrigger>Filters</DropdownMenuTrigger>
+  <DropdownMenuContent>
+    <DropdownMenuCheckboxItem checked={showActive}>
+      Show Active
+    </DropdownMenuCheckboxItem>
+    <DropdownMenuCheckboxItem checked={showArchived}>
+      Show Archived
+    </DropdownMenuCheckboxItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
+
+### Styling & Customization
+
+Dropdown components use Tailwind CSS utility classes. Customize via className prop:
+
+```tsx
+<DropdownMenuContent className="w-64">
+  {/* Custom width */}
+</DropdownMenuContent>
+
+<DropdownMenuItem className="text-red-600">
+  {/* Custom text color */}
+</DropdownMenuItem>
+```
+
+### Accessibility
+
+All shadcn/ui components include:
+- ✅ Keyboard navigation (Tab, Enter, Arrow keys, Esc)
+- ✅ ARIA labels and roles (aria-label, role="menuitem")
+- ✅ Focus management
+- ✅ Screen reader support
+- ✅ Mobile touch interactions
+
+---
+
+## Theme Management Standards
+
+### Theme Provider Pattern
+
+**Use the theme system for consistent dark mode support:**
+
+```tsx
+// ✅ Good - Using theme system
+import { useTheme } from '@/hooks/use-theme'
+
+export function MyComponent() {
+  const { theme, resolvedTheme, setTheme, isDark } = useTheme()
+
+  return (
+    <div>
+      <p>Current theme: {resolvedTheme}</p>
+      <button onClick={() => setTheme('dark')}>Dark</button>
+      <button onClick={() => setTheme('system')}>System</button>
+    </div>
+  )
+}
+```
+
+### Zustand Theme Store
+
+**Access theme state from UIStore:**
+
+```typescript
+// ✅ Good - Using Zustand selectors
+import { useUIStore } from '@/lib/store/ui-store'
+
+export function ThemeToggle() {
+  const theme = useUIStore((s) => s.theme)
+  const setTheme = useUIStore((s) => s.setTheme)
+
+  return <button onClick={() => setTheme('dark')}>Toggle</button>
+}
+```
+
+### localStorage Quota Handling
+
+**Theme system handles quota exceeded gracefully:**
+
+```typescript
+// ✅ Automatic - safeLocalStorage wrapper handles errors
+// When localStorage quota is exceeded:
+// 1. Try-catch wraps all localStorage operations
+// 2. Log warning (not error) on quota exceeded
+// 3. Clear old data and retry
+// 4. Fall back to system preference if all fails
+
+// No manual error handling needed - it's built in!
+```
+
+### FOUC Prevention
+
+**Theme is applied before React loads via inline script:**
+
+```tsx
+// ✅ Automatic - theme script injected in <head>
+// In app/layout.tsx:
+// <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+//
+// This prevents flash of unstyled content (FOUC)
+// Theme class is applied immediately as HTML loads
+```
+
+### System Preference Detection
+
+**Theme system detects OS dark mode:**
+
+```typescript
+// ✅ Good - System preference respected
+const { resolvedTheme } = useTheme()
+// If theme === 'system':
+//   resolvedTheme = 'dark' (if OS is dark mode)
+//   resolvedTheme = 'light' (if OS is light mode)
+```
+
+---
+
 ## Animation Best Practices (Motion Library)
 
 ### Motion Library Standards
@@ -983,5 +1201,5 @@ Before committing code, ensure:
 
 ---
 
-**Last Updated:** 2026-01-16
+**Last Updated:** 2026-01-20
 **Maintained By:** Development Team

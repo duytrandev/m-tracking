@@ -123,7 +123,7 @@ export default function OtpLoginPage(): React.ReactElement {
 
   // Verify Step
   return (
-    <AuthCard title="Enter verification code" showLogo>
+    <AuthCard title="Enter verification code">
       <div className="space-y-6">
         <div className="text-center space-y-2">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">

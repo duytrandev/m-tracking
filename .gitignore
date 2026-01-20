@@ -43,18 +43,29 @@ yarn-error.log*
 lerna-debug.log*
 pnpm-debug.log*
 
+# Nx
+.nx/cache
+.nx/workspace-data
+.nx/tmp
+
 # OS files
 .DS_Store
 Thumbs.db
 *.swp
 *.swo
 *~
+*~
 
 # IDE
-.vscode/
 .idea/
 *.sublime-project
 *.sublime-workspace
+*.iml
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
 
 # Temporary files
 tmp/
@@ -88,3 +99,4 @@ docker-compose.override.yml
 .claude/
 .bmad-core/
 .nx
+plans/

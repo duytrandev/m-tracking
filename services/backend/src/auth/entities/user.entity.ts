@@ -14,6 +14,7 @@ import { Session } from './session.entity';
 import { OAuthAccount } from './oauth-account.entity';
 import { PasswordResetToken } from './password-reset-token.entity';
 import { EmailVerificationToken } from './email-verification-token.entity';
+import { UserPreferences, DEFAULT_USER_PREFERENCES } from '../interfaces/user-preferences.interface';
 
 @Entity('users')
 @Index(['email'])
@@ -48,6 +49,12 @@ export class User {
 
   @Column({ name: 'two_factor_secret', nullable: true, select: false, length: 255 })
   twoFactorSecret: string;
+
+  @Column({
+    type: 'jsonb',
+    default: () => `'${JSON.stringify(DEFAULT_USER_PREFERENCES)}'::jsonb`,
+  })
+  preferences: UserPreferences;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

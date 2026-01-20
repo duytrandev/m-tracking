@@ -3,14 +3,13 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useAuth } from '@/features/auth/hooks/use-auth'
 import { Button } from '@/components/ui/button'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { UserAccountMenu } from '@/components/layout/user-account-menu'
 import {
   LayoutDashboard,
   CreditCard,
   PiggyBank,
-  Settings,
-  LogOut,
   Menu,
   X,
 } from 'lucide-react'
@@ -20,7 +19,6 @@ const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/transactions', label: 'Transactions', icon: CreditCard },
   { href: '/budgets', label: 'Budgets', icon: PiggyBank },
-  { href: '/settings', label: 'Settings', icon: Settings },
 ]
 
 interface DashboardLayoutProps {
@@ -32,7 +30,6 @@ interface DashboardLayoutProps {
  * Main layout for authenticated pages with sidebar navigation
  */
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { user, logout, isLoggingOut } = useAuth()
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
@@ -51,70 +48,52 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="flex-1">
           <span className="font-semibold">M-Tracking</span>
         </div>
+        <ThemeToggle variant="minimal" size="sm" />
       </header>
 
       <div className="flex">
-        {/* Sidebar */}
+        {/* Sidebar - Always Fixed */}
         <aside
           className={cn(
-            'fixed inset-y-0 left-0 z-50 w-64 border-r bg-background transition-transform lg:static lg:translate-x-0',
+            'fixed inset-y-0 left-0 z-50 w-64 border-r bg-background',
+            'flex flex-col',
+            'transition-transform lg:translate-x-0',
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           )}
         >
-          <div className="flex h-full flex-col">
-            {/* Logo */}
-            <div className="flex h-16 items-center border-b px-6">
-              <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-                <span className="text-xl">M-Tracking</span>
-              </Link>
-            </div>
+          {/* Logo - Fixed Height */}
+          <div className="flex h-16 flex-shrink-0 items-center border-b px-6">
+            <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
+              <span className="text-xl">M-Tracking</span>
+            </Link>
+          </div>
 
-            {/* Navigation */}
-            <nav className="flex-1 space-y-1 p-4">
-              {navItems.map((item) => {
-                const isActive = pathname === item.href
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
-                      isActive
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                    )}
-                    onClick={() => setSidebarOpen(false)}
-                  >
-                    <item.icon className="h-4 w-4" />
-                    {item.label}
-                  </Link>
-                )
-              })}
-            </nav>
+          {/* Navigation - Scrollable */}
+          <nav className="flex-1 overflow-y-auto space-y-1 p-4">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
+                    isActive
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                  )}
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
+              )
+            })}
+          </nav>
 
-            {/* User Section */}
-            <div className="border-t p-4">
-              <div className="mb-3 flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                  <span className="text-sm font-medium text-primary">
-                    {user?.name?.charAt(0).toUpperCase() || 'U'}
-                  </span>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{user?.name || 'User'}</p>
-                  <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={logout}
-                disabled={isLoggingOut}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                {isLoggingOut ? 'Logging out...' : 'Log out'}
-              </Button>
-            </div>
+          {/* User Section - Fixed at Bottom */}
+          <div className="flex-shrink-0 border-t p-4">
+            <UserAccountMenu />
           </div>
         </aside>
 
@@ -126,8 +105,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           />
         )}
 
-        {/* Main Content */}
-        <main className="flex-1 p-6">{children}</main>
+        {/* Main Content - Add left margin for fixed sidebar on desktop */}
+        <main className="flex-1 p-6 lg:ml-64">{children}</main>
       </div>
     </div>
   )

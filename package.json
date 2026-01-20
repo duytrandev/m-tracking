@@ -16,10 +16,19 @@
     "build": "nx run-many -t build --all",
     "build:backend": "nx run @m-tracking/backend:build",
     "build:frontend": "nx run @m-tracking/frontend:build",
+    "build:affected": "nx affected -t build",
     "test": "nx run-many -t test --all",
+    "test:affected": "nx affected -t test",
+    "test:watch": "nx run-many -t test --all --watch",
     "lint": "nx run-many -t lint --all",
+    "lint:affected": "nx affected -t lint",
+    "lint:fix": "nx run-many -t lint --all --fix",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "type-check": "nx run-many -t type-check --all",
+    "affected:graph": "nx affected:graph",
+    "graph": "nx graph",
+    "clean": "nx reset && rm -rf node_modules/.cache",
     "prepare": "husky",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
@@ -37,7 +46,9 @@
   },
   "engines": {
     "node": ">=20.10.0",
-    "pnpm": ">=8.0.0"
+    "npm": "please-use-pnpm",
+    "yarn": "please-use-pnpm",
+    "pnpm": ">=10.0.0"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
