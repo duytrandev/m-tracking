@@ -24,7 +24,7 @@ export default function MagicLinkVerifyPage(): React.ReactElement {
 
   if (!token) {
     return (
-      <AuthCard title="Invalid Link" showLogo>
+      <AuthCard title="Invalid Link">
         <div className="flex flex-col items-center gap-4 py-8">
           <AlertCircle className="h-12 w-12 text-destructive" />
           <p className="text-center text-muted-foreground">No token provided</p>
@@ -35,7 +35,7 @@ export default function MagicLinkVerifyPage(): React.ReactElement {
 
   if (isLoading) {
     return (
-      <AuthCard title="Verifying..." showLogo>
+      <AuthCard title="Verifying...">
         <div className="flex flex-col items-center gap-4 py-8">
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
           <p className="text-muted-foreground">Please wait while we sign you in...</p>
@@ -46,7 +46,7 @@ export default function MagicLinkVerifyPage(): React.ReactElement {
 
   if (error) {
     return (
-      <AuthCard title="Link expired or invalid" showLogo>
+      <AuthCard title="Link expired or invalid">
         <div className="flex flex-col items-center gap-4 py-8">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
             <AlertCircle className="h-8 w-8 text-destructive" />
@@ -67,7 +67,7 @@ export default function MagicLinkVerifyPage(): React.ReactElement {
 
   // Success state (will redirect)
   return (
-    <AuthCard title="Success!" showLogo>
+    <AuthCard title="Success!">
       <div className="flex flex-col items-center gap-4 py-8">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
           <CheckCircle2 className="h-8 w-8 text-green-600" />

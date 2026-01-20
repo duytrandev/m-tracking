@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { sleep as sharedSleep } from '@m-tracking/utils'
 
 /**
  * Utility function to merge Tailwind CSS classes with clsx and tailwind-merge
@@ -26,7 +27,6 @@ export function formatError(error: unknown): string {
 /**
  * Sleep utility for async operations
  * Useful for testing and simulating delays
+ * Re-exported from shared utilities for consistency
  */
-export function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
+export const sleep = sharedSleep

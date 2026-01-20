@@ -6,6 +6,8 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { Toaster } from '@/components/ui/toaster'
 import { MSWProvider } from '@/mocks/MSWProvider'
 import { AuthInitializer } from '@/features/auth/components/auth-initializer'
+import { ThemeProvider } from '@/features/preferences/components/theme-provider'
+import { ThemeErrorBoundary } from '@/features/preferences/components/theme-error-boundary'
 import { getQueryClient } from '@/lib/query'
 
 interface ProvidersProps {
@@ -21,11 +23,15 @@ export function Providers({ children, locale, messages }: ProvidersProps) {
     <NextIntlClientProvider locale={locale} messages={messages}>
       <QueryClientProvider client={queryClient}>
         <MSWProvider>
-          <AuthInitializer>
-            {children}
-            <Toaster />
-            <ReactQueryDevtools initialIsOpen={false} />
-          </AuthInitializer>
+          <ThemeErrorBoundary>
+            <ThemeProvider>
+              <AuthInitializer>
+                {children}
+                <Toaster />
+                <ReactQueryDevtools initialIsOpen={false} />
+              </AuthInitializer>
+            </ThemeProvider>
+          </ThemeErrorBoundary>
         </MSWProvider>
       </QueryClientProvider>
     </NextIntlClientProvider>

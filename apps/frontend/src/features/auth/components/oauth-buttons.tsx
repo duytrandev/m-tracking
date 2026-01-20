@@ -9,7 +9,7 @@ interface OAuthButtonsProps {
 }
 
 export function OAuthButtons({
-  providers = ['google'],
+  providers = ['google', 'apple'],
   disabled = false,
 }: OAuthButtonsProps): React.ReactElement {
   const { initiateOAuth, isLoading } = useOAuth()
@@ -22,7 +22,7 @@ export function OAuthButtons({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="grid grid-cols-2 gap-3">
       {providers.map((provider) => (
         <OAuthButton
           key={provider}

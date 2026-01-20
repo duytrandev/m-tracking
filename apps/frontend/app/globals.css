@@ -47,23 +47,50 @@
     --form-spacing: 1.5rem;
     --input-focus-ring-width: 2px;
     --input-focus-ring-offset: 2px;
+
+    /* Dark Theme Colors - Modern Tech Dark */
+    --dark-bg: 17 24 39;        /* #111827 */
+    --dark-card: 31 41 55;      /* #1f2937 */
+    --dark-text: 243 244 246;   /* #f3f4f6 */
+
+    /* Accent Colors - Bright Blue/Green */
+    --accent-blue: 14 165 233;  /* #0ea5e9 */
+    --accent-green: 16 185 129; /* #10b981 */
+
+    /* Glow Effects */
+    --glow-opacity: 0.4;
+    --glow-hover: 0.5;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    /* Fintech Dark Mode - Background #0F172A (Dark Slate) */
+    --background: 222 47% 11%;
     --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
+
+    /* Card with subtle transparency - Glassmorphism */
+    --card: 217 33% 17%;
     --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
+
+    --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
+
+    /* Primary: #F59E0B (Amber) - for highlights and important metrics */
+    --primary: 38 92% 50%;
+    --primary-foreground: 222 47% 11%;
+
+    /* Secondary: #FBBF24 (Light Amber) */
+    --secondary: 43 96% 56%;
+    --secondary-foreground: 222 47% 11%;
+
+    /* Muted */
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    /* Accent: #8B5CF6 (Purple) - for CTA buttons */
+    --accent: 258 90% 66%;
     --accent-foreground: 210 40% 98%;
+
+    /* Destructive */
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
@@ -138,6 +165,20 @@
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  /* Floating animation for brand icon */
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
     }
   }
 }

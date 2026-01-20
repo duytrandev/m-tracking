@@ -30,8 +30,11 @@ export class LoggerUtil {
   }
 
   static maskEmail(email: string): string {
-    const [localPart, domain] = email.split('@')
-    if (!domain) return email
+    const parts = email.split('@')
+    if (parts.length !== 2) return email
+
+    const localPart = parts[0]!
+    const domain = parts[1]!
 
     const maskedLocal =
       localPart.length > 2

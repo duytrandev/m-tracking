@@ -35,7 +35,7 @@ export default function TwoFactorVerifyPage(): React.ReactElement {
   }
 
   return (
-    <AuthCard title="Two-factor authentication" showLogo>
+    <AuthCard title="Two-factor authentication">
       <div className="space-y-6">
         <div className="text-center space-y-2">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">

@@ -186,7 +186,7 @@ export type AuthFlowState =
 /**
  * OAuth provider type
  */
-export type OAuthProvider = 'google' | 'github' | 'facebook'
+export type OAuthProvider = 'google' | 'github' | 'facebook' | 'apple'
 
 /**
  * OAuth callback parameters

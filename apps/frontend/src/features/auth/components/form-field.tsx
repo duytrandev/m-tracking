@@ -24,7 +24,7 @@ export function FormField({
 }: FormFieldProps) {
   return (
     <div className="space-y-2">
-      <Label htmlFor={htmlFor}>{label}</Label>
+      <Label htmlFor={htmlFor} className="text-gray-900 font-medium">{label}</Label>
       {children}
       {/* Min-height container prevents layout shift when error/success messages appear */}
       <div className="min-h-[20px]">

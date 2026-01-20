@@ -27,7 +27,7 @@ export default function VerifyEmailPage() {
   }
 
   return (
-    <AuthCard title={t('title')} showLogo>
+    <AuthCard title={t('title')}>
       <div className="space-y-6 text-center">
         <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-blue-50">
           <Mail className="h-12 w-12 text-blue-600" />

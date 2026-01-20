@@ -582,6 +582,93 @@ async categorize(transaction: Transaction): Promise<Category> {
 
 ---
 
+### ADR-010: shadcn/ui Component Library for Frontend
+
+**Status:** ✅ Accepted & Implementing
+**Date:** 2026-01-21
+**Deciders:** Frontend Team
+
+#### Context
+
+Need UI component library that is accessible, customizable, and maintainable for Next.js application.
+
+#### Decision
+
+**Use shadcn/ui (Radix UI primitives + Tailwind CSS) for all frontend UI components.**
+
+#### Rationale
+
+**Accessibility:**
+- Radix UI provides production-grade accessible components
+- WCAG 2.1 AA compliance built-in
+- Proper ARIA labels, roles, and keyboard navigation
+- Screen reader optimized
+- Mobile touch interaction support
+
+**Flexibility:**
+- Components are composable, not opinionated
+- Full control via Tailwind CSS customization
+- Easy to implement design system variations
+- Components can be modified without library updates
+
+**Developer Experience:**
+- Copy-paste components (no npm dependency bloat)
+- TypeScript support with proper types
+- Clear, well-documented API
+- Active community and support
+- Easy to extend for custom needs
+
+**Maintenance:**
+- No version conflicts across monorepo
+- Single source of truth for each component
+- Easy to audit component code
+- Type-safe props and children
+
+#### Consequences
+
+**Positive:**
+- High-quality, accessible components
+- Complete control over component code
+- No dependency version management
+- Excellent TypeScript support
+
+**Negative:**
+- Manual component updates needed if Radix changes
+- No automatic security patches
+- Must maintain component code ourselves
+- Larger codebase for UI components
+
+**Mitigation:**
+- Regular audits of Radix UI updates
+- Documentation of component patterns
+- Strict code review process for UI changes
+- Component test coverage requirements
+
+#### Components
+
+**Currently Installed:**
+- `Button` - Reusable button with variants
+- `Input` - Form input with validation
+- `DropdownMenu` - Accessible dropdown menu (Phase 01 - Sidebar User Menu)
+- `ThemeToggle` - Dark mode toggle (4 variants)
+
+**Installation Pattern:**
+```bash
+npx shadcn-ui@latest add {component-name}
+```
+
+**Component Location:**
+```
+apps/frontend/src/components/ui/
+├── button.tsx
+├── input.tsx
+├── dropdown-menu.tsx
+├── theme-toggle.tsx
+└── [future components]
+```
+
+---
+
 ## System-Wide Patterns
 
 ### Communication Patterns
@@ -932,6 +1019,123 @@ const transactions = await this.repository
 
 ---
 
+## Frontend Theme System (v0.3.0)
+
+### Theme Provider Implementation
+
+**Status:** ✅ Implemented
+**Date:** 2026-01-20
+**Review Score:** 8.5/10
+
+#### Decision
+
+**Implement frontend theme system with:**
+- FOUC prevention via inline script
+- System preference detection
+- localStorage persistence with error handling
+- Zustand state management
+- Custom React hooks for consumption
+
+#### Rationale
+
+**User Experience:**
+- No theme flickering on page load (FOUC prevention)
+- Respects OS dark mode preference
+- Theme persists across sessions
+- Works offline without backend API
+
+**Developer Experience:**
+- Simple useTheme() hook API
+- Type-safe theme management
+- Easy to extend for future backend sync
+- Clear error handling
+
+**Technical Benefits:**
+- Inline script prevents rendering delays
+- Safe localStorage wrapper handles errors
+- Zustand persist middleware for automatic hydration
+- Media query listener for system preference changes
+
+#### Consequences
+
+**Positive:**
+- Zero FOUC, instant theme application
+- Offline-first (works without backend initially)
+- Respects user OS preference
+- Graceful degradation on errors
+
+**Negative:**
+- Requires inline script (CSP consideration)
+- Future server sync will need migration logic
+- localStorage quota must be monitored
+
+#### Implementation Details
+
+**Components:**
+
+1. **theme-script.ts**: FOUC prevention
+   - Runs in `<head>` before React
+   - Reads localStorage, applies theme class
+   - Detects system preference fallback
+   - Error handling (quota exceeded, private browsing)
+
+2. **useUIStore (Zustand)**:
+   - Theme state: 'light' | 'dark' | 'system'
+   - Resolved theme: 'light' | 'dark'
+   - Persist middleware for automatic storage
+   - Safe localStorage wrapper
+
+3. **useTheme() Hook**:
+   - Get/set theme
+   - Listen for system preference changes
+   - Return isDark flag
+   - Type-safe API
+
+4. **ThemeProvider Component**:
+   - Initializes theme on mount
+   - Placeholder for future server sync
+   - Wrapped in error boundary
+
+#### File Structure
+
+```
+src/
+├── lib/store/
+│   └── ui-store.ts (theme state + safe localStorage)
+├── hooks/
+│   └── use-theme.ts (theme consumption hook)
+├── features/preferences/
+│   ├── utils/
+│   │   └── theme-script.ts (FOUC prevention)
+│   └── components/
+│       ├── theme-provider.tsx (provider)
+│       └── theme-error-boundary.tsx (resilience)
+└── app/
+    ├── layout.tsx (script injection + provider)
+    └── providers.tsx (provider setup)
+```
+
+#### Features
+
+- ✅ FOUC prevention (instant theme application)
+- ✅ System preference detection (prefers-color-scheme)
+- ✅ localStorage persistence (with quota handling)
+- ✅ Theme sync across browser tabs
+- ✅ Error boundary for resilience
+- ✅ TypeScript support
+- ✅ 83.33% test coverage
+
+#### Future Enhancements
+
+When backend is ready:
+1. Add endpoint: `GET /api/auth/me` (includes user.preferences.theme)
+2. Add endpoint: `PATCH /api/auth/preferences` (update theme)
+3. Implement server-side sync in ThemeProvider
+4. Handle conflict resolution (server vs localStorage)
+5. Add theme scheduling (light at day, dark at night)
+
+---
+
 ## Frontend Animation System (Motion Library)
 
 ### Motion Library Integration (v0.2.1)
@@ -1010,5 +1214,5 @@ export function AnimatedButton({ children }) {
 
 ---
 
-**Last Updated:** 2026-01-16
+**Last Updated:** 2026-01-20
 **Maintained By:** Architecture Team

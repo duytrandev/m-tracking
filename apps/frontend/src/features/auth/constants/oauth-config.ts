@@ -17,15 +17,15 @@ export interface OAuthConfig {
 export const OAUTH_CONFIGS: Record<OAuthProvider, OAuthConfig> = {
   google: {
     provider: 'google',
-    label: 'Continue with Google',
+    label: 'Google',
     icon: 'google',
     bgColor: 'bg-white',
-    textColor: 'text-slate-900',
-    hoverBgColor: 'hover:bg-slate-50',
+    textColor: 'text-gray-900',
+    hoverBgColor: 'hover:bg-gray-50',
   },
   github: {
     provider: 'github',
-    label: 'Continue with GitHub',
+    label: 'GitHub',
     icon: 'github',
     bgColor: 'bg-[#24292e]',
     textColor: 'text-white',
@@ -33,10 +33,18 @@ export const OAUTH_CONFIGS: Record<OAuthProvider, OAuthConfig> = {
   },
   facebook: {
     provider: 'facebook',
-    label: 'Continue with Facebook',
+    label: 'Facebook',
     icon: 'facebook',
     bgColor: 'bg-[#1877f2]',
     textColor: 'text-white',
     hoverBgColor: 'hover:bg-[#166fe5]',
+  },
+  apple: {
+    provider: 'apple',
+    label: 'Apple',
+    icon: 'apple',
+    bgColor: 'bg-black',
+    textColor: 'text-white',
+    hoverBgColor: 'hover:bg-gray-900',
   },
 }
