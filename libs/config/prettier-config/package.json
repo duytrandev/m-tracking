@@ -1,0 +1,13 @@
+{
+  "name": "@m-tracking/prettier-config",
+  "version": "1.0.0",
+  "description": "Shared Prettier configuration for M-Tracking",
+  "private": true,
+  "main": "prettier.config.js",
+  "files": [
+    "prettier.config.js"
+  ],
+  "peerDependencies": {
+    "prettier": "^3.0.0"
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "namedInputs": {
+    "default": [
+      "{projectRoot}/**/*",
+      "!{projectRoot}/**/*.md",
+      "!{projectRoot}/.env.example",
+      "!{projectRoot}/README.md",
+      "sharedGlobals"
+    ],
+    "production": [
+      "default",
+      "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
+      "!{projectRoot}/tsconfig.spec.json",
+      "!{projectRoot}/jest.config.[jt]s",
+      "!{projectRoot}/.eslintrc.json",
+      "!{projectRoot}/**/*.md"
+    ],
+    "sharedGlobals": [
+      "{workspaceRoot}/tsconfig.base.json",
+      "{workspaceRoot}/tsconfig.json",
+      "{workspaceRoot}/nx.json",
+      "{workspaceRoot}/package.json",
+      "{workspaceRoot}/pnpm-lock.yaml",
+      "{workspaceRoot}/.prettierrc",
+      "{workspaceRoot}/.eslintrc.json"
+    ],
+    "nestBuild": [
+      "{projectRoot}/src/**/*.ts",
+      "{projectRoot}/package.json",
+      "{projectRoot}/tsconfig.json",
+      "{projectRoot}/tsconfig.build.json",
+      "{projectRoot}/nest-cli.json",
+      "^production"
+    ],
+    "nextBuild": [
+      "{projectRoot}/app/**/*",
+      "{projectRoot}/src/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/package.json",
+      "{projectRoot}/tsconfig.json",
+      "{projectRoot}/next.config.ts",
+      "{projectRoot}/tailwind.config.js",
+      "{projectRoot}/postcss.config.js",
+      "^production"
+    ],
+    "libraryBuild": [
+      "{projectRoot}/src/**/*.ts",
+      "{projectRoot}/package.json",
+      "{projectRoot}/tsconfig.json",
+      "^production"
+    ]
+  },
+  "targetDefaults": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"],
+      "cache": true
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"],
+      "cache": true
+    },
+    "lint": {
+      "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+      "cache": true
+    },
+    "dev": {
+      "cache": false
+    },
+    "dev:backend": {
+      "cache": false
+    },
+    "dev:analytics": {
+      "cache": false
+    },
+    "dev:frontend": {
+      "cache": false
+    },
+    "serve": {
+      "cache": false
+    }
+  },
+  "parallel": 3,
+  "cacheDirectory": ".nx/cache",
+  "defaultBase": "main"
+}

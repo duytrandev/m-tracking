@@ -1,0 +1,63 @@
+{
+  "name": "@m-tracking/backend",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "root": "services/backend",
+  "sourceRoot": "services/backend/src",
+  "prefix": "api",
+  "tags": ["type:app", "scope:backend"],
+  "targets": {
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm dev",
+        "cwd": "services/backend"
+      },
+      "configurations": {
+        "production": {
+          "command": "pnpm start"
+        }
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm build",
+        "cwd": "services/backend"
+      },
+      "outputs": ["{projectRoot}/dist"],
+      "cache": true
+    },
+    "start": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm start",
+        "cwd": "services/backend"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm lint",
+        "cwd": "services/backend"
+      },
+      "cache": true
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm test",
+        "cwd": "services/backend"
+      },
+      "cache": true
+    },
+    "test:cov": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm test:cov",
+        "cwd": "services/backend"
+      },
+      "cache": true
+    }
+  }
+}

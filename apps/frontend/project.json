@@ -1,0 +1,65 @@
+{
+  "name": "@m-tracking/frontend",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "root": "apps/frontend",
+  "sourceRoot": "apps/frontend/src",
+  "prefix": "app",
+  "tags": ["type:app", "scope:frontend"],
+  "targets": {
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm dev",
+        "cwd": "apps/frontend"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm build",
+        "cwd": "apps/frontend"
+      },
+      "outputs": ["{projectRoot}/.next"],
+      "cache": true
+    },
+    "start": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm start",
+        "cwd": "apps/frontend"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm lint",
+        "cwd": "apps/frontend"
+      },
+      "cache": true
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm test",
+        "cwd": "apps/frontend"
+      },
+      "cache": true
+    },
+    "test:e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm test:e2e",
+        "cwd": "apps/frontend"
+      }
+    },
+    "test:cov": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm test:coverage",
+        "cwd": "apps/frontend"
+      },
+      "cache": true
+    }
+  }
+}

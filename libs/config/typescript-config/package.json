@@ -1,0 +1,13 @@
+{
+  "name": "@m-tracking/typescript-config",
+  "version": "1.0.0",
+  "description": "Shared TypeScript configuration for M-Tracking",
+  "private": true,
+  "main": "base.json",
+  "files": [
+    "base.json",
+    "react.json",
+    "next.json",
+    "nest.json"
+  ]
+}

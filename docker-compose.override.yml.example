@@ -1,0 +1,19 @@
+version: '3.8'
+
+# This file is for local development overrides
+# Copy to docker-compose.override.yml and customize
+
+services:
+  backend:
+    environment:
+      - LOG_LEVEL=debug
+    volumes:
+      - ./services/backend:/app
+    command: npm run start:dev
+
+  analytics:
+    environment:
+      - LOG_LEVEL=debug
+    volumes:
+      - ./services/analytics:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 5000 --reload

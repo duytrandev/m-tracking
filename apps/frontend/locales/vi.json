@@ -1,0 +1,77 @@
+{
+  "auth": {
+    "signup": {
+      "title": "Tạo tài khoản",
+      "subtitle": "Bắt đầu quản lý tài chính của bạn",
+      "email": "Email",
+      "password": "Mật khẩu",
+      "name": "Họ và tên",
+      "createAccount": "Tạo tài khoản",
+      "googleContinue": "Tiếp tục với Google",
+      "alreadyHaveAccount": "Đã có tài khoản?",
+      "login": "Đăng nhập",
+      "terms": "Bằng cách đăng ký, bạn đồng ý với",
+      "termsLink": "Điều khoản dịch vụ",
+      "and": "và",
+      "privacyLink": "Chính sách bảo mật",
+      "errors": {
+        "emailRequired": "Vui lòng nhập địa chỉ email",
+        "emailInvalid": "Vui lòng nhập địa chỉ email hợp lệ",
+        "emailExists": "Email này đã được đăng ký. Vui lòng đăng nhập.",
+        "passwordWeak": "Mật khẩu phải có ít nhất 12 ký tự",
+        "nameRequired": "Vui lòng nhập họ và tên"
+      }
+    },
+    "login": {
+      "title": "Chào mừng trở lại",
+      "subtitle": "Đăng nhập vào tài khoản của bạn",
+      "email": "Email",
+      "password": "Mật khẩu",
+      "rememberMe": "Ghi nhớ đăng nhập",
+      "forgotPassword": "Quên mật khẩu?",
+      "loginButton": "Đăng nhập",
+      "googleContinue": "Tiếp tục với Google",
+      "noAccount": "Chưa có tài khoản?",
+      "signup": "Đăng ký",
+      "errors": {
+        "invalidCredentials": "Email hoặc mật khẩu không chính xác",
+        "accountNotVerified": "Vui lòng xác minh địa chỉ email trước khi đăng nhập.",
+        "tooManyAttempts": "Quá nhiều lần thử không thành công. Vui lòng thử lại sau {minutes} phút."
+      }
+    },
+    "verifyEmail": {
+      "title": "Kiểm tra email của bạn",
+      "message": "Chúng tôi đã gửi liên kết xác minh đến:",
+      "instructions": "Nhấp vào liên kết để xác minh tài khoản và bắt đầu.",
+      "didntReceive": "Chưa nhận được?",
+      "checkSpam": "Kiểm tra thư mục spam",
+      "resend": "Gửi lại email xác minh",
+      "changeEmail": "Thay đổi địa chỉ email",
+      "backToLogin": "Quay lại đăng nhập",
+      "openEmail": "Mở ứng dụng Email",
+      "resendSuccess": "Đã gửi email xác minh",
+      "resendAvailable": "Gửi lại (có thể sau {seconds}s)"
+    },
+    "forgotPassword": {
+      "title": "Quên mật khẩu?",
+      "subtitle": "Nhập địa chỉ email của bạn và chúng tôi sẽ gửi cho bạn liên kết đặt lại mật khẩu.",
+      "email": "Email",
+      "sendLink": "Gửi liên kết đặt lại",
+      "backToLogin": "Quay lại đăng nhập"
+    },
+    "resetPassword": {
+      "title": "Tạo mật khẩu mới",
+      "newPassword": "Mật khẩu mới",
+      "confirmPassword": "Xác nhận mật khẩu",
+      "resetButton": "Đặt lại mật khẩu",
+      "errors": {
+        "passwordsDoNotMatch": "Mật khẩu không khớp"
+      }
+    }
+  },
+  "common": {
+    "loading": "Đang tải...",
+    "error": "Lỗi",
+    "success": "Thành công"
+  }
+}

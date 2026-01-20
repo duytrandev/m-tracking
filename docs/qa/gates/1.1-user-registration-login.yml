@@ -1,0 +1,89 @@
+# <!-- Powered by BMAD™ Core -->
+# Quality Gate Decision for Story 1.1
+
+schema: 1
+story: "1.1"
+story_title: "User Registration & Login"
+gate: CONCERNS
+status_reason: "Core functionality is solid with excellent security practices, but E2E tests and some component tests remain incomplete. Rate limiting and Redis/RabbitMQ integration are well-implemented."
+reviewer: "Quinn (Test Architect)"
+updated: "2026-01-14T00:00:00Z"
+
+waiver: { active: false }
+
+top_issues:
+  - id: "TEST-001"
+    severity: medium
+    finding: "E2E tests (Task 11) are incomplete - no Playwright tests for full user journeys"
+    suggested_action: "Add Playwright E2E tests for registration and login flows before production deployment"
+    suggested_owner: dev
+  - id: "TEST-002"
+    severity: medium
+    finding: "Component-level frontend tests with MSW are incomplete (Task 10 partially done)"
+    suggested_action: "Complete frontend integration tests with API mocking to reach 80%+ coverage goal"
+    suggested_owner: dev
+  - id: "CODE-001"
+    severity: low
+    finding: "Minor React hook usage issue in register page (useState called incorrectly at line 57)"
+    suggested_action: "Fix useState hook call - should be useEffect to watch password changes"
+    suggested_owner: dev
+  - id: "SEC-001"
+    severity: low
+    finding: "Access tokens stored in localStorage instead of httpOnly cookies"
+    suggested_action: "Consider moving to httpOnly cookies for enhanced XSS protection in future iteration"
+    suggested_owner: dev
+
+risk_summary:
+  totals:
+    critical: 0
+    high: 0
+    medium: 2
+    low: 2
+  highest: medium
+  recommendations:
+    must_fix:
+      - "Complete E2E test coverage before production deployment"
+      - "Fix React hook usage bug in register page"
+    monitor:
+      - "Token storage strategy - consider httpOnly cookies"
+      - "Component test coverage - track progress toward 80% goal"
+
+quality_score: 80
+expires: "2026-01-28T00:00:00Z"
+
+evidence:
+  tests_reviewed: 31
+  backend_tests_passing: 14
+  frontend_tests_passing: 17
+  code_coverage: "Backend: 80%+, Frontend: ~70% (core validation)"
+  trace:
+    ac_covered: [1, 2, 3, 4, 5]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "Excellent: bcrypt cost 12, password validation strong, JWT tokens with proper expiry, rate limiting (10 req/min on auth), Winston logging (no console.log), RabbitMQ events secure. Minor: localStorage vs httpOnly cookies."
+  performance:
+    status: PASS
+    notes: "Redis integration for refresh tokens with 7-day TTL, efficient bcrypt hashing, proper database indexing on email field."
+  reliability:
+    status: PASS
+    notes: "Comprehensive error handling with proper HTTP status codes (409 Conflict, 401 Unauthorized), structured logging, RabbitMQ event emission for async email."
+  maintainability:
+    status: PASS
+    notes: "Clean separation of concerns (controller/service/repository pattern), TypeScript with proper types, Zod validation schemas, no console.log violations, comprehensive ARIA labels."
+
+recommendations:
+  immediate:
+    - action: "Fix React hook usage bug - replace useState with useEffect for password watching"
+      refs: ["apps/frontend/app/[locale]/(auth)/register/page.tsx:57"]
+    - action: "Complete E2E test suite with Playwright"
+      refs: ["docs/stories/1.1.user-registration-login.md:Task 11"]
+  future:
+    - action: "Complete component-level frontend tests with MSW to achieve 80%+ coverage"
+      refs: ["docs/stories/1.1.user-registration-login.md:Task 10"]
+    - action: "Consider migrating token storage from localStorage to httpOnly cookies"
+      refs: ["apps/frontend/lib/api/auth.ts"]
+    - action: "Add token refresh interceptor (already noted as future enhancement in story)"
+      refs: ["apps/frontend/lib/api/client.ts"]
