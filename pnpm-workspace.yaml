@@ -1,0 +1,7 @@
+packages:
+  - "apps/*"
+  - "services/*"
+  - "libs/*"
+
+# Allow peer dependency mismatches (NestJS 11 compatibility)
+strictPeerDependencies: false

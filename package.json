@@ -1,0 +1,51 @@
+{
+  "name": "m-tracking",
+  "version": "1.0.0",
+  "description": "M-Tracking - Personal Finance Management Platform",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "workspaces": [
+    "services/*",
+    "libs/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "nx run-many -t serve",
+    "dev:backend": "nx run @m-tracking/backend:dev",
+    "dev:frontend": "nx run @m-tracking/frontend:dev",
+    "build": "nx run-many -t build --all",
+    "build:backend": "nx run @m-tracking/backend:build",
+    "build:frontend": "nx run @m-tracking/frontend:build",
+    "test": "nx run-many -t test --all",
+    "lint": "nx run-many -t lint --all",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "prepare": "husky",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:build": "docker-compose build"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "concurrently": "^8.2.2",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0",
+    "nx": "^22.3.3",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=20.10.0",
+    "pnpm": ">=8.0.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  }
+}

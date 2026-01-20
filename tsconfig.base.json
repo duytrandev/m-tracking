@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "M-Tracking Base Configuration",
+  "compilerOptions": {
+    // Strict Type Checking
+    "strict": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+
+    // Additional Checks
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+
+    // Emit Options
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": false,
+    "importHelpers": true,
+
+    // Interop Constraints
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+
+    // Performance
+    "skipLibCheck": true,
+    "incremental": true,
+
+    // Module Resolution
+    "moduleResolution": "bundler",
+
+    // Language and Target
+    "target": "ES2022",
+    "lib": ["ES2022"],
+
+    // Path Mappings (centralized)
+    "baseUrl": ".",
+    "paths": {
+      "@m-tracking/common": ["libs/common/src/index.ts"],
+      "@m-tracking/common/*": ["libs/common/src/*"],
+      "@m-tracking/types": ["libs/types/src/index.ts"],
+      "@m-tracking/types/*": ["libs/types/src/*"],
+      "@m-tracking/constants": ["libs/constants/src/index.ts"],
+      "@m-tracking/constants/*": ["libs/constants/src/*"],
+      "@m-tracking/utils": ["libs/utils/src/index.ts"],
+      "@m-tracking/utils/*": ["libs/utils/src/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist", "build", ".next", "coverage", "**/*.spec.ts"]
+}

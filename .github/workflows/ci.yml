@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '20.10.0'
+  PNPM_VERSION: '10.28.0'
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for Nx affected
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Set Nx base and head
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "NX_BASE=origin/${{ github.base_ref }}" >> $GITHUB_ENV
+            echo "NX_HEAD=HEAD" >> $GITHUB_ENV
+          else
+            echo "NX_BASE=HEAD~1" >> $GITHUB_ENV
+            echo "NX_HEAD=HEAD" >> $GITHUB_ENV
+          fi
+
+      - name: Lint affected projects
+        run: pnpm nx affected -t lint --base=$NX_BASE --head=$NX_HEAD --parallel=3
+
+      - name: Test affected projects
+        run: pnpm nx affected -t test --base=$NX_BASE --head=$NX_HEAD --parallel=3 --coverage
+
+      - name: Build affected projects
+        run: pnpm nx affected -t build --base=$NX_BASE --head=$NX_HEAD --parallel=3
+
+      - name: Upload coverage reports
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/**/coverage-final.json
+          flags: unittests
+          fail_ci_if_error: false

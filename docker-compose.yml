@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # NestJS Backend Monolith
+  backend:
+    build:
+      context: ./services/backend
+      dockerfile: Dockerfile
+    container_name: m-tracking-backend
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=development
+      - PORT=4000
+      - SUPABASE_DB_HOST=${SUPABASE_DB_HOST}
+      - SUPABASE_DB_PASSWORD=${SUPABASE_DB_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - SENTRY_DSN=${SENTRY_DSN}
+    volumes:
+      - ./services/backend/src:/app/src
+      - /app/node_modules
+    depends_on:
+      - redis
+    networks:
+      - m-tracking-network
+    restart: unless-stopped
+
+  # FastAPI Analytics Service
+  analytics:
+    build:
+      context: ./services/analytics
+      dockerfile: Dockerfile
+    container_name: m-tracking-analytics
+    ports:
+      - "5000:5000"
+    environment:
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=${DATABASE_URL}
+    volumes:
+      - ./services/analytics/app:/app/app
+    depends_on:
+      - redis
+    networks:
+      - m-tracking-network
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: m-tracking-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - m-tracking-network
+    restart: unless-stopped
+
+networks:
+  m-tracking-network:
+    driver: bridge
+
+volumes:
+  redis-data:

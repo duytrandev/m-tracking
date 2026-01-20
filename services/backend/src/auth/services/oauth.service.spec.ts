@@ -1,0 +1,269 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { OAuthService, OAuthProfile } from './oauth.service';
+import { User } from '../entities/user.entity';
+import { OAuthAccount } from '../entities/oauth-account.entity';
+import { Role } from '../entities/role.entity';
+import { TokenService } from './token.service';
+import { SessionService } from './session.service';
+
+describe('OAuthService', () => {
+  let service: OAuthService;
+  let userRepository: Repository<User>;
+  let oauthAccountRepository: Repository<OAuthAccount>;
+  let roleRepository: Repository<Role>;
+  let tokenService: TokenService;
+  let sessionService: SessionService;
+
+  const mockUser = {
+    id: 'user-123',
+    email: 'test@example.com',
+    name: 'Test User',
+    avatar: 'avatar.jpg',
+    emailVerified: true,
+    password: '',
+    roles: [{ id: 'role-1', name: 'user' }],
+  } as User;
+
+  const mockRole = {
+    id: 'role-1',
+    name: 'user',
+    description: 'Standard user',
+    permissions: [],
+    createdAt: new Date(),
+    users: [],
+  } as Role;
+
+  const mockOAuthProfile: OAuthProfile = {
+    provider: 'google',
+    providerId: 'google-123',
+    email: 'test@example.com',
+    emailVerified: true,
+    name: 'Test User',
+    avatar: 'avatar.jpg',
+    accessToken: 'access-token',
+    refreshToken: 'refresh-token',
+  };
+
+  const mockRequest = {
+    headers: { 'user-agent': 'Test Browser' },
+    ip: '127.0.0.1',
+  };
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        OAuthService,
+        {
+          provide: getRepositoryToken(User),
+          useValue: {
+            findOne: jest.fn(),
+            save: jest.fn(),
+            create: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(OAuthAccount),
+          useValue: {
+            findOne: jest.fn(),
+            find: jest.fn(),
+            save: jest.fn(),
+            remove: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(Role),
+          useValue: {
+            findOne: jest.fn(),
+            save: jest.fn(),
+            create: jest.fn(),
+          },
+        },
+        {
+          provide: TokenService,
+          useValue: {
+            generateAccessToken: jest.fn().mockReturnValue('access-token'),
+            generateRefreshToken: jest.fn().mockReturnValue('refresh-token'),
+          },
+        },
+        {
+          provide: SessionService,
+          useValue: {
+            createSession: jest.fn().mockResolvedValue({ id: 'session-123' }),
+            updateRefreshToken: jest.fn(),
+          },
+        },
+      ],
+    }).compile();
+
+    service = module.get<OAuthService>(OAuthService);
+    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    oauthAccountRepository = module.get<Repository<OAuthAccount>>(
+      getRepositoryToken(OAuthAccount),
+    );
+    roleRepository = module.get<Repository<Role>>(getRepositoryToken(Role));
+    tokenService = module.get<TokenService>(TokenService);
+    sessionService = module.get<SessionService>(SessionService);
+
+    // Setup environment variable
+    process.env.OAUTH_ENCRYPTION_KEY = '0'.repeat(64); // 32 bytes in hex
+  });
+
+  describe('handleOAuthCallback', () => {
+    it('should login existing OAuth user', async () => {
+      const mockOAuthAccount = {
+        id: 'oauth-123',
+        userId: mockUser.id,
+        provider: 'google',
+        providerId: 'google-123',
+        user: mockUser,
+      } as OAuthAccount;
+
+      jest
+        .spyOn(oauthAccountRepository, 'findOne')
+        .mockResolvedValue(mockOAuthAccount);
+      jest.spyOn(oauthAccountRepository, 'save').mockResolvedValue(mockOAuthAccount);
+
+      const result = await service.handleOAuthCallback(
+        mockOAuthProfile,
+        mockRequest,
+      );
+
+      expect(result).toHaveProperty('accessToken');
+      expect(result).toHaveProperty('refreshToken');
+      expect(result.user.id).toBe(mockUser.id);
+    });
+
+    it('should create new user for new OAuth account', async () => {
+      jest.spyOn(oauthAccountRepository, 'findOne').mockResolvedValue(null);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
+      jest.spyOn(roleRepository, 'findOne').mockResolvedValue(mockRole);
+      jest.spyOn(userRepository, 'save').mockResolvedValue(mockUser);
+      jest
+        .spyOn(oauthAccountRepository, 'save')
+        .mockResolvedValue({} as OAuthAccount);
+
+      const result = await service.handleOAuthCallback(
+        mockOAuthProfile,
+        mockRequest,
+      );
+
+      expect(result).toHaveProperty('accessToken');
+      expect(result).toHaveProperty('refreshToken');
+      expect(userRepository.save).toHaveBeenCalled();
+      expect(oauthAccountRepository.save).toHaveBeenCalled();
+    });
+
+    it('should auto-link OAuth to existing user by verified email', async () => {
+      jest.spyOn(oauthAccountRepository, 'findOne').mockResolvedValue(null);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
+      jest
+        .spyOn(oauthAccountRepository, 'save')
+        .mockResolvedValue({} as OAuthAccount);
+
+      const result = await service.handleOAuthCallback(
+        mockOAuthProfile,
+        mockRequest,
+      );
+
+      expect(result.user.id).toBe(mockUser.id);
+      expect(oauthAccountRepository.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('unlinkOAuthAccount', () => {
+    it('should unlink OAuth account', async () => {
+      const mockOAuthAccount = {
+        id: 'oauth-123',
+        userId: mockUser.id,
+        provider: 'google',
+      } as OAuthAccount;
+
+      const userWithMultipleAccounts = {
+        ...mockUser,
+        password: 'hashed-password',
+        oauthAccounts: [mockOAuthAccount, {} as OAuthAccount],
+      } as User;
+
+      jest
+        .spyOn(oauthAccountRepository, 'findOne')
+        .mockResolvedValue(mockOAuthAccount);
+      jest
+        .spyOn(userRepository, 'findOne')
+        .mockResolvedValue(userWithMultipleAccounts);
+      jest
+        .spyOn(oauthAccountRepository, 'remove')
+        .mockResolvedValue(mockOAuthAccount);
+
+      await service.unlinkOAuthAccount(mockUser.id, 'google');
+
+      expect(oauthAccountRepository.remove).toHaveBeenCalledWith(
+        mockOAuthAccount,
+      );
+    });
+
+    it('should throw error when unlinking last auth method', async () => {
+      const mockOAuthAccount = {
+        id: 'oauth-123',
+        userId: mockUser.id,
+        provider: 'google',
+      } as OAuthAccount;
+
+      const userWithSingleAccount = {
+        ...mockUser,
+        password: '',
+        oauthAccounts: [mockOAuthAccount],
+      } as User;
+
+      jest
+        .spyOn(oauthAccountRepository, 'findOne')
+        .mockResolvedValue(mockOAuthAccount);
+      jest
+        .spyOn(userRepository, 'findOne')
+        .mockResolvedValue(userWithSingleAccount);
+
+      await expect(
+        service.unlinkOAuthAccount(mockUser.id, 'google'),
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('should throw error when OAuth account not found', async () => {
+      jest.spyOn(oauthAccountRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(
+        service.unlinkOAuthAccount(mockUser.id, 'google'),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
+  describe('getLinkedAccounts', () => {
+    it('should return linked OAuth accounts', async () => {
+      const mockAccounts = [
+        {
+          id: 'oauth-1',
+          provider: 'google',
+          providerEmail: 'test@example.com',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 'oauth-2',
+          provider: 'github',
+          providerEmail: 'test@example.com',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ] as OAuthAccount[];
+
+      jest.spyOn(oauthAccountRepository, 'find').mockResolvedValue(mockAccounts);
+
+      const result = await service.getLinkedAccounts(mockUser.id);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].provider).toBe('google');
+      expect(result[1].provider).toBe('github');
+    });
+  });
+});

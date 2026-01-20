@@ -1,0 +1,41 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "jsx": "preserve",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowJs": true,
+    "noEmit": true,
+
+    // Next.js plugin
+    "plugins": [{ "name": "next" }],
+
+    // Build optimization
+    "composite": true,
+    "tsBuildInfoFile": "./.next/.tsbuildinfo",
+
+    // Module path mappings
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@m-tracking/common": ["../../libs/common/src/index.ts"],
+      "@m-tracking/common/*": ["../../libs/common/src/*"],
+      "@m-tracking/types": ["../../libs/types/src/index.ts"],
+      "@m-tracking/types/*": ["../../libs/types/src/*"],
+      "@m-tracking/constants": ["../../libs/constants/src/index.ts"],
+      "@m-tracking/constants/*": ["../../libs/constants/src/*"],
+      "@m-tracking/utils": ["../../libs/utils/src/index.ts"],
+      "@m-tracking/utils/*": ["../../libs/utils/src/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}

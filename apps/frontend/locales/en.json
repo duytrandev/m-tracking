@@ -1,0 +1,77 @@
+{
+  "auth": {
+    "signup": {
+      "title": "Create your account",
+      "subtitle": "Start tracking your finances",
+      "email": "Email",
+      "password": "Password",
+      "name": "Full Name",
+      "createAccount": "Create Account",
+      "googleContinue": "Continue with Google",
+      "alreadyHaveAccount": "Already have an account?",
+      "login": "Log in",
+      "terms": "By signing up, you agree to our",
+      "termsLink": "Terms of Service",
+      "and": "and",
+      "privacyLink": "Privacy Policy",
+      "errors": {
+        "emailRequired": "Please enter your email address",
+        "emailInvalid": "Please enter a valid email address",
+        "emailExists": "This email is already registered. Log in instead.",
+        "passwordWeak": "Password must be at least 12 characters",
+        "nameRequired": "Please enter your name"
+      }
+    },
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Log in to your account",
+      "email": "Email",
+      "password": "Password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "loginButton": "Log In",
+      "googleContinue": "Continue with Google",
+      "noAccount": "Don't have an account?",
+      "signup": "Sign up",
+      "errors": {
+        "invalidCredentials": "Invalid email or password",
+        "accountNotVerified": "Please verify your email address before logging in.",
+        "tooManyAttempts": "Too many failed attempts. Please try again in {minutes} minutes."
+      }
+    },
+    "verifyEmail": {
+      "title": "Check your email",
+      "message": "We sent a verification link to:",
+      "instructions": "Click the link to verify your account and get started.",
+      "didntReceive": "Didn't receive it?",
+      "checkSpam": "Check your spam folder",
+      "resend": "Resend verification email",
+      "changeEmail": "Change email address",
+      "backToLogin": "Back to login",
+      "openEmail": "Open Email App",
+      "resendSuccess": "Verification email sent",
+      "resendAvailable": "Resend (available in {seconds}s)"
+    },
+    "forgotPassword": {
+      "title": "Forgot your password?",
+      "subtitle": "Enter your email address and we'll send you a link to reset your password.",
+      "email": "Email",
+      "sendLink": "Send Reset Link",
+      "backToLogin": "Back to login"
+    },
+    "resetPassword": {
+      "title": "Create new password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "resetButton": "Reset Password",
+      "errors": {
+        "passwordsDoNotMatch": "Passwords do not match"
+      }
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  }
+}

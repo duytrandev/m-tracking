@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "M-Tracking Base",
+  "compilerOptions": {
+    // Type Checking
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUncheckedIndexedAccess": true,
+
+    // Modules
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+
+    // Emit
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": false,
+    "importHelpers": true,
+
+    // Language
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "useDefineForClassFields": true,
+
+    // Interop Constraints
+    "isolatedModules": true,
+    "allowJs": false,
+    "forceConsistentCasingInFileNames": true,
+
+    // Skip type checking of declaration files
+    "skipLibCheck": true
+  },
+  "exclude": ["node_modules", "dist", "build", ".next", "coverage"]
+}

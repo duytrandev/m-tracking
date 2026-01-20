@@ -1,0 +1,41 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "ES2021",
+    "lib": ["ES2021"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+
+    // NestJS-specific
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+
+    // Build optimization
+    "composite": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+
+    // Module path mappings for internal modules
+    "paths": {
+      "@gateway/*": ["src/gateway/*"],
+      "@auth/*": ["src/auth/*"],
+      "@transactions/*": ["src/transactions/*"],
+      "@banking/*": ["src/banking/*"],
+      "@budgets/*": ["src/budgets/*"],
+      "@notifications/*": ["src/notifications/*"],
+      "@shared/*": ["src/shared/*"],
+      "@integrations/*": ["src/integrations/*"],
+      "@m-tracking/common": ["../../libs/common/src/index.ts"],
+      "@m-tracking/common/*": ["../../libs/common/src/*"],
+      "@m-tracking/types": ["../../libs/types/src/index.ts"],
+      "@m-tracking/types/*": ["../../libs/types/src/*"],
+      "@m-tracking/constants": ["../../libs/constants/src/index.ts"],
+      "@m-tracking/constants/*": ["../../libs/constants/src/*"],
+      "@m-tracking/utils": ["../../libs/utils/src/index.ts"],
+      "@m-tracking/utils/*": ["../../libs/utils/src/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "test", "**/*.spec.ts"]
+}
