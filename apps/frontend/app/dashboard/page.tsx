@@ -1,16 +1,40 @@
 'use client'
 
 import { useState } from 'react'
+import dynamic from 'next/dynamic'
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { useAuth } from '@/features/auth/hooks/use-auth'
 import { useSpendingData } from '@/features/spending/hooks/use-spending-data'
 import { StatisticsCard } from '@/features/spending/components/statistics-card'
 import { TimeFilter } from '@/features/spending/components/time-filter'
-import { SpendingChart } from '@/features/spending/components/spending-chart'
-import { CategoryBreakdownChart } from '@/features/spending/components/category-breakdown'
+import { ChartSkeleton } from '@/components/ui/chart-skeleton'
 import { TimePeriod } from '@/types/api/spending'
-import { Wallet, TrendingUp, TrendingDown, DollarSign, ChevronDown, ChevronUp } from 'lucide-react'
+import {
+  Wallet,
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react'
+
+// Dynamic imports - only load when needed (defers ~150KB Recharts library)
+const SpendingChart = dynamic(
+  () => import('@/features/spending/components/spending-chart'),
+  {
+    ssr: false,
+    loading: () => <ChartSkeleton height={300} />,
+  }
+)
+
+const CategoryBreakdownChart = dynamic(
+  () => import('@/features/spending/components/category-breakdown'),
+  {
+    ssr: false,
+    loading: () => <ChartSkeleton height={250} />,
+  }
+)
 
 /**
  * Dashboard page
@@ -83,7 +107,11 @@ export default function DashboardPage() {
                   (summary?.netBalance || 0) >= 0 ? 'Positive' : 'Negative'
                 }
                 icon={Wallet}
-                iconColor={(summary?.netBalance || 0) >= 0 ? 'text-success' : 'text-destructive'}
+                iconColor={
+                  (summary?.netBalance || 0) >= 0
+                    ? 'text-success'
+                    : 'text-destructive'
+                }
                 delay={0.2}
               />
               <StatisticsCard
@@ -134,7 +162,9 @@ export default function DashboardPage() {
 
                 {/* Category Breakdown */}
                 <div className="rounded-lg border border-border/20 bg-background/20 p-4">
-                  <h3 className="mb-3 text-sm font-medium">Category Breakdown</h3>
+                  <h3 className="mb-3 text-sm font-medium">
+                    Category Breakdown
+                  </h3>
                   {isLoading ? (
                     <div className="h-[250px] animate-pulse rounded-lg bg-background/50" />
                   ) : summary && summary.categoryBreakdown.length > 0 ? (

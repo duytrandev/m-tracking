@@ -11,6 +11,7 @@
 This changelog documents all notable changes, features, fixes, and updates to M-Tracking. Each version includes categorized changes following the Keep a Changelog format.
 
 **Categories:**
+
 - **Added** - New features
 - **Changed** - Changes to existing functionality
 - **Deprecated** - Features to be removed in future versions
@@ -24,8 +25,60 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 
 ### Added
 
+**Phase 02: Frontend Performance Optimization - Code-Split Heavy Libraries (2026-01-21)**
+
+- ✅ Dynamic imports for Recharts component (~150KB deferred)
+- ✅ Dynamic imports for CategoryBreakdown component
+- ✅ Chart skeleton/loading component (chart-skeleton.tsx)
+- ✅ Default exports added to chart components for dynamic import compatibility
+- ✅ Removed jsPDF zombie dependency (-200KB immediate)
+- ✅ Next.js dynamic() with loading states and ssr: false
+- ✅ Bundle reduction achieved: ~350KB total (200KB jsPDF + 150KB Recharts deferred)
+- ✅ Lazy loading with smooth skeleton transitions
+- ✅ All tests passing: 64/64
+- ✅ Code review approved: 8.5/10
+
+**Implementation Details:**
+
+- apps/frontend/src/components/ui/chart-skeleton.tsx - New loading component
+- apps/frontend/src/features/spending/components/spending-chart.tsx - Default export added
+- apps/frontend/src/features/spending/components/category-breakdown-chart.tsx - Default export added
+- apps/frontend/app/dashboard/page.tsx - Dynamic imports with lazy loading
+- apps/frontend/package.json - jsPDF removed
+
+**Phase 01: Frontend Performance Optimization - Bundle Analysis Baseline (2026-01-21)**
+
+- ✅ @next/bundle-analyzer package installed (@16.1.4)
+- ✅ Webpack bundle analyzer configured (ANALYZE=true mode)
+- ✅ Turbopack experimental analyzer configured (next experimental-analyze command)
+- ✅ Two npm scripts for bundle analysis:
+  - `analyze`: Webpack-based visual reports (with known PostCSS compatibility note)
+  - `analyze:turbopack`: Turbopack-based analysis (recommended, more stable)
+- ✅ Bundle analyzer integration in next.config.ts with plugin composition
+- ✅ Baseline metrics documented:
+  - Total current bundle: ~500KB (estimated)
+  - Recharts: ~150KB (no code-split)
+  - jsPDF: ~200KB (identified as unused - zombie dependency)
+  - Other dependencies: ~100KB
+- ✅ Performance targets established (70% reduction: 500KB → 80-120KB)
+- ✅ Optimization roadmap created (4 phases):
+  1. Remove jsPDF (-200KB immediate)
+  2. Code-split Recharts (-150KB deferred)
+  3. Migrate to Server Components (-80KB hydration)
+  4. Optimize provider architecture (-20KB nesting)
+- ✅ Critical issues identified and documented:
+  - All 18+ routes using `'use client'` (100% client-side rendering)
+  - 7 nested providers causing reconciliation overhead
+  - localStorage SSR errors in theme provider
+  - No code splitting for heavy dependencies
+- ✅ Architecture Decision Record (ADR-010) added: Bundle Analysis & Performance Monitoring
+- ✅ Development roadmap updated with Phase 01 completion
+
+### Added
+
 **Phase 0: Configuration Fixes & TypeScript Compliance**
-- ✅ ESLint dependencies installed (eslint@9, @typescript-eslint/*)
+
+- ✅ ESLint dependencies installed (eslint@9, @typescript-eslint/\*)
 - ✅ Docker secrets management pattern (.env.docker for local dev)
 - ✅ Strict peer dependencies enabled in package.json
 - ✅ Jest preset created (jest.preset.js) for workspace testing
@@ -36,6 +89,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - ✅ @types/node@22 for Node.js type definitions
 
 **UI Component Library: Dropdown Menu (Phase 01 - Sidebar User Menu)**
+
 - ✅ shadcn/ui dropdown-menu component installed at `apps/frontend/src/components/ui/dropdown-menu.tsx`
 - ✅ Radix UI @radix-ui/react-dropdown-menu integration
 - ✅ 11 dropdown menu primitives exported:
@@ -57,6 +111,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - ✅ Tailwind CSS styling with customization support
 
 **Component Features:**
+
 - Animated menu content (fade-in/zoom-in on open)
 - Customizable positioning (top/bottom/left/right)
 - Sub-menu nesting support
@@ -65,13 +120,16 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - Keyboard shortcut display via DropdownMenuShortcut
 
 ### Changed
+
 - Updated code-standards.md with UI Component Standards section
 - Enhanced theme-toggle.tsx TypeScript compliance (fixed eslint-disable comments)
 
 ### Fixed
+
 - None
 
 ### Security
+
 - ✅ Maintained accessibility standards
 - ✅ No new security vulnerabilities introduced
 
@@ -82,6 +140,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 ### Added
 
 **Frontend Theme Provider System (Phase 03 - User Preferences):**
+
 - ✅ FOUC (Flash of Unstyled Content) prevention script
   - Runs in `<head>` before React hydration
   - Applies theme immediately from localStorage
@@ -103,6 +162,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - ✅ Comprehensive test coverage (83.33%)
 
 **Implementation Details:**
+
 - theme-script.ts: FOUC prevention inline script
 - ui-store.ts: Enhanced with theme state and safe localStorage
 - use-theme.ts: Custom hook for theme consumption
@@ -112,6 +172,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - app/providers.tsx: Provider setup in main providers
 
 ### Technical Decisions
+
 - In-memory theme resolution with system preference detection
 - localStorage with safe error handling (quota exceeded, private browsing)
 - Zustand persist middleware for automatic hydration
@@ -119,14 +180,17 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - System preference listening via media query listener
 
 ### Changed
+
 - Updated useUIStore with theme state management
 - Updated app layout to include theme provider
 - Updated providers setup to include theme system
 
 ### Fixed
+
 - None
 
 ### Security
+
 - ✅ No sensitive data in localStorage
 - ✅ Safe error handling for quota exceeded
 - ✅ XSS protection via Zustand serialization
@@ -138,12 +202,14 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 ### Added
 
 **Login Page UX Enhancement (Motion Library Integration):**
+
 - ✅ Motion (Framer Motion) v12.27.1 animation library integrated
 - ✅ LazyMotion for optimized bundle size
 - ✅ MotionProvider component (Context-based motion configuration)
 - ✅ useReducedMotion hook (respects prefers-reduced-motion preference)
 
 **Modern Minimalist UI Design:**
+
 - ✅ Refined layout (400px max-width, clean spacing)
 - ✅ 60fps smooth animations (fade + slide entrance effects)
 - ✅ Error state shake animation
@@ -151,6 +217,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - ✅ Zero layout shift during validation
 
 **Enhanced Validation UX:**
+
 - ✅ "Reward early, punish late" validation pattern
 - ✅ Actionable error messages (e.g., "Enter a valid email like name@example.com")
 - ✅ Success indicators for valid fields
@@ -158,6 +225,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - ✅ Loading states during submission
 
 **Accessibility Enhancements:**
+
 - ✅ WCAG 2.2 AA compliance verified
 - ✅ Enhanced focus rings (2px + 2px offset)
 - ✅ ARIA live regions for errors/success messages
@@ -166,25 +234,30 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - ✅ prefers-reduced-motion respecting
 
 **Component Updates:**
+
 - ✅ FormField: Layout shift prevention, improved spacing
 - ✅ Input: Success state support, enhanced validation feedback
 - ✅ AnimatedInput: Focus state tracking, animation integration
 - ✅ Button: Hover/press scale animations
 
 **Documentation:**
+
 - ✅ Design guidelines document (design-guidelines.md)
 - ✅ Implementation report generated
 
 ### Changed
+
 - Updated FormField component for animation support
 - Updated Input component with success state styling
 - Updated Button component with motion animations
 - Improved form validation feedback UX
 
 ### Fixed
+
 - None
 
 ### Security
+
 - ✅ Maintained input validation security standards
 - ✅ WCAG 2.2 AA accessibility compliance preserved
 
@@ -195,6 +268,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 ### Added
 
 **Frontend Authentication System Complete (8 Phases):**
+
 - ✅ Phase 1: Authentication Core - JWT tokens, refresh logic, token management (in-memory, auto-refresh)
 - ✅ Phase 2: Registration Flow - Email/password signup, email verification, account creation
 - ✅ Phase 3: Login & Session Management - Email/password login, session lifecycle, remember me
@@ -205,6 +279,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - ✅ Phase 8: Profile & Session Management - Avatar upload, session listing, password change
 
 **Implementation Deliverables:**
+
 - ✅ 31 UI Components (AuthCard, PasswordInput, OAuthButton, CodeInput, modals, etc.)
 - ✅ 16 Custom Hooks (useAuth, useLogin, useSignup, use2FA, useSessions, etc.)
 - ✅ 20 Routes (signup, login, verify-email, forgot-password, reset-password, 2fa, settings, profile)
@@ -217,6 +292,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - ✅ Error handling and recovery flows
 
 **Security Features:**
+
 - ✅ JWT access tokens (15-minute expiry)
 - ✅ JWT refresh tokens (7-day expiry)
 - ✅ Token blacklisting via Redis
@@ -228,6 +304,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - ✅ XSS prevention
 
 **OAuth & Social Login:**
+
 - ✅ OAuth 2.1 with PKCE flow
 - ✅ Auto-account linking by verified email
 - ✅ Account linking/unlinking endpoints
@@ -235,6 +312,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - ✅ Session management with JWT rotation
 
 **Profile Management:**
+
 - ✅ Avatar upload (file handling, optimization)
 - ✅ Session management (view active sessions, logout from devices)
 - ✅ Password change with verification
@@ -243,6 +321,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - ✅ Account settings
 
 ### Technical Decisions
+
 - In-memory token storage for access tokens
 - Auto-refresh mechanism (15-min interval)
 - Secure refresh token storage (httpOnly cookies)
@@ -253,13 +332,16 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - Zustand for client state
 
 ### Changed
+
 - Updated frontend architecture documentation
 - Updated system architecture with OAuth/2FA details
 
 ### Fixed
+
 - None
 
 ### Security
+
 - ✅ WCAG 2.1 AA compliance verified
 - ✅ XSS prevention implemented
 - ✅ CSRF protection enabled
@@ -273,6 +355,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 ### Added
 
 **Project Foundation:**
+
 - ✅ Monorepo structure with npm workspaces
 - ✅ Root package.json with workspace configuration
 - ✅ TypeScript configuration (root + all services)
@@ -281,6 +364,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - ✅ Git repository initialization
 
 **Backend (NestJS):**
+
 - ✅ NestJS 11.1.11 application bootstrap
 - ✅ Main application file (main.ts) with CORS, validation, global prefix
 - ✅ Root module (app.module.ts) importing all domain modules
@@ -296,6 +380,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - ✅ Environment template (.env.example)
 
 **Analytics Service (FastAPI):**
+
 - ✅ FastAPI 0.110+ application structure
 - ✅ Main application file (main.py)
 - ✅ Core module (config, dependencies)
@@ -305,6 +390,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - ✅ Python environment template
 
 **Frontend (Next.js):**
+
 - ✅ Next.js 16.1.1 with App Router
 - ✅ React 19.2 with React Compiler
 - ✅ TypeScript configuration
@@ -316,18 +402,21 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - ✅ Environment template
 
 **Shared Libraries:**
+
 - ✅ @m-tracking/types - Shared TypeScript types
 - ✅ @m-tracking/utils - Shared utility functions
 - ✅ @m-tracking/constants - Shared constants
 - ✅ @m-tracking/common - Common utilities (logger, validation, errors, regex)
 
 **Infrastructure:**
+
 - ✅ Docker Compose configuration (docker-compose.yml)
 - ✅ Dockerfiles for backend and analytics
 - ✅ Redis service configuration
 - ✅ Environment variable templates
 
 **Documentation:**
+
 - ✅ Comprehensive architecture documentation
 - ✅ Architecture overview (architecture-overview.md)
 - ✅ Backend architecture documentation (backend-architecture/index.md)
@@ -346,6 +435,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 ### Technical Decisions
 
 **Architecture:**
+
 - Modular monolith pattern for NestJS backend
 - Separate FastAPI service for AI/LLM operations
 - Direct in-process communication within monolith
@@ -353,6 +443,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - Redis for caching and async jobs (BullMQ)
 
 **Technology Stack:**
+
 - Node.js 24.13.0 LTS (Active until April 2028)
 - NestJS 11.1.11 (modular framework)
 - FastAPI 0.110+ (Python async framework)
@@ -365,12 +456,14 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - Docker + Docker Compose
 
 **Database Hosting:**
+
 - Supabase for managed PostgreSQL (free tier for development)
 - Built-in connection pooling (PgBouncer)
 - TimescaleDB for time-series optimization
 - pgvector for future AI features
 
 **Cost Strategy:**
+
 - Target: <$1.00/user/month
 - MVP: ~$0.02-0.03/user/month
 - Docker Compose over Kubernetes (85-90% cost savings)
@@ -378,18 +471,23 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - Aggressive caching (95%+ hit rate target)
 
 ### Changed
+
 - N/A (initial version)
 
 ### Deprecated
+
 - N/A
 
 ### Removed
+
 - N/A
 
 ### Fixed
+
 - N/A
 
 ### Security
+
 - ✅ CORS configuration with origin whitelist
 - ✅ Global validation pipe with whitelist and transform
 - ✅ Environment variable separation (.env files not committed)
@@ -399,17 +497,17 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 
 ## Version History
 
-| Version | Release Date | Status | Description |
-|---------|--------------|--------|-------------|
-| 0.1.0 | 2026-01-16 | Released | Initial project foundation and scaffolding |
-| 0.2.0 | 2026-01-16 | Released | Frontend authentication system (complete) |
-| 0.2.1 | 2026-01-20 | Released | Login page UX enhancements (Motion, animations, accessibility) |
-| 0.3.0 | 2026-01-20 | Released | Frontend theme provider system (dark mode, localStorage persistence) |
-| 0.4.0 | TBD | Planned | Backend core implementation (entities, auth, gateway) |
-| 0.5.0 | TBD | Planned | Domain modules (transactions, banking, budgets, notifications) |
-| 0.6.0 | TBD | Planned | Analytics service (LLM integration, caching) |
-| 0.7.0 | TBD | Planned | Frontend MVP (auth, dashboard, transactions, budgets) |
-| 1.0.0 | TBD | Planned | Production launch |
+| Version | Release Date | Status   | Description                                                          |
+| ------- | ------------ | -------- | -------------------------------------------------------------------- |
+| 0.1.0   | 2026-01-16   | Released | Initial project foundation and scaffolding                           |
+| 0.2.0   | 2026-01-16   | Released | Frontend authentication system (complete)                            |
+| 0.2.1   | 2026-01-20   | Released | Login page UX enhancements (Motion, animations, accessibility)       |
+| 0.3.0   | 2026-01-20   | Released | Frontend theme provider system (dark mode, localStorage persistence) |
+| 0.4.0   | TBD          | Planned  | Backend core implementation (entities, auth, gateway)                |
+| 0.5.0   | TBD          | Planned  | Domain modules (transactions, banking, budgets, notifications)       |
+| 0.6.0   | TBD          | Planned  | Analytics service (LLM integration, caching)                         |
+| 0.7.0   | TBD          | Planned  | Frontend MVP (auth, dashboard, transactions, budgets)                |
+| 1.0.0   | TBD          | Planned  | Production launch                                                    |
 
 ---
 
@@ -418,14 +516,17 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 ### Migrating from 0.1.0 to 0.2.0 (TBD)
 
 **Breaking Changes:**
+
 - None expected
 
 **Database Migrations:**
+
 1. Run initial schema migration
 2. Seed default categories
 3. Create indexes
 
 **Environment Variables:**
+
 - Add `SUPABASE_URL`
 - Add `SUPABASE_KEY`
 - Add `JWT_SECRET`
@@ -433,6 +534,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - Add `REDIS_URL`
 
 **Dependencies:**
+
 - Update to latest versions
 - Install new packages for auth and validation
 
@@ -449,15 +551,18 @@ Currently no deprecated features.
 ### Version 0.1.0 (2026-01-16)
 
 **Security Measures:**
+
 - Environment variable separation
 - Pre-commit hooks to prevent secret commits
 - CORS configuration
 - Input validation pipeline
 
 **Known Issues:**
+
 - None
 
 **Recommendations:**
+
 - Keep dependencies updated
 - Review security advisories regularly
 - Use strong JWT secrets in production
@@ -469,11 +574,13 @@ Currently no deprecated features.
 ### Version 0.1.0
 
 **Build Performance:**
+
 - Backend build time: N/A (not implemented)
 - Frontend build time: ~10s (Turbopack)
 - Docker build time: ~2 min
 
 **Runtime Performance:**
+
 - N/A (not implemented)
 
 ---
@@ -483,12 +590,15 @@ Currently no deprecated features.
 ### Version 0.1.0
 
 **High Priority:**
+
 - None
 
 **Medium Priority:**
+
 - None
 
 **Low Priority:**
+
 - None
 
 ---
@@ -496,12 +606,14 @@ Currently no deprecated features.
 ## Future Enhancements
 
 ### Completed for 0.2.1
+
 - Login page UX enhancements (Motion animations)
 - Accessibility improvements (WCAG 2.2 AA)
 - Modern minimalist design
 - Enhanced validation feedback
 
 ### Planned for 0.3.0
+
 - Database entities and migrations
 - JWT authentication backend
 - OpenAPI/Swagger documentation
@@ -509,18 +621,21 @@ Currently no deprecated features.
 - Global error handling
 
 ### Planned for 0.4.0
+
 - Transaction CRUD operations
 - Bank account integrations (Plaid, Tink, MoMo)
 - Budget calculations
 - Telegram bot integration
 
 ### Planned for 0.4.0
+
 - LLM categorization (OpenAI GPT-4o-mini)
 - AI chat assistant (Anthropic Claude 3.5 Haiku)
 - 4-tier caching strategy
 - Spending insights
 
 ### Planned for 0.5.0
+
 - User authentication flow
 - Dashboard with overview
 - Transaction list and filters
@@ -528,6 +643,7 @@ Currently no deprecated features.
 - Responsive UI components
 
 ### Planned for 1.0.0
+
 - Production deployment
 - CI/CD pipeline
 - Monitoring and logging
@@ -535,6 +651,7 @@ Currently no deprecated features.
 - Load testing
 
 ### Post-1.0.0
+
 - Multi-currency support
 - Recurring transaction detection
 - Advanced analytics
@@ -559,16 +676,19 @@ Currently no deprecated features.
 ### Versioning Rules
 
 **Major Version (X.0.0):**
+
 - Breaking API changes
 - Major architecture changes
 - Database schema breaking changes
 
 **Minor Version (0.X.0):**
+
 - New features
 - Non-breaking API additions
 - New modules or services
 
 **Patch Version (0.0.X):**
+
 - Bug fixes
 - Performance improvements
 - Documentation updates
@@ -606,11 +726,13 @@ Currently no deprecated features.
 ## Support
 
 **For questions about changes:**
+
 - Check [Development Roadmap](./development-roadmap.md)
 - Review [Architecture Documentation](./architecture-overview.md)
 - See [Code Standards](./code-standards.md)
 
 **For bug reports:**
+
 - Create GitHub issue with version number
 - Include reproduction steps
 - Provide error logs

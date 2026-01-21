@@ -37,7 +37,6 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "jspdf": "^4.0.0",
     "lucide-react": "^0.468.0",
     "motion": "^12.27.1",
     "next": "^16.1.4",

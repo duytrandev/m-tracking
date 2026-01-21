@@ -1,6 +1,17 @@
 'use client'
 
-import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import {
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts'
 import type { DailyTrend } from '@/types/api/spending'
 import { format } from 'date-fns'
 
@@ -9,8 +20,8 @@ interface SpendingChartProps {
   type?: 'line' | 'area'
 }
 
-export function SpendingChart({ data, type = 'area' }: SpendingChartProps) {
-  const formattedData = data.map((item) => ({
+function SpendingChart({ data, type = 'area' }: SpendingChartProps) {
+  const formattedData = data.map(item => ({
     ...item,
     dateFormatted: format(new Date(item.date), 'MMM dd'),
   }))
@@ -50,7 +61,7 @@ export function SpendingChart({ data, type = 'area' }: SpendingChartProps) {
             fontSize={12}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(value) => `$${value}`}
+            tickFormatter={value => `$${value}`}
           />
 
           <Tooltip
@@ -62,13 +73,18 @@ export function SpendingChart({ data, type = 'area' }: SpendingChartProps) {
             }}
             labelStyle={{ color: '#F8FAFC', fontWeight: 600 }}
             itemStyle={{ color: '#94A3B8' }}
-            formatter={(value: number | undefined) => [`$${(value || 0).toFixed(2)}`, '']}
+            formatter={(value: number | undefined) => [
+              `$${(value || 0).toFixed(2)}`,
+              '',
+            ]}
           />
 
           <Legend
             wrapperStyle={{ paddingTop: '20px' }}
             iconType="circle"
-            formatter={(value) => <span className="text-sm text-muted-foreground">{value}</span>}
+            formatter={value => (
+              <span className="text-sm text-muted-foreground">{value}</span>
+            )}
           />
 
           {type === 'area' ? (
@@ -117,3 +133,9 @@ export function SpendingChart({ data, type = 'area' }: SpendingChartProps) {
     </div>
   )
 }
+
+// Default export for dynamic imports
+export default SpendingChart
+
+// Keep named export for backwards compatibility
+export { SpendingChart }

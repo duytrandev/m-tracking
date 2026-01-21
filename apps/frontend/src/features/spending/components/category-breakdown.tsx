@@ -1,13 +1,20 @@
 'use client'
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Legend,
+  Tooltip,
+} from 'recharts'
 import type { CategoryBreakdown } from '@/types/api/spending'
 
 interface CategoryBreakdownProps {
   data: CategoryBreakdown[]
 }
 
-export function CategoryBreakdownChart({ data }: CategoryBreakdownProps) {
+function CategoryBreakdownChart({ data }: CategoryBreakdownProps) {
   if (!data || data.length === 0) {
     return (
       <div className="flex h-[300px] items-center justify-center text-muted-foreground">
@@ -17,7 +24,7 @@ export function CategoryBreakdownChart({ data }: CategoryBreakdownProps) {
   }
 
   const total = data.reduce((sum, item) => sum + item.total, 0)
-  const chartData = data.map((item) => ({
+  const chartData = data.map(item => ({
     ...item,
     percentage: total > 0 ? ((item.total / total) * 100).toFixed(1) : 0,
   }))
@@ -47,13 +54,19 @@ export function CategoryBreakdownChart({ data }: CategoryBreakdownProps) {
                 borderRadius: '8px',
                 backdropFilter: 'blur(12px)',
               }}
-              formatter={(value: number | undefined) => [`$${(value || 0).toFixed(2)}`, 'Total']}
+              formatter={(value: number | undefined) => [
+                `$${(value || 0).toFixed(2)}`,
+                'Total',
+              ]}
             />
             <Legend
               verticalAlign="middle"
               align="right"
               layout="vertical"
-              formatter={(_value, entry: any) => (
+              formatter={(
+                _value,
+                entry: { payload: { categoryName: string; percentage: string } }
+              ) => (
                 <span className="text-sm text-muted-foreground">
                   {entry.payload.categoryName} ({entry.payload.percentage}%)
                 </span>
@@ -65,7 +78,7 @@ export function CategoryBreakdownChart({ data }: CategoryBreakdownProps) {
 
       {/* Category list */}
       <div className="space-y-2">
-        {chartData.map((category) => (
+        {chartData.map(category => (
           <div
             key={category.categoryId}
             className="flex items-center justify-between rounded-lg border border-border/40 bg-card/40 p-3 backdrop-blur-xl transition-all duration-200 hover:border-primary/40"
@@ -83,8 +96,12 @@ export function CategoryBreakdownChart({ data }: CategoryBreakdownProps) {
               </div>
             </div>
             <div className="text-right">
-              <p className="font-heading text-lg font-semibold">${category.total.toFixed(2)}</p>
-              <p className="text-xs text-muted-foreground">{category.percentage}%</p>
+              <p className="font-heading text-lg font-semibold">
+                ${category.total.toFixed(2)}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {category.percentage}%
+              </p>
             </div>
           </div>
         ))}
@@ -92,3 +109,9 @@ export function CategoryBreakdownChart({ data }: CategoryBreakdownProps) {
     </div>
   )
 }
+
+// Default export for dynamic imports
+export default CategoryBreakdownChart
+
+// Keep named export for backwards compatibility
+export { CategoryBreakdownChart }
