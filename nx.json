@@ -28,9 +28,7 @@
     "nestBuild": [
       "{projectRoot}/src/**/*.ts",
       "{projectRoot}/package.json",
-      "{projectRoot}/tsconfig.json",
-      "{projectRoot}/tsconfig.build.json",
-      "{projectRoot}/nest-cli.json"
+      "{projectRoot}/tsconfig.json"
     ],
     "nextBuild": [
       "{projectRoot}/app/**/*",
@@ -67,7 +65,7 @@
       "inputs": ["nextBuild", "^production"],
       "cache": true
     },
-    "@nx/nest:build": {
+    "@nx/js:tsc": {
       "inputs": ["nestBuild", "^production"],
       "cache": true
     },

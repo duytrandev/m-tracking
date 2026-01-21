@@ -8,43 +8,39 @@
   "tags": ["type:app", "scope:backend"],
   "targets": {
     "build": {
-      "executor": "@nx/nest:build",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/services/backend",
         "main": "services/backend/src/main.ts",
-        "tsConfig": "services/backend/tsconfig.build.json",
+        "tsConfig": "services/backend/tsconfig.json",
         "assets": ["services/backend/src/assets"]
       },
       "configurations": {
         "production": {
-          "optimization": true,
-          "extractLicenses": true,
-          "inspect": false
+          "optimization": true
         }
       }
     },
     "serve": {
-      "executor": "@nx/nest:serve",
+      "executor": "nx:run-commands",
       "options": {
-        "buildTarget": "@m-tracking/backend:build"
-      },
-      "configurations": {
-        "production": {
-          "buildTarget": "@m-tracking/backend:build:production"
-        }
+        "command": "pnpm dev",
+        "cwd": "services/backend"
       }
     },
     "dev": {
-      "executor": "@nx/nest:serve",
+      "executor": "nx:run-commands",
       "options": {
-        "buildTarget": "@m-tracking/backend:build"
+        "command": "pnpm dev",
+        "cwd": "services/backend"
       }
     },
     "start": {
-      "executor": "@nx/nest:serve",
+      "executor": "nx:run-commands",
       "options": {
-        "buildTarget": "@m-tracking/backend:build:production"
+        "command": "pnpm start",
+        "cwd": "services/backend"
       }
     },
     "lint": {
