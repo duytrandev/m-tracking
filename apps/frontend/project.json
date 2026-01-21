@@ -86,6 +86,14 @@
         "cwd": "apps/frontend"
       },
       "cache": true
+    },
+    "type-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit",
+        "cwd": "apps/frontend"
+      },
+      "cache": true
     }
   }
 }

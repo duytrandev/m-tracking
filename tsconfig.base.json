@@ -25,6 +25,7 @@
     "sourceMap": true,
     "removeComments": false,
     "importHelpers": true,
+    "composite": true,
 
     // Interop Constraints
     "esModuleInterop": true,
@@ -58,5 +59,12 @@
       "@m-tracking/utils/*": ["libs/utils/src/*"]
     }
   },
-  "exclude": ["node_modules", "dist", "build", ".next", "coverage", "**/*.spec.ts"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    ".next",
+    "coverage",
+    "**/*.spec.ts"
+  ]
 }

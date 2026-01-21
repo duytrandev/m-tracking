@@ -6,20 +6,26 @@ on:
   pull_request:
     branches: [main, develop]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   NODE_VERSION: '20.10.0'
   PNPM_VERSION: '10.28.0'
   NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
 jobs:
-  main:
+  setup:
     runs-on: ubuntu-latest
-
+    outputs:
+      nx_base: ${{ steps.set-shas.outputs.base }}
+      nx_head: ${{ steps.set-shas.outputs.head }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Required for Nx affected
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -34,8 +40,7 @@ jobs:
       - name: Get pnpm store directory
         id: pnpm-cache
         shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
       - name: Setup pnpm cache
         uses: actions/cache@v4
@@ -48,29 +53,164 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Set Nx base and head
-        run: |
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            echo "NX_BASE=origin/${{ github.base_ref }}" >> $GITHUB_ENV
-            echo "NX_HEAD=HEAD" >> $GITHUB_ENV
-          else
-            echo "NX_BASE=HEAD~1" >> $GITHUB_ENV
-            echo "NX_HEAD=HEAD" >> $GITHUB_ENV
-          fi
+      - name: Set NX SHAs
+        id: set-shas
+        uses: nrwl/nx-set-shas@v4
+        with:
+          main-branch-name: main
 
-      - name: Lint affected projects
-        run: pnpm nx affected -t lint --base=$NX_BASE --head=$NX_HEAD --parallel=3
+  lint:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Test affected projects
-        run: pnpm nx affected -t test --base=$NX_BASE --head=$NX_HEAD --parallel=3 --coverage
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
 
-      - name: Build affected projects
-        run: pnpm nx affected -t build --base=$NX_BASE --head=$NX_HEAD --parallel=3
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
 
-      - name: Upload coverage reports
+      - name: Restore pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: $(pnpm store path)
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint affected
+        run: pnpm nx affected -t lint --base=${{ needs.setup.outputs.nx_base }} --head=${{ needs.setup.outputs.nx_head }} --parallel=3
+
+  type-check:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Restore pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: $(pnpm store path)
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check affected
+        run: pnpm nx affected -t type-check --base=${{ needs.setup.outputs.nx_base }} --head=${{ needs.setup.outputs.nx_head }} --parallel=3
+
+  test:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Restore pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: $(pnpm store path)
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test affected
+        run: pnpm nx affected -t test --base=${{ needs.setup.outputs.nx_base }} --head=${{ needs.setup.outputs.nx_head }} --parallel=3 --coverage
+
+      - name: Upload coverage
         if: always()
         uses: codecov/codecov-action@v4
         with:
           files: ./coverage/**/coverage-final.json
           flags: unittests
           fail_ci_if_error: false
+
+  format-check:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Restore pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: $(pnpm store path)
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check formatting
+        run: pnpm format:check
+
+  build:
+    needs: [lint, type-check, test, format-check]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Restore pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: $(pnpm store path)
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build affected
+        run: pnpm nx affected -t build --base=${{ needs.setup.outputs.nx_base }} --head=${{ needs.setup.outputs.nx_head }} --parallel=3
