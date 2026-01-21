@@ -55,14 +55,21 @@ Authorization: Bearer <access_token>
 **Example:**
 ```bash
 curl -X GET "http://localhost:4000/api/users/me" \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
 ### Token Lifecycle
 
-- **Access Token**: Valid for 15 minutes
-- **Refresh Token**: Valid for 7 days
+- **Access Token**: Valid for 15 minutes (RS256, asymmetric)
+- **Refresh Token**: Valid for 7 days (HS256, symmetric, httpOnly cookie)
 - **Token Refresh**: Use `/auth/refresh` endpoint before access token expires
+- **Token Revocation**: Logout immediately blacklists tokens via Redis
+
+### Token Algorithms
+
+- **Access Token:** RS256 (RSA with SHA-256), public key verification
+- **Refresh Token:** HS256 (HMAC with SHA-256), secret-only verification
+- **Security:** Hybrid approach combines asymmetric and symmetric strengths
 
 ### Obtaining Tokens
 
@@ -870,12 +877,15 @@ Visit `/api/docs` for interactive Swagger UI documentation where you can:
 
 ## Additional Resources
 
-- [Backend Architecture](./backend-architecture/index.md)
-- [API Specification (OpenAPI)](./backend-architecture/api-specification.md)
-- [Authentication Guide](./backend-architecture/oauth-social-login.md)
-- [Testing Guide](./testing.md)
-- [Troubleshooting](./troubleshooting.md)
+- [Backend Authentication Implementation](./backend-authentication.md) - Complete auth system documentation
+- [System Architecture](./system-architecture.md) - Architectural decisions (ADR-006 JWT, ADR-007 OAuth)
+- [Backend Configuration](./backend-configuration.md) - TypeScript and NestJS configuration
+- [Code Standards](./code-standards.md) - Development guidelines and patterns
+- [ENV Configuration Guide](./ENV_CONFIG_GUIDE.md) - Environment variable setup
+- [Testing Guide](./testing.md) - Testing strategies
+- [Troubleshooting](./troubleshooting.md) - Common issues and solutions
 
 ---
 
-**Last Updated:** 2026-01-18
+**Last Updated:** 2026-01-21
+**Status:** ✅ Updated with Backend Authentication (Production Ready)

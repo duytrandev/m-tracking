@@ -44,11 +44,19 @@ services:
       - PORT=4000
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_DATABASE=m_tracking
     volumes:
       - ./services/backend/src:/app/src
       - /app/node_modules
     depends_on:
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - m-tracking-network
     restart: unless-stopped
@@ -86,9 +94,31 @@ services:
       - m-tracking-network
     restart: unless-stopped
 
+  # PostgreSQL Database (Local Development)
+  postgres:
+    image: postgres:17-alpine
+    container_name: m-tracking-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=m_tracking
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - m-tracking-network
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 networks:
   m-tracking-network:
     driver: bridge
 
 volumes:
   redis-data:
+  postgres-data:

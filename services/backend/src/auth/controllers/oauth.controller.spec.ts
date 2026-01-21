@@ -4,9 +4,7 @@ import { OAuthController } from './oauth.controller';
 import { OAuthService } from '../services/oauth.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 
-// TODO: Fix TypeORM metadata issue with Vitest
-// https://github.com/vitest-dev/vitest/issues/XXX
-describe.skip('OAuthController', () => {
+describe('OAuthController', () => {
   let controller: OAuthController;
   let oauthService: OAuthService;
 

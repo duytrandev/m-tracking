@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { ThrottlerModule } from '@nestjs/throttler';
 import {
   User,
   Role,
@@ -47,17 +48,28 @@ import * as fs from 'fs';
     ]),
     ConfigModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 1 minute time window
+        limit: 10, // 10 requests per minute for auth endpoints
+      },
+    ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: () => ({
-        privateKey: fs.readFileSync('jwt-private-key.pem', 'utf8'),
-        publicKey: fs.readFileSync('jwt-public-key.pem', 'utf8'),
-        signOptions: {
-          algorithm: 'RS256',
-          expiresIn: '15m',
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const privateKeyPath = configService.get<string>('JWT_PRIVATE_KEY_PATH', 'jwt-private-key.pem');
+        const publicKeyPath = configService.get<string>('JWT_PUBLIC_KEY_PATH', 'jwt-public-key.pem');
+
+        return {
+          privateKey: fs.readFileSync(privateKeyPath, 'utf8'),
+          publicKey: fs.readFileSync(publicKeyPath, 'utf8'),
+          signOptions: {
+            algorithm: 'RS256',
+            expiresIn: '15m',
+          },
+        };
+      },
     }),
     SharedModule,
   ],

@@ -1,13 +1,15 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 import { TokenPayload } from '../services/token.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor() {
-    const publicKey = fs.readFileSync('jwt-public-key.pem', 'utf8');
+  constructor(configService: ConfigService) {
+    const publicKeyPath = configService.get<string>('JWT_PUBLIC_KEY_PATH', 'jwt-public-key.pem');
+    const publicKey = fs.readFileSync(publicKeyPath, 'utf8');
 
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

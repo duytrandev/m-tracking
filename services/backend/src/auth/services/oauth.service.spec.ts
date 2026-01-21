@@ -9,7 +9,7 @@ import { Role } from '../entities/role.entity';
 import { TokenService } from './token.service';
 import { SessionService } from './session.service';
 
-describe.skip('OAuthService', () => {
+describe('OAuthService', () => {
   let service: OAuthService;
   let userRepository: Repository<User>;
   let oauthAccountRepository: Repository<OAuthAccount>;
@@ -121,9 +121,9 @@ describe.skip('OAuthService', () => {
         user: mockUser,
       } as OAuthAccount;
 
-      jest
-        .spyOn(oauthAccountRepository, 'findOne')
-        .mockResolvedValue(mockOAuthAccount);
+      vi.spyOn(oauthAccountRepository, 'findOne').mockResolvedValue(
+        mockOAuthAccount,
+      );
       vi.spyOn(oauthAccountRepository, 'save').mockResolvedValue(mockOAuthAccount);
 
       const result = await service.handleOAuthCallback(
@@ -141,9 +141,9 @@ describe.skip('OAuthService', () => {
       vi.spyOn(userRepository, 'findOne').mockResolvedValue(null);
       vi.spyOn(roleRepository, 'findOne').mockResolvedValue(mockRole);
       vi.spyOn(userRepository, 'save').mockResolvedValue(mockUser);
-      jest
-        .spyOn(oauthAccountRepository, 'save')
-        .mockResolvedValue({} as OAuthAccount);
+      vi.spyOn(oauthAccountRepository, 'save').mockResolvedValue(
+        {} as OAuthAccount,
+      );
 
       const result = await service.handleOAuthCallback(
         mockOAuthProfile,
@@ -159,9 +159,9 @@ describe.skip('OAuthService', () => {
     it('should auto-link OAuth to existing user by verified email', async () => {
       vi.spyOn(oauthAccountRepository, 'findOne').mockResolvedValue(null);
       vi.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
-      jest
-        .spyOn(oauthAccountRepository, 'save')
-        .mockResolvedValue({} as OAuthAccount);
+      vi.spyOn(oauthAccountRepository, 'save').mockResolvedValue(
+        {} as OAuthAccount,
+      );
 
       const result = await service.handleOAuthCallback(
         mockOAuthProfile,
@@ -187,15 +187,15 @@ describe.skip('OAuthService', () => {
         oauthAccounts: [mockOAuthAccount, {} as OAuthAccount],
       } as User;
 
-      jest
-        .spyOn(oauthAccountRepository, 'findOne')
-        .mockResolvedValue(mockOAuthAccount);
-      jest
-        .spyOn(userRepository, 'findOne')
-        .mockResolvedValue(userWithMultipleAccounts);
-      jest
-        .spyOn(oauthAccountRepository, 'remove')
-        .mockResolvedValue(mockOAuthAccount);
+      vi.spyOn(oauthAccountRepository, 'findOne').mockResolvedValue(
+        mockOAuthAccount,
+      );
+      vi.spyOn(userRepository, 'findOne').mockResolvedValue(
+        userWithMultipleAccounts,
+      );
+      vi.spyOn(oauthAccountRepository, 'remove').mockResolvedValue(
+        mockOAuthAccount,
+      );
 
       await service.unlinkOAuthAccount(mockUser.id, 'google');
 
@@ -217,12 +217,12 @@ describe.skip('OAuthService', () => {
         oauthAccounts: [mockOAuthAccount],
       } as User;
 
-      jest
-        .spyOn(oauthAccountRepository, 'findOne')
-        .mockResolvedValue(mockOAuthAccount);
-      jest
-        .spyOn(userRepository, 'findOne')
-        .mockResolvedValue(userWithSingleAccount);
+      vi.spyOn(oauthAccountRepository, 'findOne').mockResolvedValue(
+        mockOAuthAccount,
+      );
+      vi.spyOn(userRepository, 'findOne').mockResolvedValue(
+        userWithSingleAccount,
+      );
 
       await expect(
         service.unlinkOAuthAccount(mockUser.id, 'google'),

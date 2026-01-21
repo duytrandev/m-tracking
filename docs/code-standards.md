@@ -816,28 +816,32 @@ JwtModule.register({
 })
 ```
 
-### OAuth Token Encryption
+### OAuth Token Encryption (Production Implementation ✅)
 
-**Always encrypt OAuth tokens at rest:**
+**Always encrypt OAuth tokens at rest using AES-256-GCM:**
 
 ```typescript
-// ✅ Good - Encrypt sensitive tokens
+// ✅ Good - Encrypt sensitive tokens (AES-256-GCM)
 import { EncryptionUtil } from '../utils/encryption.util'
 
 const encrypted = EncryptionUtil.encrypt(oauthAccessToken)
 await this.oauthAccountRepository.save({
-  accessToken: encrypted, // Stored encrypted
+  accessToken: encrypted, // Stored encrypted with authentication tag
 })
+
+// Decrypt when needed for API calls
+const plaintext = EncryptionUtil.decrypt(encrypted)
+await this.oauthProvider.makeAuthenticatedCall(plaintext)
 
 // ❌ Bad - Plaintext tokens in database
 const oauthAccount = new OAuthAccount()
 oauthAccount.accessToken = oauthAccessToken // Plain dangerous!
 ```
 
-**OAuth Account Auto-Linking (Email Verification):**
+**OAuth Account Auto-Linking (Email Verification - Production ✅):**
 
 ```typescript
-// ✅ Good - Only auto-link verified emails
+// ✅ Good - Only auto-link verified emails (prevents account takeover)
 if (profile.emailVerified) {
   const user = await this.userRepository.findOne({
     where: { email: profile.email },
@@ -845,22 +849,136 @@ if (profile.emailVerified) {
   if (user) return user // Safe to link
 }
 
+// Create new user if email not already linked
+const newUser = new User()
+newUser.email = profile.email
+newUser.emailVerified = profile.emailVerified
+newUser.name = profile.displayName
+
 // ❌ Bad - Auto-link unverified emails
 const user = await this.userRepository.findOne({
   where: { email: profile.email }, // May not be user's email!
 })
 ```
 
-**OAuth Account Unlinking (Prevent Lockout):**
+**OAuth Account Unlinking (Prevent Lockout - Production ✅):**
 
 ```typescript
-// ✅ Good - Ensure alternative auth exists
+// ✅ Good - Ensure alternative auth exists (prevents account lockout)
 if (!user.password && user.oauthAccounts.length === 1) {
   throw new ConflictException('Cannot unlink last authentication method')
 }
 
+// Safe to unlink
+await this.oauthAccountRepository.remove(oauthAccount)
+
 // ❌ Bad - Allow complete lockout
 await this.oauthAccountRepository.remove(oauthAccount) // User locked out!
+```
+
+### JWT Token Generation (Production Implementation ✅)
+
+**Use RS256 for access tokens, HS256 for refresh tokens:**
+
+```typescript
+// ✅ Good - Hybrid JWT strategy (asymmetric + symmetric)
+async generateTokens(user: User): Promise<{ accessToken: string; refreshToken: string }> {
+  // Access token: RS256 (asymmetric), 15 minutes
+  const accessToken = this.jwtService.sign(
+    {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    },
+    {
+      algorithm: 'RS256',
+      expiresIn: '15m',
+    }
+  );
+
+  // Refresh token: HS256 (symmetric), 7 days
+  const refreshToken = this.jwtService.sign(
+    {
+      sub: user.id,
+      type: 'refresh',
+    },
+    {
+      algorithm: 'HS256',
+      secret: process.env.JWT_REFRESH_SECRET,
+      expiresIn: '7d',
+    }
+  );
+
+  return { accessToken, refreshToken };
+}
+
+// ❌ Bad - Same algorithm for both tokens
+const token = this.jwtService.sign(payload, {
+  expiresIn: '7d', // Long expiry on short-lived token!
+})
+```
+
+### Token Validation with Blacklist Check (Production ✅)
+
+```typescript
+// ✅ Good - Validate and check Redis blacklist
+async validateToken(token: string): Promise<User | null> {
+  try {
+    // Check if token is blacklisted (from logout)
+    const isBlacklisted = await this.redis.get(`blacklist:${token}`);
+    if (isBlacklisted) {
+      throw new UnauthorizedException('Token has been revoked');
+    }
+
+    // Verify signature and decode
+    const payload = this.jwtService.verify(token);
+
+    // Fetch user to ensure still exists and active
+    const user = await this.userRepository.findOne(payload.sub);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    return user;
+  } catch (error) {
+    if (error instanceof JsonWebTokenError) {
+      throw new UnauthorizedException('Invalid token');
+    }
+    throw error;
+  }
+}
+
+// ❌ Bad - No blacklist check on logout
+// User can still use token for 15 minutes after logout!
+```
+
+### Rate Limiting for Auth Endpoints (Production ✅)
+
+```typescript
+// ✅ Good - Strict rate limiting on sensitive endpoints
+@Post('login')
+@Throttle({ limit: 5, ttl: 60000 }) // 5 req/min
+async login(@Body() dto: LoginDto) {
+  // Protects against brute force attacks
+}
+
+@Post('register')
+@Throttle({ limit: 5, ttl: 60000 }) // 5 req/min
+async register(@Body() dto: RegisterDto) {
+  // Prevents account enumeration
+}
+
+@Post('forgot-password')
+@Throttle({ limit: 3, ttl: 60000 }) // 3 req/min
+async forgotPassword(@Body() dto: ForgotPasswordDto) {
+  // Prevents abuse of password reset
+}
+
+// ❌ Bad - Default limits on auth endpoints
+@Post('login')
+async login(@Body() dto: LoginDto) {
+  // 10 req/min default - too high for security-critical endpoint
+}
 ```
 
 ---

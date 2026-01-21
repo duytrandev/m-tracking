@@ -30,9 +30,14 @@ export class TokenService {
     private redisService: RedisService,
     private configService: ConfigService,
   ) {
-    // Load RSA keys
-    this.privateKey = fs.readFileSync('jwt-private-key.pem', 'utf8');
-    this.publicKey = fs.readFileSync('jwt-public-key.pem', 'utf8');
+    // Load RSA keys from configurable paths
+    const privateKeyPath = this.configService.get<string>('JWT_PRIVATE_KEY_PATH', 'jwt-private-key.pem');
+    const publicKeyPath = this.configService.get<string>('JWT_PUBLIC_KEY_PATH', 'jwt-public-key.pem');
+
+    this.privateKey = fs.readFileSync(privateKeyPath, 'utf8');
+    this.publicKey = fs.readFileSync(publicKeyPath, 'utf8');
+
+    this.logger.log('JWT keys loaded successfully');
   }
 
   /**

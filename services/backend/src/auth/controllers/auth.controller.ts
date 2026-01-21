@@ -11,6 +11,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { Request, Response } from 'express';
 import { AuthService } from '../services/auth.service';
 import {
@@ -32,8 +33,10 @@ export class AuthController {
   /**
    * Register new user
    * POST /auth/register
+   * Rate limit: 5 requests per minute
    */
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() dto: RegisterDto) {
@@ -55,8 +58,10 @@ export class AuthController {
    * Login with email and password
    * POST /auth/login
    * Returns access token + sets refresh token in httpOnly cookie
+   * Rate limit: 5 requests per minute to prevent brute force
    */
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(
@@ -150,8 +155,10 @@ export class AuthController {
   /**
    * Request password reset
    * POST /auth/forgot-password
+   * Rate limit: 3 requests per minute to prevent email enumeration
    */
   @Public()
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
