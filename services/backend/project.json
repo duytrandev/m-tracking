@@ -53,7 +53,7 @@
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "jest",
+        "command": "vitest run",
         "cwd": "services/backend"
       },
       "cache": true
