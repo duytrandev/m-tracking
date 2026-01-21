@@ -12,7 +12,13 @@ module.exports = {
     node: true,
     jest: true,
   },
-  ignorePatterns: ['.eslintrc.js', 'vitest.config.ts', 'vitest.setup.ts'],
+  ignorePatterns: [
+    '.eslintrc.js',
+    'vitest.config.ts',
+    'vitest.setup.ts',
+    'dist/**',
+    '**/*.d.ts',
+  ],
   rules: {
     '@typescript-eslint/interface-name-prefix': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',

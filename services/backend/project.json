@@ -46,7 +46,7 @@
     "lint": {
       "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": ["services/backend/**/*.ts"]
+        "lintFilePatterns": ["services/backend/src/**/*.ts"]
       },
       "cache": true
     },
