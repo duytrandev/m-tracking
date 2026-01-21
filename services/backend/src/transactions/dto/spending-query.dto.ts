@@ -10,7 +10,7 @@ export enum TimePeriod {
 
 export class SpendingQueryDto {
   @IsEnum(TimePeriod)
-  period: TimePeriod;
+  period!: TimePeriod;
 
   @IsOptional()
   @IsDateString()

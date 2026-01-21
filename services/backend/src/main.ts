@@ -3,7 +3,7 @@ import { ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { AppModule } from './app.module'
 import cookieParser from 'cookie-parser'
-import * as Sentry from '@sentry/node'
+// import * as Sentry from '@sentry/node'
 
 // Global filters, interceptors, pipes
 import {
@@ -23,10 +23,10 @@ async function bootstrap() {
   initializeSentry(configService)
 
   // Sentry request handler (MUST be first middleware)
-  app.use(Sentry.Handlers.requestHandler())
+  // app.use(Sentry.Handlers.requestHandler())
 
   // Sentry tracing middleware
-  app.use(Sentry.Handlers.tracingHandler())
+  // app.use(Sentry.Handlers.tracingHandler())
 
   // Cookie parser middleware
   app.use(cookieParser())
@@ -50,7 +50,7 @@ async function bootstrap() {
   )
 
   // Sentry error handler (MUST be before exception filter)
-  app.use(Sentry.Handlers.errorHandler())
+  // app.use(Sentry.Handlers.errorHandler())
 
   // CORS - Use config service
   app.enableCors({

@@ -73,9 +73,9 @@ export class TransactionsService {
   ): Promise<Transaction> {
     const transaction = await this.findOneTransaction(userId, id);
 
-    if (dto.categoryId) {
+    if ((dto as any).categoryId) {
       const category = await this.categoryRepository.findOne({
-        where: { id: dto.categoryId, userId },
+        where: { id: (dto as any).categoryId, userId },
       });
       if (!category) {
         throw new NotFoundException('Category not found');
@@ -207,19 +207,23 @@ export class TransactionsService {
     const currentDate = new Date(startDate);
     while (currentDate <= endDate) {
       const dateKey = currentDate.toISOString().split('T')[0];
-      dailyMap.set(dateKey, { expense: 0, income: 0 });
+      if (dateKey) {
+        dailyMap.set(dateKey, { expense: 0, income: 0 });
+      }
       currentDate.setDate(currentDate.getDate() + 1);
     }
 
     transactions.forEach((transaction) => {
       const dateKey = new Date(transaction.date).toISOString().split('T')[0];
-      const existing = dailyMap.get(dateKey);
+      if (dateKey) {
+        const existing = dailyMap.get(dateKey);
 
-      if (existing) {
-        if (transaction.type === TransactionType.EXPENSE) {
-          existing.expense += Number(transaction.amount);
-        } else {
-          existing.income += Number(transaction.amount);
+        if (existing) {
+          if (transaction.type === TransactionType.EXPENSE) {
+            existing.expense += Number(transaction.amount);
+          } else {
+            existing.income += Number(transaction.amount);
+          }
         }
       }
     });

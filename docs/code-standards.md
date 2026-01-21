@@ -362,6 +362,37 @@ async function processTransaction(data: TransactionDto) {
 }
 ```
 
+**Type casting pattern for error handling (Phase 0 - Configuration Fixes):**
+
+```typescript
+// ✅ Good - Type guard for error objects
+async function fetchData() {
+  try {
+    return await externalApi.call()
+  } catch (error) {
+    // Always type-guard error as unknown first
+    if (error instanceof Error) {
+      this.logger.error('API call failed', {
+        message: error.message,
+        stack: error.stack,
+      })
+    } else {
+      this.logger.error('Unknown error occurred', { error })
+    }
+    throw new ApiException('Failed to fetch data')
+  }
+}
+
+// Type-safe error handling with custom errors
+try {
+  // operation
+} catch (error) {
+  const typedError = error as Error
+  // Now safe to access .message, .stack
+  throw new CustomException(typedError.message)
+}
+```
+
 ### Logging Errors
 
 **Log all errors with context:**

@@ -38,6 +38,7 @@
     "incremental": true,
 
     // Module Resolution
+    "module": "ESNext",
     "moduleResolution": "bundler",
 
     // Language and Target

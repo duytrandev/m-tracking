@@ -42,13 +42,18 @@ pnpm install
 cp .env.example .env
 # Edit .env with your configuration
 
-# 4. Start Docker services
+# 4. (Phase 0) Setup Docker secrets for local development
+cp .env.docker.example .env.docker
+# Contains POSTGRES_PASSWORD, REDIS_PASSWORD, etc.
+# Never commit .env.docker to git
+
+# 5. Start Docker services
 pnpm nx run docker:up
 
-# 5. Run migrations
+# 6. Run migrations
 pnpm nx run --filter @m-tracking/backend migration:run
 
-# 6. Start development servers
+# 7. Start development servers
 pnpm dev
 ```
 

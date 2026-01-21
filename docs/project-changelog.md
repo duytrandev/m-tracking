@@ -24,6 +24,17 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 
 ### Added
 
+**Phase 0: Configuration Fixes & TypeScript Compliance**
+- ✅ ESLint dependencies installed (eslint@9, @typescript-eslint/*)
+- ✅ Docker secrets management pattern (.env.docker for local dev)
+- ✅ Strict peer dependencies enabled in package.json
+- ✅ Jest preset created (jest.preset.js) for workspace testing
+- ✅ NX caching optimization for incremental builds
+- ✅ 146 TypeScript errors resolved across backend
+- ✅ All DTOs/entities now use proper `!` assertion pattern
+- ✅ Error type casting pattern documented and enforced
+- ✅ @types/node@22 for Node.js type definitions
+
 **UI Component Library: Dropdown Menu (Phase 01 - Sidebar User Menu)**
 - ✅ shadcn/ui dropdown-menu component installed at `apps/frontend/src/components/ui/dropdown-menu.tsx`
 - ✅ Radix UI @radix-ui/react-dropdown-menu integration

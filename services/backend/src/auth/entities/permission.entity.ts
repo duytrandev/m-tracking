@@ -12,17 +12,17 @@ import { Role } from './role.entity';
 @Index(['name'], { unique: true })
 export class Permission {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column({ unique: true, length: 100 })
-  name: string;
+  name!: string;
 
   @Column({ type: 'text', nullable: true })
-  description: string;
+  description!: string;
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @ManyToMany(() => Role, (role) => role.permissions)
-  roles: Role[];
+  roles!: Role[];
 }

@@ -98,7 +98,7 @@ export class TokenService {
 
       return decoded;
     } catch (error) {
-      this.logger.error(`Access token verification failed: ${error.message}`);
+      this.logger.error(`Access token verification failed: ${(error as Error).message}`);
       throw new UnauthorizedException('Invalid or expired token');
     }
   }
@@ -124,7 +124,7 @@ export class TokenService {
 
       return decoded;
     } catch (error) {
-      this.logger.error(`Refresh token verification failed: ${error.message}`);
+      this.logger.error(`Refresh token verification failed: ${(error as Error).message}`);
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
   }

@@ -33,6 +33,7 @@ out/
 .env.development
 .env.production
 .env.test
+.env.docker
 
 # Logs
 logs/

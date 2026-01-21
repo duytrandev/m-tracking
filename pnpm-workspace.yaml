@@ -3,5 +3,12 @@ packages:
   - "services/*"
   - "libs/*"
 
-# Allow peer dependency mismatches (NestJS 11 compatibility)
-strictPeerDependencies: false
+# Re-enable strict mode for better dependency management
+strictPeerDependencies: true
+
+# Document known safe exceptions (NestJS 11 compatibility)
+pnpm:
+  peerDependencyRules:
+    ignoreMissing:
+      - "@nestjs/common"
+      - "@nestjs/core"

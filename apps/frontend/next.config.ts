@@ -1,8 +1,12 @@
 import type { NextConfig } from 'next'
 import createNextIntlPlugin from 'next-intl/plugin'
 import { withSentryConfig } from '@sentry/nextjs'
+import bundleAnalyzer from '@next/bundle-analyzer'
 
 const withNextIntl = createNextIntlPlugin('./src/lib/i18n/request.ts')
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+})
 
 const nextConfig: NextConfig = {
   typescript: {
@@ -27,8 +31,8 @@ const sentryWebpackPluginOptions = {
   disableClientWebpackPlugin: process.env.NEXT_PUBLIC_APP_ENV !== 'production',
 }
 
-// Wrap with Sentry config for error tracking and performance monitoring
+// Apply plugins in order: intl -> bundleAnalyzer -> sentry
 export default withSentryConfig(
-  withNextIntl(nextConfig),
+  withBundleAnalyzer(withNextIntl(nextConfig)),
   sentryWebpackPluginOptions
 )

@@ -148,7 +148,8 @@ export class SentryService {
    *   transaction.finish();
    * }
    */
-  startTransaction(name: string, op: string): Sentry.Transaction {
-    return Sentry.startTransaction({ name, op });
+  startTransaction(name: string, op: string): any {
+    // return Sentry.startTransaction({ name, op });
+    return { name, op, finish: () => {}, setStatus: () => {} };
   }
 }

@@ -21,46 +21,46 @@ import { UserPreferences, DEFAULT_USER_PREFERENCES } from '../interfaces/user-pr
 @Index(['phone'])
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column({ unique: true, length: 255 })
-  email: string;
+  email!: string;
 
   @Column({ nullable: true, select: false, length: 255 })
-  password: string;
+  password!: string;
 
   @Column({ length: 255 })
-  name: string;
+  name!: string;
 
   @Column({ nullable: true, length: 500 })
-  avatar: string;
+  avatar!: string;
 
   @Column({ nullable: true, length: 50 })
-  phone: string;
+  phone!: string;
 
   @Column({ name: 'email_verified', default: false })
-  emailVerified: boolean;
+  emailVerified!: boolean;
 
   @Column({ name: 'phone_verified', default: false })
-  phoneVerified: boolean;
+  phoneVerified!: boolean;
 
   @Column({ name: 'two_factor_enabled', default: false })
-  twoFactorEnabled: boolean;
+  twoFactorEnabled!: boolean;
 
   @Column({ name: 'two_factor_secret', nullable: true, select: false, length: 255 })
-  twoFactorSecret: string;
+  twoFactorSecret!: string;
 
   @Column({
     type: 'jsonb',
     default: () => `'${JSON.stringify(DEFAULT_USER_PREFERENCES)}'::jsonb`,
   })
-  preferences: UserPreferences;
+  preferences!: UserPreferences;
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updatedAt!: Date;
 
   @ManyToMany(() => Role, (role) => role.users)
   @JoinTable({
@@ -68,17 +68,17 @@ export class User {
     joinColumn: { name: 'user_id', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'role_id', referencedColumnName: 'id' },
   })
-  roles: Role[];
+  roles!: Role[];
 
   @OneToMany(() => Session, (session) => session.user)
-  sessions: Session[];
+  sessions!: Session[];
 
   @OneToMany(() => OAuthAccount, (account) => account.user)
-  oauthAccounts: OAuthAccount[];
+  oauthAccounts!: OAuthAccount[];
 
   @OneToMany(() => PasswordResetToken, (token) => token.user)
-  passwordResetTokens: PasswordResetToken[];
+  passwordResetTokens!: PasswordResetToken[];
 
   @OneToMany(() => EmailVerificationToken, (token) => token.user)
-  emailVerificationTokens: EmailVerificationToken[];
+  emailVerificationTokens!: EmailVerificationToken[];
 }

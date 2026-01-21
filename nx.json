@@ -30,8 +30,7 @@
       "{projectRoot}/package.json",
       "{projectRoot}/tsconfig.json",
       "{projectRoot}/tsconfig.build.json",
-      "{projectRoot}/nest-cli.json",
-      "^production"
+      "{projectRoot}/nest-cli.json"
     ],
     "nextBuild": [
       "{projectRoot}/app/**/*",
@@ -41,20 +40,27 @@
       "{projectRoot}/tsconfig.json",
       "{projectRoot}/next.config.ts",
       "{projectRoot}/tailwind.config.js",
-      "{projectRoot}/postcss.config.js",
-      "^production"
+      "{projectRoot}/postcss.config.js"
     ],
     "libraryBuild": [
       "{projectRoot}/src/**/*.ts",
       "{projectRoot}/package.json",
-      "{projectRoot}/tsconfig.json",
-      "^production"
+      "{projectRoot}/tsconfig.json"
     ]
   },
   "targetDefaults": {
+    "type-check": {
+      "inputs": ["default", "^production"],
+      "cache": true
+    },
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"],
+      "outputs": [
+        "{projectRoot}/dist",
+        "{projectRoot}/.next",
+        "{projectRoot}/build"
+      ],
       "cache": true
     },
     "test": {

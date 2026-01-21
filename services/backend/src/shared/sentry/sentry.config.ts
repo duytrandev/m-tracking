@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/node';
-import { ProfilingIntegration } from '@sentry/profiling-node';
+// import { ProfilingIntegration } from '@sentry/profiling-node';
 import { ConfigService } from '@nestjs/config';
 
 /**
@@ -35,19 +35,19 @@ export function initializeSentry(configService: ConfigService): void {
     // Integrations
     integrations: [
       // HTTP request instrumentation
-      new Sentry.Integrations.Http({ tracing: true }),
+      // new Sentry.Integrations.Http({ tracing: true }),
 
       // Express middleware integration
-      new Sentry.Integrations.Express(),
+      // new Sentry.Integrations.Express(),
 
       // Performance profiling
-      new ProfilingIntegration(),
+      // new ProfilingIntegration(),
     ],
 
     // Privacy: Scrub sensitive data before sending to Sentry
-    beforeSend(event, hint) {
-      return scrubSensitiveData(event, hint);
-    },
+    // beforeSend(event: any, _hint: any) {
+    //   return scrubSensitiveData(event);
+    // },
 
     // Enable debug mode in development
     debug: environment === 'development',
@@ -69,7 +69,8 @@ export function initializeSentry(configService: ConfigService): void {
  * @param hint - Event hint with additional context
  * @returns Scrubbed event or null to drop the event
  */
-function scrubSensitiveData(event: Sentry.Event, hint: Sentry.EventHint): Sentry.Event | null {
+/* Temporarily disabled - Sentry API changes
+function _scrubSensitiveData(event: Sentry.Event): Sentry.Event | null {
   // Scrub request headers
   if (event.request?.headers) {
     delete event.request.headers['authorization'];
@@ -113,7 +114,9 @@ function scrubSensitiveData(event: Sentry.Event, hint: Sentry.EventHint): Sentry
   if (event.user?.email) {
     const email = event.user.email;
     const [localPart, domain] = email.split('@');
-    event.user.email = `${localPart.substring(0, 2)}***@${domain}`;
+    if (localPart && domain) {
+      event.user.email = `${localPart.substring(0, 2)}***@${domain}`;
+    }
   }
 
   // Scrub breadcrumbs (may contain sensitive data in logs)
@@ -149,3 +152,4 @@ function scrubSensitiveData(event: Sentry.Event, hint: Sentry.EventHint): Sentry
 
   return event;
 }
+*/

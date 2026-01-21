@@ -31,7 +31,7 @@ export class OAuthController {
    */
   @Get('google')
   @UseGuards(AuthGuard('google'))
-  async googleAuth(@Query('redirect') redirect?: string) {
+  async googleAuth(@Query('redirect') _redirect?: string) {
     // Guard redirects to Google OAuth
   }
 
@@ -55,7 +55,7 @@ export class OAuthController {
     } catch (error) {
       // Redirect to frontend with error
       const frontendUrl = this.configService.get<string>('FRONTEND_URL');
-      const errorUrl = `${frontendUrl}/auth/error?message=${encodeURIComponent(error.message)}`;
+      const errorUrl = `${frontendUrl}/auth/error?message=${encodeURIComponent((error as Error).message)}`;
       return res.redirect(errorUrl);
     }
   }
@@ -65,7 +65,7 @@ export class OAuthController {
    */
   @Get('github')
   @UseGuards(AuthGuard('github'))
-  async githubAuth(@Query('redirect') redirect?: string) {
+  async githubAuth(@Query('redirect') _redirect?: string) {
     // Guard redirects to GitHub OAuth
   }
 
@@ -87,7 +87,7 @@ export class OAuthController {
       return res.redirect(redirectUrl);
     } catch (error) {
       const frontendUrl = this.configService.get<string>('FRONTEND_URL');
-      const errorUrl = `${frontendUrl}/auth/error?message=${encodeURIComponent(error.message)}`;
+      const errorUrl = `${frontendUrl}/auth/error?message=${encodeURIComponent((error as Error).message)}`;
       return res.redirect(errorUrl);
     }
   }
@@ -97,7 +97,7 @@ export class OAuthController {
    */
   @Get('facebook')
   @UseGuards(AuthGuard('facebook'))
-  async facebookAuth(@Query('redirect') redirect?: string) {
+  async facebookAuth(@Query('redirect') _redirect?: string) {
     // Guard redirects to Facebook OAuth
   }
 
@@ -119,7 +119,7 @@ export class OAuthController {
       return res.redirect(redirectUrl);
     } catch (error) {
       const frontendUrl = this.configService.get<string>('FRONTEND_URL');
-      const errorUrl = `${frontendUrl}/auth/error?message=${encodeURIComponent(error.message)}`;
+      const errorUrl = `${frontendUrl}/auth/error?message=${encodeURIComponent((error as Error).message)}`;
       return res.redirect(errorUrl);
     }
   }

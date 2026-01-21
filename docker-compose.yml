@@ -9,16 +9,13 @@ services:
     container_name: m-tracking-backend
     ports:
       - "4000:4000"
+    env_file:
+      - .env.docker
     environment:
       - NODE_ENV=development
       - PORT=4000
-      - SUPABASE_DB_HOST=${SUPABASE_DB_HOST}
-      - SUPABASE_DB_PASSWORD=${SUPABASE_DB_PASSWORD}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-      - SENTRY_DSN=${SENTRY_DSN}
     volumes:
       - ./services/backend/src:/app/src
       - /app/node_modules
@@ -36,11 +33,10 @@ services:
     container_name: m-tracking-analytics
     ports:
       - "5000:5000"
+    env_file:
+      - .env.docker
     environment:
-      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
       - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=${DATABASE_URL}
     volumes:
       - ./services/analytics/app:/app/app
     depends_on:

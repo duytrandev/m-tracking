@@ -301,7 +301,6 @@ export class AuthService {
     this.logger.log(`Generating tokens for user: ${user.id}`);
 
     // Generate access and refresh tokens
-    const accessToken = this.tokenService.generateAccessToken(user, '');
     const refreshToken = this.tokenService.generateRefreshToken(user.id, '', 1);
 
     // Create session with refresh token
