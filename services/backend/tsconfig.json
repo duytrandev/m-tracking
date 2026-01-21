@@ -44,5 +44,11 @@
     "**/*.spec.ts",
     "vitest.config.ts",
     "vitest.setup.ts"
+  ],
+  "references": [
+    { "path": "../../libs/types" },
+    { "path": "../../libs/constants" },
+    { "path": "../../libs/utils" },
+    { "path": "../../libs/common" }
   ]
 }
