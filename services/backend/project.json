@@ -7,46 +7,57 @@
   "prefix": "api",
   "tags": ["type:app", "scope:backend"],
   "targets": {
-    "dev": {
-      "executor": "nx:run-commands",
+    "build": {
+      "executor": "@nx/nest:build",
+      "outputs": ["{options.outputPath}"],
       "options": {
-        "command": "pnpm dev",
-        "cwd": "services/backend"
+        "outputPath": "dist/services/backend",
+        "main": "services/backend/src/main.ts",
+        "tsConfig": "services/backend/tsconfig.build.json",
+        "assets": ["services/backend/src/assets"]
       },
       "configurations": {
         "production": {
-          "command": "pnpm start"
+          "optimization": true,
+          "extractLicenses": true,
+          "inspect": false
         }
       }
     },
-    "build": {
-      "executor": "nx:run-commands",
+    "serve": {
+      "executor": "@nx/nest:serve",
       "options": {
-        "command": "pnpm build",
-        "cwd": "services/backend"
+        "buildTarget": "@m-tracking/backend:build"
       },
-      "outputs": ["{projectRoot}/dist"],
-      "cache": true
+      "configurations": {
+        "production": {
+          "buildTarget": "@m-tracking/backend:build:production"
+        }
+      }
+    },
+    "dev": {
+      "executor": "@nx/nest:serve",
+      "options": {
+        "buildTarget": "@m-tracking/backend:build"
+      }
     },
     "start": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/nest:serve",
       "options": {
-        "command": "pnpm start",
-        "cwd": "services/backend"
+        "buildTarget": "@m-tracking/backend:build:production"
       }
     },
     "lint": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/eslint:lint",
       "options": {
-        "command": "pnpm lint",
-        "cwd": "services/backend"
+        "lintFilePatterns": ["services/backend/**/*.ts"]
       },
       "cache": true
     },
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pnpm test",
+        "command": "jest",
         "cwd": "services/backend"
       },
       "cache": true

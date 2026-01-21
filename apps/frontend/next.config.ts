@@ -9,9 +9,12 @@ const withBundleAnalyzer = bundleAnalyzer({
 })
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   typescript: {
     ignoreBuildErrors: false,
   },
+  // Ensure static file tracing includes shared libs in monorepo
+  outputFileTracingRoot: '../..',
 }
 
 // Sentry webpack plugin options
@@ -35,4 +38,4 @@ const sentryWebpackPluginOptions = {
 export default withSentryConfig(
   withBundleAnalyzer(withNextIntl(nextConfig)),
   sentryWebpackPluginOptions
-)
+) satisfies NextConfig

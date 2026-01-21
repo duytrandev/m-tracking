@@ -7,41 +7,67 @@
   "prefix": "app",
   "tags": ["type:app", "scope:frontend"],
   "targets": {
-    "dev": {
-      "executor": "nx:run-commands",
+    "build": {
+      "executor": "@nx/next:build",
+      "outputs": [
+        "{options.outputPath}",
+        "{projectRoot}/.next/standalone",
+        "{projectRoot}/.next/static"
+      ],
       "options": {
-        "command": "pnpm dev",
-        "cwd": "apps/frontend"
+        "outputPath": "dist/apps/frontend"
+      },
+      "configurations": {
+        "production": {
+          "outputPath": "dist/apps/frontend"
+        },
+        "development": {
+          "outputPath": "apps/frontend/.next"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@nx/next:serve",
+      "options": {
+        "dev": true,
+        "port": 3000
+      },
+      "configurations": {
+        "production": {
+          "dev": false
+        },
+        "development": {
+          "dev": true
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "dev": {
+      "executor": "@nx/next:serve",
+      "options": {
+        "dev": true,
+        "port": 3000
       }
     },
-    "build": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "pnpm build",
-        "cwd": "apps/frontend"
-      },
-      "outputs": ["{projectRoot}/.next"],
-      "cache": true
-    },
     "start": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/next:serve",
       "options": {
-        "command": "pnpm start",
-        "cwd": "apps/frontend"
+        "dev": false,
+        "port": 3000
       }
     },
     "lint": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/eslint:lint",
       "options": {
-        "command": "pnpm lint",
-        "cwd": "apps/frontend"
+        "lintFilePatterns": ["apps/frontend/**/*.{ts,tsx,js,jsx}"]
       },
       "cache": true
     },
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pnpm test",
+        "command": "vitest run",
         "cwd": "apps/frontend"
       },
       "cache": true
