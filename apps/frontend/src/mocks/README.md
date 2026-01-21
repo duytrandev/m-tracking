@@ -43,6 +43,31 @@ export const handlers = [
 ]
 ```
 
+### Current Handlers
+
+The following API endpoints are currently mocked:
+
+**Auth Endpoints:**
+
+- `POST /auth/login`
+- `POST /auth/register`
+- `POST /auth/logout`
+- `POST /auth/refresh`
+- `GET /users/me`
+
+**Spending Endpoints:**
+
+- `GET /transactions` - Returns mock transactions
+- `GET /transactions/summary` - Returns spending summary with charts data
+- `GET /transactions/categories` - Returns categories
+- `POST /transactions` - Creates new transaction
+- `GET /transactions/:id` - Gets transaction by ID
+- `PUT /transactions/:id` - Updates transaction
+- `DELETE /transactions/:id` - Deletes transaction
+- `POST /transactions/categories` - Creates new category
+- `GET /transactions/categories/:id` - Gets category by ID
+- `DELETE /transactions/categories/:id` - Deletes category
+
 ### 2. Update Types
 
 Ensure that your mock responses match the TypeScript interfaces defined in your application (e.g., in `src/features/*/types`).

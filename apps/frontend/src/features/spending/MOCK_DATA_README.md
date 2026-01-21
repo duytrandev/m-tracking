@@ -11,19 +11,19 @@ This directory contains mock data for testing and development of the spending tr
 
 ### Categories (11 categories)
 
-| Category | Color | Icon | Type |
-|----------|-------|------|------|
-| Food & Dining | #FF6B6B | utensils | expense |
-| Transportation | #4ECDC4 | car | expense |
-| Entertainment | #95E1D3 | film | expense |
-| Shopping | #F38181 | shopping-bag | expense |
-| Healthcare | #AA96DA | heart-pulse | expense |
-| Utilities | #FCBAD3 | zap | expense |
-| Salary | #A8E6CF | briefcase | income |
-| Freelance | #FFD93D | laptop | income |
-| Housing | #6C5CE7 | home | expense |
-| Education | #74B9FF | book | expense |
-| **Unknown** | #94A3B8 | help-circle | expense |
+| Category       | Color   | Icon         | Type    |
+| -------------- | ------- | ------------ | ------- |
+| Food & Dining  | #FF6B6B | utensils     | expense |
+| Transportation | #4ECDC4 | car          | expense |
+| Entertainment  | #95E1D3 | film         | expense |
+| Shopping       | #F38181 | shopping-bag | expense |
+| Healthcare     | #AA96DA | heart-pulse  | expense |
+| Utilities      | #FCBAD3 | zap          | expense |
+| Salary         | #A8E6CF | briefcase    | income  |
+| Freelance      | #FFD93D | laptop       | income  |
+| Housing        | #6C5CE7 | home         | expense |
+| Education      | #74B9FF | book         | expense |
+| **Unknown**    | #94A3B8 | help-circle  | expense |
 
 ### Transactions (39 total)
 
@@ -37,48 +37,55 @@ This directory contains mock data for testing and development of the spending tr
 
 ### Transaction Distribution by Category
 
-| Category | Count | Total Amount |
-|----------|-------|--------------|
-| Food & Dining | 8 | $382.45 |
-| Transportation | 5 | $265.50 |
-| Entertainment | 5 | $131.48 |
-| Shopping | 4 | $323.48 |
-| Healthcare | 3 | $215.00 |
-| Utilities | 4 | $250.00 |
-| Housing | 2 | $1,350.00 |
-| Education | 2 | $84.99 |
-| **Unknown** | **3** | **$96.25** |
-| Salary | 1 | $4,500.00 |
-| Freelance | 2 | $1,450.00 |
+| Category       | Count | Total Amount |
+| -------------- | ----- | ------------ |
+| Food & Dining  | 8     | $382.45      |
+| Transportation | 5     | $265.50      |
+| Entertainment  | 5     | $131.48      |
+| Shopping       | 4     | $323.48      |
+| Healthcare     | 3     | $215.00      |
+| Utilities      | 4     | $250.00      |
+| Housing        | 2     | $1,350.00    |
+| Education      | 2     | $84.99       |
+| **Unknown**    | **3** | **$96.25**   |
+| Salary         | 1     | $4,500.00    |
+| Freelance      | 2     | $1,450.00    |
 
 ## Usage
 
-### In TypeScript/React Components
+### MSW Mock Service Worker
+
+The mock data is now used by [Mock Service Worker (MSW)](https://mswjs.io/) for API mocking during development.
+
+**To enable MSW mocking:**
+
+```bash
+NEXT_PUBLIC_API_MOCKING=enabled
+```
+
+When MSW is enabled, all API calls to spending endpoints are intercepted and return mock data.
+
+### Direct Import (for testing/development)
 
 ```typescript
-import { mockCategories, mockTransactions, mockSpendingSummary } from './mock-data'
+import {
+  mockCategories,
+  mockTransactions,
+  mockSpendingSummary,
+} from './mock-data'
 
-// Use in components
+// Use in components or tests
 const categories = mockCategories
 const transactions = mockTransactions
 const summary = mockSpendingSummary
 ```
-
-### Enable Mock Data Mode
-
-Set environment variable in `.env.local`:
-
-```bash
-NEXT_PUBLIC_USE_MOCK_DATA=true
-```
-
-When enabled, the API layer will return mock data instead of making real API calls.
 
 ## Testing Scenarios
 
 ### Date Range Filtering
 
 The mock data spans 30 days, allowing you to test:
+
 - **Today** - Shows recent transactions
 - **Last 7 Days** - Shows 7 most recent transactions
 - **Last 30 Days** - Shows all transactions
@@ -88,6 +95,7 @@ The mock data spans 30 days, allowing you to test:
 ### Sorting
 
 Test sorting by:
+
 - **Date** - Ascending (oldest first) / Descending (newest first)
 - **Amount** - Ascending (smallest first) / Descending (largest first)
 
@@ -117,10 +125,14 @@ const getDateDaysAgo = (daysAgo: number): string => {
 }
 
 // Generate daily trend for charts
-const generateDailyTrend = () => { /* ... */ }
+const generateDailyTrend = () => {
+  /* ... */
+}
 
 // Generate category breakdown for pie charts
-const generateCategoryBreakdown = () => { /* ... */ }
+const generateCategoryBreakdown = () => {
+  /* ... */
+}
 ```
 
 ## Updating Mock Data
@@ -180,25 +192,27 @@ The "Unknown" category is used for transactions without a valid category assignm
 ```
 
 **Use Cases:**
+
 - Testing uncategorized transactions
 - Handling imported data without category mapping
 - Transactions pending categorization
 - System-generated transactions
 
 **Visual Indicators:**
+
 - Gray color badge
 - Help circle icon (?)
 - Distinguishable from regular categories
 
 ## API Integration
 
-When `NEXT_PUBLIC_USE_MOCK_DATA=true`, the following API methods return mock data:
+The mock data is used by MSW handlers to provide responses for API calls. When `NEXT_PUBLIC_API_MOCKING=enabled`, the following endpoints return mock data:
 
-```typescript
-spendingApi.getAllTransactions(query) // Returns mockTransactions
-spendingApi.getAllCategories() // Returns mockCategories
-spendingApi.getSpendingSummary(query) // Returns mockSpendingSummary
-```
+- `GET /transactions` → Returns `mockTransactions`
+- `GET /transactions/summary` → Returns `mockSpendingSummary`
+- `GET /transactions/categories` → Returns `mockCategories`
+
+All API methods in `spendingApi` now go through MSW when mocking is enabled, providing a more realistic development experience.
 
 ## Notes
 
@@ -210,17 +224,21 @@ spendingApi.getSpendingSummary(query) // Returns mockSpendingSummary
 ## Example Transactions
 
 ### Largest Expense
+
 - Monthly rent: $1,200.00 (Housing)
 
 ### Smallest Expense
+
 - Coffee shop: $12.50 (Food & Dining)
 
 ### Income Examples
+
 - Monthly salary: $4,500.00 (Salary)
 - Freelance project: $850.00 (Freelance)
 - Consulting work: $600.00 (Freelance)
 
 ### Common Transactions
+
 - Groceries: $85.20 - $92.30
 - Gas fill-up: $60.00
 - Utilities: $45.00 - $85.00
