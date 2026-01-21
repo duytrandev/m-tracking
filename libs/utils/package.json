@@ -13,15 +13,15 @@
     }
   },
   "sideEffects": false,
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage"
-  },
-  "devDependencies": {
-    "typescript": "^5.9.0"
   }
 }

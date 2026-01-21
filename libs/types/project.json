@@ -21,7 +21,7 @@
         "command": "pnpm eslint src --ext .ts",
         "cwd": "libs/types"
       },
-      "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+      "inputs": ["default", "{workspaceRoot}/eslint.config.js"],
       "cache": true
     },
     "test": {
@@ -30,7 +30,7 @@
         "command": "pnpm test",
         "cwd": "libs/types"
       },
-      "inputs": ["default", "^production", ],
+      "inputs": ["default", "^production"],
       "cache": true
     },
     "type-check": {

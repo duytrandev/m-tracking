@@ -72,13 +72,9 @@
     "@types/node": "^24.0.0",
     "@types/passport-jwt": "^4.0.1",
     "@types/passport-local": "^1.0.38",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
     "@vitest/coverage-v8": "^4.0.17",
-    "eslint": "^8.57.0",
     "ts-node": "^10.9.2",
     "tslib": "^2.8.1",
-    "typescript": "^5.9.0",
     "vitest": "^4.0.17"
   }
 }

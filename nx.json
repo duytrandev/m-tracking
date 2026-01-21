@@ -13,7 +13,7 @@
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
       "!{projectRoot}/tsconfig.spec.json",
       "!{projectRoot}/jest.config.[jt]s",
-      "!{projectRoot}/.eslintrc.json",
+      "!{projectRoot}/eslint.config.js",
       "!{projectRoot}/**/*.md"
     ],
     "sharedGlobals": [
@@ -23,7 +23,7 @@
       "{workspaceRoot}/package.json",
       "{workspaceRoot}/pnpm-lock.yaml",
       "{workspaceRoot}/.prettierrc",
-      "{workspaceRoot}/.eslintrc.json"
+      "{workspaceRoot}/eslint.config.js"
     ],
     "nestBuild": [
       "{projectRoot}/src/**/*.ts",
@@ -44,6 +44,11 @@
       "{projectRoot}/src/**/*.ts",
       "{projectRoot}/package.json",
       "{projectRoot}/tsconfig.json"
+    ],
+    "pythonBuild": [
+      "{projectRoot}/app/**/*.py",
+      "{projectRoot}/pyproject.toml",
+      "{projectRoot}/poetry.lock"
     ]
   },
   "targetDefaults": {
@@ -75,7 +80,7 @@
       "cache": true
     },
     "lint": {
-      "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+      "inputs": ["default", "{workspaceRoot}/eslint.config.js"],
       "cache": true
     },
     "dev": {

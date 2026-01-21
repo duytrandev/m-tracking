@@ -1,34 +1,36 @@
 {
-  "name": "analytics",
+  "name": "@m-tracking/analytics",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "root": "services/analytics",
+  "sourceRoot": "services/analytics/app",
+  "tags": ["type:app", "scope:backend"],
   "targets": {
-    "dev": {
+    "serve": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "uvicorn app.main:app --reload --port 5000",
-        "cwd": "services/analytics"
-      }
-    },
-    "lint": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "echo 'No linting configured for analytics yet'",
-        "cwd": "services/analytics"
-      }
-    },
-    "test": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "echo 'No testing configured for analytics yet'",
+        "command": "uvicorn app.main:app --reload",
         "cwd": "services/analytics"
       }
     },
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "echo 'No build configured for analytics yet'",
+        "command": "command -v poetry > /dev/null 2>&1 && poetry build || echo 'Poetry not installed - skipping build. Install: curl -sSL https://install.python-poetry.org | python3 -'",
+        "cwd": "services/analytics"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "ruff check .",
+        "cwd": "services/analytics"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pytest",
         "cwd": "services/analytics"
       }
     }

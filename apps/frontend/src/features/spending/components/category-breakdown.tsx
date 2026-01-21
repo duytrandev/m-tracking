@@ -63,14 +63,19 @@ function CategoryBreakdownChart({ data }: CategoryBreakdownProps) {
               verticalAlign="middle"
               align="right"
               layout="vertical"
-              formatter={(
-                _value,
-                entry: { payload: { categoryName: string; percentage: string } }
-              ) => (
-                <span className="text-sm text-muted-foreground">
-                  {entry.payload.categoryName} ({entry.payload.percentage}%)
-                </span>
-              )}
+              formatter={(_value, entry) => {
+                const payload = entry.payload as unknown as
+                  | { categoryName: string; percentage: string }
+                  | undefined
+                if (!payload?.categoryName || !payload?.percentage) {
+                  return null
+                }
+                return (
+                  <span className="text-sm text-muted-foreground">
+                    {payload.categoryName} ({payload.percentage}%)
+                  </span>
+                )
+              }}
             />
           </PieChart>
         </ResponsiveContainer>

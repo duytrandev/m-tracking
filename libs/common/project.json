@@ -21,7 +21,7 @@
         "command": "pnpm eslint src --ext .ts",
         "cwd": "libs/common"
       },
-      "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+      "inputs": ["default", "{workspaceRoot}/eslint.config.js"],
       "cache": true
     },
     "test": {

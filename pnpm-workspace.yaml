@@ -8,7 +8,11 @@ strictPeerDependencies: true
 
 # Document known safe exceptions (NestJS 11 compatibility)
 pnpm:
+  overrides:
+    typescript: "5.9.3"
+    eslint: "9.39.2"
+    "@swc/helpers": "0.5.17"
   peerDependencyRules:
-    ignoreMissing:
+    allowAny:
       - "@nestjs/common"
       - "@nestjs/core"
