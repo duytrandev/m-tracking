@@ -15,6 +15,14 @@ const nextConfig: NextConfig = {
   },
   // Ensure static file tracing includes shared libs in monorepo
   outputFileTracingRoot: '../..',
+  // Fix for Next.js 16 standalone mode + static generation issue
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+  },
+  // Skip trailing slash redirect to avoid prerender issues
+  skipTrailingSlashRedirect: true,
 }
 
 // Sentry webpack plugin options
