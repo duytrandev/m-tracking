@@ -1,7 +1,10 @@
 'use client'
 
-import { ReactNode } from 'react'
+import { ReactNode, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuthInit } from '../hooks/use-auth-init'
+import { useAuthStore } from '../store/auth-store'
+import { onAuthEvent } from '@/lib/api-client'
 
 interface AuthInitializerProps {
   children: ReactNode
@@ -16,9 +19,22 @@ interface AuthInitializerProps {
  * 1. Attempts to restore session on mount via useAuthInit
  * 2. Shows loading spinner during initialization
  * 3. Renders children once auth state is determined
+ * 4. Listens for session expiry events and redirects to login
  */
 export function AuthInitializer({ children, fallback }: AuthInitializerProps): React.ReactElement {
   const { isInitializing } = useAuthInit()
+  const logout = useAuthStore(s => s.logout)
+  const router = useRouter()
+
+  // Listen for session expiry events from API client
+  useEffect(() => {
+    const unsubscribe = onAuthEvent('session-expired', () => {
+      logout()
+      router.push('/auth/login?reason=session-expired')
+    })
+
+    return unsubscribe
+  }, [logout, router])
 
   if (isInitializing) {
     return (

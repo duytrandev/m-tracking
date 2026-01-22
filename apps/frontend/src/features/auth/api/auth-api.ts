@@ -1,4 +1,5 @@
 import { apiClient, setAuthToken, clearAuthToken } from '@/lib/api-client'
+import { createAppError, ApiErrorCode } from '@/lib/api-errors'
 import { tokenService } from '../services/token-service'
 import type {
   RegisterRequest,
@@ -23,17 +24,47 @@ type TwoFactorEnrollResponse = {
 export const authApi = {
   // Registration
   register: async (data: RegisterRequest): Promise<MessageResponse> => {
-    const response = await apiClient.post<MessageResponse>('/auth/register', data)
-    return response.data
+    try {
+      const response = await apiClient.post<MessageResponse>('/auth/register', data)
+      return response.data
+    } catch (error) {
+      const appError = createAppError(error)
+
+      if (appError.code === ApiErrorCode.VALIDATION) {
+        throw new Error(appError.message || 'Please check your input')
+      }
+      if (appError.code === ApiErrorCode.NETWORK_ERROR) {
+        throw new Error('Unable to connect. Please check your internet connection.')
+      }
+
+      throw new Error(appError.message)
+    }
   },
 
   // Login
   login: async (data: LoginRequest): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>('/auth/login', data)
-    if (response.data.accessToken) {
-      setAuthToken(response.data.accessToken, response.data.expiresIn)
+    try {
+      const response = await apiClient.post<AuthResponse>('/auth/login', data)
+      if (response.data.accessToken) {
+        setAuthToken(response.data.accessToken, response.data.expiresIn)
+      }
+      return response.data
+    } catch (error) {
+      const appError = createAppError(error)
+
+      // Specific error handling for login
+      if (appError.code === ApiErrorCode.UNAUTHORIZED) {
+        throw new Error('Invalid email or password')
+      }
+      if (appError.code === ApiErrorCode.VALIDATION) {
+        throw new Error(appError.message || 'Please check your input')
+      }
+      if (appError.code === ApiErrorCode.NETWORK_ERROR) {
+        throw new Error('Unable to connect. Please check your internet connection.')
+      }
+
+      throw new Error(appError.message)
     }
-    return response.data
   },
 
   // Logout

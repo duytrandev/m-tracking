@@ -1,9 +1,10 @@
 import { useMutation } from '@tanstack/react-query'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { authApi } from '../api/auth-api'
 import { useAuthStore } from '../store/auth-store'
 import type { LoginRequest, AuthResponse } from '@/types/api/auth'
 import { isApiError } from '@/lib/api-client'
+import { getRedirectUrl } from '@/lib/redirect-utils'
 
 interface UseLoginReturn {
   login: (data: LoginRequest) => void
@@ -13,6 +14,7 @@ interface UseLoginReturn {
 
 export function useLogin(): UseLoginReturn {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { login: setUser, setRequires2FA } = useAuthStore()
 
   const mutation = useMutation({
@@ -28,7 +30,10 @@ export function useLogin(): UseLoginReturn {
       // Normal login success
       if (data.user) {
         setUser(data.user)
-        router.push('/dashboard')
+
+        // Redirect to intended destination or dashboard (validated for security)
+        const destination = getRedirectUrl(searchParams)
+        router.push(destination)
       }
     },
   })

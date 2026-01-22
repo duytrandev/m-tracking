@@ -8,14 +8,17 @@ import { useEffect } from 'react'
 
 interface ProtectedRouteProps {
   children: ReactNode
+  /** Optional fallback while loading (defaults to spinner) */
+  fallback?: ReactNode
 }
 
 /**
  * ProtectedRoute component
- * Redirects to login if user is not authenticated
+ * Client-side auth check as fallback after middleware
+ * Handles cases where cookie exists but token is invalid
  * Saves intended destination for post-login redirect
  */
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
+export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading } = useAuthStore()
   const router = useRouter()
   const pathname = usePathname()
@@ -33,12 +36,12 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   // Show loading while checking auth
   if (isLoading) {
-    return <FullPageLoader text="Loading..." />
+    return fallback || <FullPageLoader text="Verifying session..." />
   }
 
   // Don't render if not authenticated (will redirect)
   if (!isAuthenticated) {
-    return <FullPageLoader text="Redirecting..." />
+    return fallback || <FullPageLoader text="Redirecting to login..." />
   }
 
   return <>{children}</>

@@ -46,6 +46,17 @@ class TokenService {
   }
 
   /**
+   * Check if we have a potentially valid token
+   * (doesn't verify signature, just checks existence and expiry)
+   * @returns True if token exists and hasn't expired yet
+   */
+  hasValidToken(): boolean {
+    if (!this.accessToken) return false
+    if (!this.tokenExpiresAt) return false
+    return Date.now() < this.tokenExpiresAt
+  }
+
+  /**
    * Clear token and cancel scheduled refresh
    * Called on logout or auth failure
    */

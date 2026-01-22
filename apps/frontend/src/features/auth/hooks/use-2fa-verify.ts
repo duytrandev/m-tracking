@@ -1,8 +1,9 @@
 import { useMutation } from '@tanstack/react-query'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { authApi } from '../api/auth-api'
 import { useAuthStore } from '../store/auth-store'
 import { isApiError } from '@/lib/api-client'
+import { getRedirectUrl } from '@/lib/redirect-utils'
 
 interface Use2FAVerifyReturn {
   verify: (code: string) => void
@@ -13,6 +14,7 @@ interface Use2FAVerifyReturn {
 
 export function use2FAVerify(): Use2FAVerifyReturn {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { login, pendingEmail, setRequires2FA } = useAuthStore()
 
   const mutation = useMutation({
@@ -26,7 +28,10 @@ export function use2FAVerify(): Use2FAVerifyReturn {
       if (data.user) {
         login(data.user)
         setRequires2FA(false)
-        router.push('/dashboard')
+
+        // Redirect to intended destination or dashboard (validated for security)
+        const destination = getRedirectUrl(searchParams)
+        router.push(destination)
       }
     },
   })

@@ -2,9 +2,29 @@ import axios, { AxiosError, type AxiosInstance, type InternalAxiosRequestConfig 
 import { tokenService } from '@/features/auth/services/token-service'
 import * as Sentry from '@sentry/nextjs'
 
+/**
+ * Auth event system for handling authentication state changes
+ * Allows components to react to auth events without tight coupling
+ */
+type AuthEventType = 'logout' | 'session-expired'
+const authEvents = new EventTarget()
+
+export function onAuthEvent(
+  type: AuthEventType,
+  callback: () => void
+): () => void {
+  const handler = () => callback()
+  authEvents.addEventListener(type, handler)
+  return () => authEvents.removeEventListener(type, handler)
+}
+
+function emitAuthEvent(type: AuthEventType): void {
+  authEvents.dispatchEvent(new Event(type))
+}
+
 const API_BASE_URL = typeof window !== 'undefined'
-  ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000')
-  : (process.env.API_URL || 'http://localhost:4000')
+  ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1')
+  : (process.env.API_URL || 'http://localhost:4000/api/v1')
 
 /**
  * Create axios instance with base configuration
@@ -120,10 +140,8 @@ apiClient.interceptors.response.use(
         processQueue(refreshError as Error, null)
         tokenService.clearToken()
 
-        // Only redirect if not already on auth page
-        if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/auth/')) {
-          window.location.href = '/auth/login'
-        }
+        // Emit event instead of redirecting (allows React Router to handle navigation)
+        emitAuthEvent('session-expired')
 
         return Promise.reject(refreshError)
       } finally {
