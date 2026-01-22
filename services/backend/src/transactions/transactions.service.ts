@@ -1,20 +1,28 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Injectable, NotFoundException, ForbiddenException, Inject, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import { Transaction, TransactionType } from './entities/transaction.entity';
 import { Category } from './entities/category.entity';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { SpendingQueryDto, TimePeriod } from './dto/spending-query.dto';
+import { PaginationDto } from './dto/pagination.dto';
+import { PaginatedTransactionResponse } from './dto/paginated-transaction-response.dto';
 
 @Injectable()
 export class TransactionsService {
+  private readonly logger = new Logger(TransactionsService.name);
   constructor(
     @InjectRepository(Transaction)
     private transactionRepository: Repository<Transaction>,
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
+    @Inject(CACHE_MANAGER)
+    private cacheManager: Cache,
   ) {}
 
   // ==================== Transaction CRUD ====================
@@ -33,20 +41,39 @@ export class TransactionsService {
       userId,
     });
 
-    return this.transactionRepository.save(transaction);
+    const saved = await this.transactionRepository.save(transaction);
+
+    // Invalidate cache
+    await this.invalidateUserCache(userId);
+
+    return saved;
   }
 
-  async findAllTransactions(userId: string, query: SpendingQueryDto): Promise<Transaction[]> {
+  async findAllTransactions(
+    userId: string,
+    query: SpendingQueryDto,
+    pagination: PaginationDto = new PaginationDto(),
+  ): Promise<PaginatedTransactionResponse> {
     const { startDate, endDate } = this.getDateRange(query);
 
-    return this.transactionRepository.find({
+    const [transactions, total] = await this.transactionRepository.findAndCount({
       where: {
         userId,
         date: Between(startDate, endDate),
       },
       relations: ['category'],
       order: { date: 'DESC' },
+      skip: pagination.skip,
+      take: pagination.limit,
     });
+
+    return {
+      transactions,
+      total,
+      page: pagination.page ?? 1,
+      limit: pagination.limit ?? 20,
+      totalPages: Math.ceil(total / (pagination.limit ?? 20)),
+    };
   }
 
   async findOneTransaction(userId: string, id: string): Promise<Transaction> {
@@ -83,12 +110,20 @@ export class TransactionsService {
     }
 
     Object.assign(transaction, dto);
-    return this.transactionRepository.save(transaction);
+    const saved = await this.transactionRepository.save(transaction);
+
+    // Invalidate cache
+    await this.invalidateUserCache(userId);
+
+    return saved;
   }
 
   async deleteTransaction(userId: string, id: string): Promise<void> {
     const transaction = await this.findOneTransaction(userId, id);
     await this.transactionRepository.remove(transaction);
+
+    // Invalidate cache
+    await this.invalidateUserCache(userId);
   }
 
   // ==================== Category CRUD ====================
@@ -134,108 +169,117 @@ export class TransactionsService {
   async getSpendingSummary(userId: string, query: SpendingQueryDto) {
     const { startDate, endDate } = this.getDateRange(query);
 
-    const transactions = await this.transactionRepository.find({
-      where: {
-        userId,
-        date: Between(startDate, endDate),
-      },
-      relations: ['category'],
-    });
+    // Generate cache key
+    const cacheKey = `spending-summary:${userId}:${query.period}:${startDate.toISOString()}:${endDate.toISOString()}`;
 
-    const totalExpense = transactions
-      .filter((t) => t.type === TransactionType.EXPENSE)
-      .reduce((sum, t) => sum + Number(t.amount), 0);
+    // Try to get from cache
+    const cached = await this.cacheManager.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
 
-    const totalIncome = transactions
-      .filter((t) => t.type === TransactionType.INCOME)
-      .reduce((sum, t) => sum + Number(t.amount), 0);
+    // Get total counts with database aggregation
+    const totals = await this.transactionRepository
+      .createQueryBuilder('t')
+      .select('t.type', 'type')
+      .addSelect('SUM(t.amount)', 'total')
+      .addSelect('COUNT(t.id)', 'count')
+      .where('t.userId = :userId', { userId })
+      .andWhere('t.date BETWEEN :start AND :end', { start: startDate, end: endDate })
+      .groupBy('t.type')
+      .getRawMany();
 
-    const categoryBreakdown = this.getCategoryBreakdown(transactions);
-    const dailyTrend = this.getDailyTrend(transactions, startDate, endDate);
+    const totalExpense = Number(totals.find((t) => t.type === TransactionType.EXPENSE)?.total || 0);
+    const totalIncome = Number(totals.find((t) => t.type === TransactionType.INCOME)?.total || 0);
+    const expenseCount = Number(totals.find((t) => t.type === TransactionType.EXPENSE)?.count || 0);
+    const transactionCount = totals.reduce((sum, t) => sum + Number(t.count), 0);
 
-    return {
+    const categoryBreakdown = await this.getCategoryBreakdown(userId, startDate, endDate, totalExpense);
+    const dailyTrend = await this.getDailyTrend(userId, startDate, endDate);
+
+    const summary = {
       period: query.period,
       startDate,
       endDate,
       totalExpense,
       totalIncome,
       netBalance: totalIncome - totalExpense,
-      transactionCount: transactions.length,
-      averageExpense: transactions.length > 0 ? totalExpense / transactions.length : 0,
+      transactionCount,
+      averageExpense: expenseCount > 0 ? totalExpense / expenseCount : 0,
       categoryBreakdown,
       dailyTrend,
     };
+
+    // Cache for 5 minutes
+    await this.cacheManager.set(cacheKey, summary, 300000);
+
+    return summary;
   }
 
-  private getCategoryBreakdown(transactions: Transaction[]) {
-    const categoryMap = new Map<string, { category: Category; total: number; count: number }>();
+  private async getCategoryBreakdown(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+    totalExpense: number,
+  ) {
+    const raw = await this.transactionRepository
+      .createQueryBuilder('t')
+      .select('c.id', 'categoryId')
+      .addSelect('c.name', 'categoryName')
+      .addSelect('c.color', 'categoryColor')
+      .addSelect('c.icon', 'categoryIcon')
+      .addSelect('SUM(t.amount)', 'total')
+      .addSelect('COUNT(t.id)', 'count')
+      .leftJoin('t.category', 'c')
+      .where('t.userId = :userId', { userId })
+      .andWhere('t.date BETWEEN :start AND :end', { start: startDate, end: endDate })
+      .andWhere('t.type = :type', { type: TransactionType.EXPENSE })
+      .groupBy('c.id')
+      .addGroupBy('c.name')
+      .addGroupBy('c.color')
+      .addGroupBy('c.icon')
+      .orderBy('SUM(t.amount)', 'DESC')
+      .getRawMany();
 
-    transactions
-      .filter((t) => t.type === TransactionType.EXPENSE)
-      .forEach((transaction) => {
-        const categoryId = transaction.categoryId;
-        const existing = categoryMap.get(categoryId);
-
-        if (existing) {
-          existing.total += Number(transaction.amount);
-          existing.count += 1;
-        } else {
-          categoryMap.set(categoryId, {
-            category: transaction.category,
-            total: Number(transaction.amount),
-            count: 1,
-          });
-        }
-      });
-
-    return Array.from(categoryMap.values())
-      .sort((a, b) => b.total - a.total)
-      .map((item) => ({
-        categoryId: item.category.id,
-        categoryName: item.category.name,
-        categoryColor: item.category.color,
-        categoryIcon: item.category.icon,
-        total: item.total,
-        count: item.count,
-        percentage: 0,
-      }));
+    return raw.map((r) => ({
+      categoryId: r.categoryId,
+      categoryName: r.categoryName,
+      categoryColor: r.categoryColor,
+      categoryIcon: r.categoryIcon,
+      total: Number(r.total),
+      count: Number(r.count),
+      percentage: totalExpense > 0 ? (Number(r.total) / totalExpense) * 100 : 0,
+    }));
   }
 
-  private getDailyTrend(transactions: Transaction[], startDate: Date, endDate: Date) {
-    const dailyMap = new Map<string, { expense: number; income: number }>();
+  private async getDailyTrend(userId: string, startDate: Date, endDate: Date) {
+    const raw = await this.transactionRepository
+      .createQueryBuilder('t')
+      .select("TO_CHAR(t.date, 'YYYY-MM-DD')", 'date')
+      .addSelect(
+        "SUM(CASE WHEN t.type = 'expense' THEN t.amount ELSE 0 END)",
+        'expense',
+      )
+      .addSelect(
+        "SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END)",
+        'income',
+      )
+      .addSelect(
+        "SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE -t.amount END)",
+        'net',
+      )
+      .where('t.userId = :userId', { userId })
+      .andWhere('t.date BETWEEN :start AND :end', { start: startDate, end: endDate })
+      .groupBy("TO_CHAR(t.date, 'YYYY-MM-DD')")
+      .orderBy("TO_CHAR(t.date, 'YYYY-MM-DD')", 'ASC')
+      .getRawMany();
 
-    const currentDate = new Date(startDate);
-    while (currentDate <= endDate) {
-      const dateKey = currentDate.toISOString().split('T')[0];
-      if (dateKey) {
-        dailyMap.set(dateKey, { expense: 0, income: 0 });
-      }
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-
-    transactions.forEach((transaction) => {
-      const dateKey = new Date(transaction.date).toISOString().split('T')[0];
-      if (dateKey) {
-        const existing = dailyMap.get(dateKey);
-
-        if (existing) {
-          if (transaction.type === TransactionType.EXPENSE) {
-            existing.expense += Number(transaction.amount);
-          } else {
-            existing.income += Number(transaction.amount);
-          }
-        }
-      }
-    });
-
-    return Array.from(dailyMap.entries())
-      .map(([date, data]) => ({
-        date,
-        expense: data.expense,
-        income: data.income,
-        net: data.income - data.expense,
-      }))
-      .sort((a, b) => a.date.localeCompare(b.date));
+    return raw.map((r) => ({
+      date: r.date,
+      expense: Number(r.expense),
+      income: Number(r.income),
+      net: Number(r.net),
+    }));
   }
 
   private getDateRange(query: SpendingQueryDto): { startDate: Date; endDate: Date } {
@@ -267,5 +311,44 @@ export class TransactionsService {
     }
 
     return { startDate, endDate };
+  }
+
+  /**
+   * Invalidate all cache entries for a user
+   * Uses cache versioning approach to avoid wildcard deletion complexity
+   */
+  private async invalidateUserCache(userId: string): Promise<void> {
+    try {
+      // Invalidate all possible time period combinations
+      const periods = ['day', 'week', 'month', 'year', 'custom'];
+      const now = new Date();
+      const ranges = [
+        // Today
+        { start: new Date(now.getFullYear(), now.getMonth(), now.getDate()), end: now },
+        // This week
+        { start: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000), end: now },
+        // This month
+        { start: new Date(now.getFullYear(), now.getMonth(), 1), end: now },
+        // This year
+        { start: new Date(now.getFullYear(), 0, 1), end: now },
+      ];
+
+      const deletePromises = [];
+      for (const period of periods) {
+        for (const range of ranges) {
+          const cacheKey = `spending-summary:${userId}:${period}:${range.start.toISOString()}:${range.end.toISOString()}`;
+          deletePromises.push(this.cacheManager.del(cacheKey));
+        }
+      }
+
+      // Also delete common patterns
+      deletePromises.push(this.cacheManager.del(`transactions-list:${userId}`));
+      deletePromises.push(this.cacheManager.del(`categories:${userId}`));
+
+      await Promise.all(deletePromises);
+    } catch (error) {
+      // Log error but don't throw - cache invalidation failure shouldn't break mutations
+      this.logger.error('Cache invalidation error:', error);
+    }
   }
 }

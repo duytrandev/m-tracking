@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Controller,
   Get,
@@ -14,6 +15,7 @@ import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { SpendingQueryDto } from './dto/spending-query.dto';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Controller('transactions')
 export class TransactionsController {
@@ -27,8 +29,12 @@ export class TransactionsController {
   }
 
   @Get()
-  findAllTransactions(@Request() req: any, @Query() query: SpendingQueryDto) {
-    return this.transactionsService.findAllTransactions(req.user.id, query);
+  findAllTransactions(
+    @Request() req: any,
+    @Query() query: SpendingQueryDto,
+    @Query() pagination: PaginationDto,
+  ) {
+    return this.transactionsService.findAllTransactions(req.user.id, query, pagination);
   }
 
   @Get('summary')

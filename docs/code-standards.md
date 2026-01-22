@@ -517,6 +517,228 @@ async createTransaction(
 
 ---
 
+## API Pagination & Caching Patterns (Phase 01)
+
+### Pagination Implementation
+
+**All list endpoints must use pagination with safe limits:**
+
+```typescript
+// ✅ Good - Use PaginationDto
+import { PaginationDto } from './dto/pagination.dto'
+
+@Get('transactions')
+async findAll(
+  @Query() pagination: PaginationDto,
+  @Request() req: any,
+): Promise<PaginatedTransactionResponse> {
+  return this.service.findAllTransactions(req.user.id, {}, pagination)
+}
+
+// ❌ Bad - No pagination limit
+@Get('transactions')
+async findAll(@Query() limit: number): Promise<Transaction[]> {
+  // User could request 1 million records!
+  return this.service.find({ take: limit })
+}
+```
+
+**PaginationDto Pattern:**
+
+```typescript
+export class PaginationDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)  // Hard limit prevents memory exhaustion
+  limit?: number = 20;
+
+  get skip(): number {
+    return ((this.page ?? 1) - 1) * (this.limit ?? 20);
+  }
+}
+```
+
+**Response Format:**
+
+```typescript
+export class PaginatedTransactionResponse {
+  transactions!: Transaction[];
+  total!: number;
+  page!: number;
+  limit!: number;
+  totalPages!: number;
+}
+
+// Usage in service
+async findAllTransactions(
+  userId: string,
+  query: SpendingQueryDto,
+  pagination: PaginationDto = new PaginationDto(),
+): Promise<PaginatedTransactionResponse> {
+  const [transactions, total] = await this.transactionRepository.findAndCount({
+    where: { userId, date: Between(startDate, endDate) },
+    relations: ['category'],
+    order: { date: 'DESC' },
+    skip: pagination.skip,
+    take: pagination.limit,
+  });
+
+  return {
+    transactions,
+    total,
+    page: pagination.page ?? 1,
+    limit: pagination.limit ?? 20,
+    totalPages: Math.ceil(total / (pagination.limit ?? 20)),
+  };
+}
+```
+
+**Benefits:**
+
+- Type-safe pagination with validation
+- Hard limit prevents DoS attacks
+- RDBMS handles offset efficiently
+- Predictable response size
+
+### Caching Strategy for Analytics Queries
+
+**Pattern: Generate cache key from query parameters**
+
+```typescript
+// ✅ Good - Cache with unique key
+async getSpendingSummary(userId: string, query: SpendingQueryDto) {
+  const { startDate, endDate } = this.getDateRange(query)
+
+  // Generate cache key including all query parameters
+  const cacheKey = `spending-summary:${userId}:${query.period}:${startDate.toISOString()}:${endDate.toISOString()}`
+
+  // Try cache first
+  const cached = await this.cacheManager.get(cacheKey)
+  if (cached) return cached
+
+  // Expensive database query
+  const summary = await this.calculateSummary(userId, startDate, endDate)
+
+  // Cache for 5 minutes (300000ms)
+  await this.cacheManager.set(cacheKey, summary, 300000)
+
+  return summary
+}
+
+// ❌ Bad - No caching on expensive queries
+async getSpendingSummary(userId: string, query: SpendingQueryDto) {
+  // Recalculates every request - could be 5-10s each!
+  return this.calculateExpensiveSummary(userId, query)
+}
+```
+
+**Cache Invalidation on Mutations:**
+
+```typescript
+// ✅ Good - Invalidate cache on writes
+async createTransaction(userId: string, dto: CreateTransactionDto) {
+  const transaction = await this.transactionRepository.save(transaction)
+
+  // Invalidate related cache keys
+  await this.invalidateUserCache(userId)
+
+  return transaction
+}
+
+private async invalidateUserCache(userId: string): Promise<void> {
+  try {
+    // Invalidate all time period combinations
+    const periods = ['day', 'week', 'month', 'year', 'custom']
+    const ranges = [
+      { start: new Date(now.getFullYear(), now.getMonth(), now.getDate()), end: now },
+      // ... more ranges
+    ]
+
+    const deletePromises = []
+    for (const period of periods) {
+      for (const range of ranges) {
+        const cacheKey = `spending-summary:${userId}:${period}:${range.start.toISOString()}:${range.end.toISOString()}`
+        deletePromises.push(this.cacheManager.del(cacheKey))
+      }
+    }
+
+    await Promise.all(deletePromises)
+  } catch (error) {
+    // Log but don't throw - cache invalidation shouldn't break mutations
+    console.error('Cache invalidation error:', error)
+  }
+}
+
+// ❌ Bad - No cache invalidation
+async createTransaction(userId: string, dto: CreateTransactionDto) {
+  return this.transactionRepository.save(transaction)
+  // User might see stale data for 5+ minutes!
+}
+```
+
+**TTL Configuration:**
+
+- **Short-lived (1 minute):** Rate limit counters
+- **Medium (5 minutes):** Analytics summaries, report data
+- **Long (90 days):** LLM categorization cache (immutable)
+- **Session (7 days):** User sessions, auth tokens
+
+### Database Aggregation (No In-Memory Processing)
+
+**Pattern: Use QueryBuilder for aggregation**
+
+```typescript
+// ✅ Good - Database aggregation (instant for any dataset size)
+async getCategoryBreakdown(userId: string, startDate: Date, endDate: Date) {
+  const raw = await this.transactionRepository
+    .createQueryBuilder('t')
+    .select('c.id', 'categoryId')
+    .addSelect('SUM(t.amount)', 'total')
+    .addSelect('COUNT(t.id)', 'count')
+    .leftJoin('t.category', 'c')
+    .where('t.userId = :userId', { userId })
+    .andWhere('t.date BETWEEN :start AND :end', { start: startDate, end: endDate })
+    .groupBy('c.id')
+    .orderBy('SUM(t.amount)', 'DESC')
+    .getRawMany()
+
+  return raw.map((r) => ({
+    categoryId: r.categoryId,
+    total: Number(r.total),
+    count: Number(r.count),
+  }))
+}
+
+// ❌ Bad - In-memory aggregation (slow for large datasets)
+async getCategoryBreakdown(userId: string, startDate: Date, endDate: Date) {
+  const transactions = await this.transactionRepository.find({
+    where: { userId, date: Between(startDate, endDate) },
+    relations: ['category'],
+  })
+
+  // Manual aggregation - O(n) complexity, memory intensive
+  const breakdown: Map<string, any> = new Map()
+  for (const t of transactions) {
+    if (!breakdown.has(t.categoryId)) {
+      breakdown.set(t.categoryId, { total: 0, count: 0 })
+    }
+    const cat = breakdown.get(t.categoryId)
+    cat.total += t.amount
+    cat.count += 1
+  }
+
+  return Array.from(breakdown.values())
+}
+```
+
 ## NestJS Patterns
 
 ### Dependency Injection
