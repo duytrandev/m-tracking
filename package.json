@@ -9,6 +9,7 @@
     "libs/*",
     "apps/*"
   ],
+  "type": "module",
   "scripts": {
     "dev": "nx run-many -t serve --parallel",
     "dev:backend": "nx serve @m-tracking/backend",

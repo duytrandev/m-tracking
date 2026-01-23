@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "M-Tracking Frontend - Next.js 16 Dashboard",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

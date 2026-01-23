@@ -3,6 +3,7 @@
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useAuthStore } from '@/features/auth/store/auth-store'
 import { FullPageLoader } from '@/components/ui/loading-spinner'
+import { buildLoginUrl } from '@/lib/redirect-utils'
 import type { ReactNode } from 'react'
 import { useEffect } from 'react'
 
@@ -26,10 +27,10 @@ export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      // Build redirect URL with current location
+      // Build safe redirect URL with current location
       const search = searchParams.toString()
       const fullPath = search ? `${pathname}?${search}` : pathname
-      const loginUrl = `/auth/login?redirect=${encodeURIComponent(fullPath)}`
+      const loginUrl = buildLoginUrl(fullPath)
       router.replace(loginUrl)
     }
   }, [isLoading, isAuthenticated, pathname, searchParams, router])

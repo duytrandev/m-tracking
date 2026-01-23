@@ -28,30 +28,33 @@
       "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@nx/next:serve",
+      "executor": "@nx/next:server",
       "options": {
+        "buildTarget": "@m-tracking/frontend:build",
         "dev": true,
         "port": 3000
       },
       "configurations": {
         "production": {
+          "buildTarget": "@m-tracking/frontend:build",
           "dev": false
         },
         "development": {
+          "buildTarget": "@m-tracking/frontend:build",
           "dev": true
         }
       },
       "defaultConfiguration": "development"
     },
     "dev": {
-      "executor": "@nx/next:serve",
+      "executor": "@nx/next:server",
       "options": {
         "dev": true,
         "port": 3000
       }
     },
     "start": {
-      "executor": "@nx/next:serve",
+      "executor": "@nx/next:server",
       "options": {
         "dev": false,
         "port": 3000

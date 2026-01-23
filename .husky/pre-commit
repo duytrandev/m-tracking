@@ -1,4 +1,27 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# npx lint-staged
+echo "🔍 Running pre-commit checks..."
+
+# Run lint-staged for formatting and linting of staged files
+echo "\n📝 Checking staged files (lint + format)..."
+pnpm lint-staged || {
+  echo "❌ Lint-staged checks failed. Please fix the issues above."
+  exit 1
+}
+
+# Type check affected projects (fast, only checks changed code)
+echo "\n🔎 Type checking affected projects..."
+pnpm nx affected -t type-check --parallel=3 || {
+  echo "❌ Type check failed. Please fix TypeScript errors."
+  exit 1
+}
+
+# Run tests on affected projects (optional - comment out if too slow)
+# echo "\n🧪 Testing affected projects..."
+# pnpm nx affected -t test --parallel=3 || {
+#   echo "❌ Tests failed. Please fix failing tests."
+#   exit 1
+# }
+
+echo "✅ All pre-commit checks passed!\n"

@@ -7,10 +7,16 @@ export type SidebarState = 'expanded' | 'collapsed'
 
 /**
  * Safe localStorage wrapper that handles quota exceeded errors
- * and other localStorage failures gracefully
+ * and other localStorage failures gracefully.
+ * Includes client-side guards for SSR compatibility.
  */
 const safeLocalStorage: StateStorage = {
   getItem: (name) => {
+    // Guard: Only access localStorage in browser environment
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+      return null
+    }
+
     try {
       return localStorage.getItem(name)
     } catch (error) {
@@ -19,6 +25,11 @@ const safeLocalStorage: StateStorage = {
     }
   },
   setItem: (name, value) => {
+    // Guard: Only access localStorage in browser environment
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+      return
+    }
+
     try {
       localStorage.setItem(name, value)
     } catch (error) {
@@ -42,6 +53,11 @@ const safeLocalStorage: StateStorage = {
     }
   },
   removeItem: (name) => {
+    // Guard: Only access localStorage in browser environment
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+      return
+    }
+
     try {
       localStorage.removeItem(name)
     } catch (error) {

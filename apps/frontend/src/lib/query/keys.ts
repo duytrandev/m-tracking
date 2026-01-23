@@ -54,6 +54,23 @@ export const queryKeys = {
     progress: (id: string) =>
       [...queryKeys.budgets.all, 'progress', id] as const,
   },
+
+  // Spending domain
+  spending: {
+    all: ['spending'] as const,
+    summary: (period?: string) =>
+      [...queryKeys.spending.all, 'summary', period] as const,
+    transactions: (period?: string) =>
+      [...queryKeys.spending.all, 'transactions', period] as const,
+  },
+
+  // Categories domain
+  categories: {
+    all: ['categories'] as const,
+    list: () => [...queryKeys.categories.all, 'list'] as const,
+    detail: (id: string) =>
+      [...queryKeys.categories.all, 'detail', id] as const,
+  },
 } as const
 
 // Type helper for query key inference

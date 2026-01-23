@@ -3,21 +3,13 @@
 import { useState, useMemo } from 'react'
 import { motion } from 'motion/react'
 import { format, parseISO } from 'date-fns'
-import {
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-  HelpCircle,
-  ChevronRight,
-} from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Transaction } from '@/types/api/spending'
-
-/**
- * Sort configuration types
- */
-type SortField = 'date' | 'spend' | 'receive'
-type SortDirection = 'asc' | 'desc'
+import { SortableHeader, type SortField, type SortDirection } from './sortable-header'
+import { CategoryBadge } from './category-badge'
+import { TableSkeleton } from './table-skeleton'
+import { ExpandedRow } from './expanded-row'
 
 /**
  * Daily transaction group interface
@@ -68,99 +60,6 @@ const UNKNOWN_CATEGORY = {
   name: 'Unknown',
   color: '#94A3B8',
   icon: 'help-circle',
-}
-
-/**
- * Loading skeleton for table
- */
-function TableSkeleton({ rows = 5 }: { rows?: number }) {
-  return (
-    <div className="space-y-2">
-      {Array.from({ length: rows }).map((_, i) => (
-        <div
-          key={i}
-          className="h-16 animate-pulse rounded-lg bg-background/50"
-          style={{ animationDelay: `${i * 50}ms` }}
-        />
-      ))}
-    </div>
-  )
-}
-
-/**
- * Sortable header component props
- */
-interface SortableHeaderProps {
-  label: string
-  field: SortField
-  currentSort: SortField | null
-  direction: SortDirection
-  onSort: (field: SortField) => void
-  className?: string
-}
-
-/**
- * Sortable header component
- */
-function SortableHeader({
-  label,
-  field,
-  currentSort,
-  direction,
-  onSort,
-  className,
-}: SortableHeaderProps) {
-  const isActive = currentSort === field
-
-  return (
-    <button
-      onClick={() => onSort(field)}
-      className={cn(
-        'flex items-center gap-1 text-left font-medium text-muted-foreground cursor-pointer',
-        'hover:text-foreground transition-colors duration-200',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded',
-        isActive && 'text-foreground',
-        className
-      )}
-      aria-label={`Sort by ${label} ${isActive ? (direction === 'asc' ? 'descending' : 'ascending') : ''}`}
-    >
-      {label}
-      {isActive ? (
-        direction === 'asc' ? (
-          <ArrowUp className="h-3.5 w-3.5" />
-        ) : (
-          <ArrowDown className="h-3.5 w-3.5" />
-        )
-      ) : (
-        <ArrowUpDown className="h-3.5 w-3.5 opacity-50" />
-      )}
-    </button>
-  )
-}
-
-/**
- * Category badge component
- */
-function CategoryBadge({ category }: { category: { name: string; color: string } }) {
-  const isUnknown = category.name === 'Unknown'
-
-  return (
-    <div
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-background/60 border"
-      style={{
-        borderColor: `${category.color}40`,
-        color: category.color,
-      }}
-    >
-      <div
-        className="h-1.5 w-1.5 rounded-full flex-shrink-0"
-        style={{ backgroundColor: category.color }}
-        aria-hidden="true"
-      />
-      <span className="truncate max-w-[80px]">{category.name}</span>
-      {isUnknown && <HelpCircle className="h-2.5 w-2.5" />}
-    </div>
-  )
 }
 
 /**
@@ -511,57 +410,12 @@ export function TransactionTable({
 
                 {/* Expanded Category Breakdown */}
                 {expandable && isExpanded && (
-                  <motion.tr
+                  <ExpandedRow
                     key={`${group.date}-expanded`}
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <td colSpan={expandable ? 6 : 5} className="p-0">
-                      <div className="bg-background/40 backdrop-blur-sm border-t border-border/10">
-                        <div className="px-6 py-3">
-                          <div className="text-xs font-medium text-muted-foreground mb-2">
-                            Category Breakdown
-                          </div>
-                          <div className="space-y-2">
-                            {categoryBreakdown.map((cat, idx) => (
-                              <motion.div
-                                key={cat.categoryId}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: idx * 0.05, duration: 0.2 }}
-                                className="flex items-center justify-between rounded-md bg-background/60 backdrop-blur-sm px-3 py-2 border border-border/20 hover:border-border/40 transition-colors duration-200"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <div
-                                    className="h-2 w-2 rounded-full"
-                                    style={{ backgroundColor: cat.categoryColor }}
-                                  />
-                                  <span className="text-sm font-medium">{cat.categoryName}</span>
-                                  <span className="text-xs text-muted-foreground">
-                                    ({cat.transactionCount} {cat.transactionCount === 1 ? 'transaction' : 'transactions'})
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                  {cat.totalSpend > 0 && (
-                                    <span className="text-sm font-medium text-destructive tabular-nums">
-                                      -{formatCurrency(cat.totalSpend)}
-                                    </span>
-                                  )}
-                                  {cat.totalReceive > 0 && (
-                                    <span className="text-sm font-medium text-success tabular-nums">
-                                      +{formatCurrency(cat.totalReceive)}
-                                    </span>
-                                  )}
-                                </div>
-                              </motion.div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                  </motion.tr>
+                    categoryBreakdown={categoryBreakdown}
+                    expandable={expandable}
+                    formatCurrency={formatCurrency}
+                  />
                 )}
               </>
             )

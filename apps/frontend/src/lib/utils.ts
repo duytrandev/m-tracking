@@ -30,3 +30,15 @@ export function formatError(error: unknown): string {
  * Re-exported from shared utilities for consistency
  */
 export const sleep = sharedSleep
+
+/**
+ * Re-export safe storage utilities for convenience
+ * These utilities provide SSR-safe access to localStorage/sessionStorage
+ */
+export {
+  isBrowser,
+  isLocalStorageAvailable,
+  isSessionStorageAvailable,
+  safeLocalStorage,
+  safeSessionStorage,
+} from './utils/safe-storage'

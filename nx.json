@@ -104,11 +104,9 @@
   "defaultBase": "main",
   "tasksRunnerOptions": {
     "default": {
-      "runner": "nx-cloud",
+      "runner": "nx/tasks-runners/default",
       "options": {
-        "accessToken": "${NX_CLOUD_ACCESS_TOKEN}",
-        "cacheableOperations": ["build", "test", "lint", "type-check"],
-        "canTrackAnalytics": false
+        "cacheableOperations": ["build", "test", "lint", "type-check"]
       }
     }
   },
