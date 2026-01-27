@@ -8,8 +8,8 @@ import {
   JoinColumn,
   Index,
   Unique,
-} from 'typeorm';
-import { User } from './user.entity';
+} from 'typeorm'
+import { User } from './user.entity'
 
 @Entity('oauth_accounts')
 @Index(['userId'])
@@ -17,33 +17,33 @@ import { User } from './user.entity';
 @Unique(['provider', 'providerId'])
 export class OAuthAccount {
   @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  id!: string
 
   @Column({ name: 'user_id', type: 'uuid' })
-  userId!: string;
+  userId!: string
 
   @Column({ length: 50 })
-  provider!: string;
+  provider!: string
 
   @Column({ name: 'provider_id', length: 255 })
-  providerId!: string;
+  providerId!: string
 
   @Column({ name: 'provider_email', length: 255, nullable: true })
-  providerEmail!: string;
+  providerEmail!: string
 
   @Column({ name: 'access_token', type: 'text', nullable: true })
-  accessToken!: string;
+  accessToken!: string
 
   @Column({ name: 'refresh_token', type: 'text', nullable: true })
-  refreshToken!: string;
+  refreshToken!: string
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt!: Date;
+  createdAt!: Date
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt!: Date;
+  updatedAt!: Date
 
-  @ManyToOne(() => User, (user) => user.oauthAccounts, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, user => user.oauthAccounts, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-  user!: User;
+  user!: User
 }

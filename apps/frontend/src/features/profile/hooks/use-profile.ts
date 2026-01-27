@@ -20,7 +20,7 @@ export function useProfile() {
 
   const updateMutation = useMutation({
     mutationFn: profileApi.updateProfile,
-    onSuccess: (data) => {
+    onSuccess: data => {
       updateUser(data)
       queryClient.setQueryData(['profile'], data)
       toast({
@@ -29,7 +29,7 @@ export function useProfile() {
         variant: 'success',
       })
     },
-    onError: (error) => {
+    onError: error => {
       toast({
         title: 'Update failed',
         description: isApiError(error)

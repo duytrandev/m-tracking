@@ -25,8 +25,8 @@ export class ApiResponseWrapper<T> {
  * @ApiStandardResponse(UserDto)
  * async getUsers() { }
  */
-export const ApiStandardResponse = <TModel extends Type<any>>(
-  model: TModel,
+export const ApiStandardResponse = <TModel extends Type<unknown>>(
+  model: TModel
 ) => {
   return applyDecorators(
     ApiOkResponse({
@@ -43,6 +43,6 @@ export const ApiStandardResponse = <TModel extends Type<any>>(
           },
         ],
       },
-    }),
+    })
   )
 }

@@ -5,7 +5,10 @@ import { ProtectedRoute } from '@/components/auth/protected-route'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { DateRangePicker } from '@/features/spending/components/date-range-picker'
 import { TransactionTable } from '@/features/spending/components/transaction-table'
-import { useTransactionsByDateRange, getDefaultDateRange } from '@/features/spending/hooks/use-transactions-by-date'
+import {
+  useTransactionsByDateRange,
+  getDefaultDateRange,
+} from '@/features/spending/hooks/use-transactions-by-date'
 
 /**
  * Transactions page
@@ -13,19 +16,20 @@ import { useTransactionsByDateRange, getDefaultDateRange } from '@/features/spen
  */
 export default function TransactionsPage() {
   // Date range state for transactions table
-  const [dateRange, setDateRange] = useState<{ start: Date | null; end: Date | null }>(() => {
+  const [dateRange, setDateRange] = useState<{
+    start: Date | null
+    end: Date | null
+  }>(() => {
     const { start, end } = getDefaultDateRange()
     return { start, end }
   })
 
   // Fetch transactions by date range
-  const {
-    transactions,
-    isLoading: isTransactionsLoading,
-  } = useTransactionsByDateRange({
-    startDate: dateRange.start,
-    endDate: dateRange.end,
-  })
+  const { transactions, isLoading: isTransactionsLoading } =
+    useTransactionsByDateRange({
+      startDate: dateRange.start,
+      endDate: dateRange.end,
+    })
 
   // Handle date range change
   const handleDateRangeChange = (start: Date | null, end: Date | null) => {

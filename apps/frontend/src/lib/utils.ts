@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import { sleep as sharedSleep } from '@m-tracking/utils'
+import { sleep as sharedSleep } from '@m-tracking/shared'
 
 /**
  * Utility function to merge Tailwind CSS classes with clsx and tailwind-merge

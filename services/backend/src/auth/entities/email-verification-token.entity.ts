@@ -6,32 +6,34 @@ import {
   ManyToOne,
   JoinColumn,
   Index,
-} from 'typeorm';
-import { User } from './user.entity';
+} from 'typeorm'
+import { User } from './user.entity'
 
 @Entity('email_verification_tokens')
 @Index(['tokenHash'])
 @Index(['userId'])
 export class EmailVerificationToken {
   @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  id!: string
 
   @Column({ name: 'user_id', type: 'uuid' })
-  userId!: string;
+  userId!: string
 
   @Column({ name: 'token_hash', length: 255 })
-  tokenHash!: string;
+  tokenHash!: string
 
   @Column({ name: 'expires_at', type: 'timestamp' })
-  expiresAt!: Date;
+  expiresAt!: Date
 
   @Column({ default: false })
-  used!: boolean;
+  used!: boolean
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt!: Date;
+  createdAt!: Date
 
-  @ManyToOne(() => User, (user) => user.emailVerificationTokens, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, user => user.emailVerificationTokens, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'user_id' })
-  user!: User;
+  user!: User
 }

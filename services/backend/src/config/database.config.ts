@@ -5,7 +5,7 @@ export default registerAs('database', () => ({
   host: process.env.SUPABASE_DB_HOST || process.env.DB_HOST || 'localhost',
   port: parseInt(
     process.env.SUPABASE_DB_PORT || process.env.DB_PORT || '5432',
-    10,
+    10
   ),
   username:
     process.env.SUPABASE_DB_USER || process.env.DB_USERNAME || 'postgres',
@@ -14,8 +14,7 @@ export default registerAs('database', () => ({
   database:
     process.env.SUPABASE_DB_NAME || process.env.DB_DATABASE || 'm_tracking',
   ssl:
-    process.env.DB_SSL === 'true' ||
-    process.env.SUPABASE_DB_HOST !== undefined
+    process.env.DB_SSL === 'true' || process.env.SUPABASE_DB_HOST !== undefined
       ? { rejectUnauthorized: false }
       : false,
   synchronize: process.env.NODE_ENV === 'development',

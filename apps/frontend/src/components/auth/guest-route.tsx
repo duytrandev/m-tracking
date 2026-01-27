@@ -18,7 +18,10 @@ interface GuestRouteProps {
  * For pages that should only be accessible to unauthenticated users
  * (e.g., login, register)
  */
-export function GuestRoute({ children, redirectTo = '/dashboard' }: GuestRouteProps) {
+export function GuestRoute({
+  children,
+  redirectTo = '/dashboard',
+}: GuestRouteProps) {
   const { isAuthenticated, isLoading } = useAuthStore()
   const router = useRouter()
   const searchParams = useSearchParams()

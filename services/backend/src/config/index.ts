@@ -10,12 +10,7 @@ import jwtConfig from './jwt.config'
 import redisConfig from './redis.config'
 
 // Array of all config modules for ConfigModule.forRoot()
-export const configModules = [
-  appConfig,
-  databaseConfig,
-  jwtConfig,
-  redisConfig,
-]
+export const configModules = [appConfig, databaseConfig, jwtConfig, redisConfig]
 
 // Individual config exports
 export { default as appConfig } from './app.config'

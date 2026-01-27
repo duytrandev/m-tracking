@@ -40,11 +40,15 @@ export const profileApi = {
     const formData = new FormData()
     formData.append('avatar', file)
 
-    const response = await apiClient.post<{ avatarUrl: string }>('/users/me/avatar', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+    const response = await apiClient.post<{ avatarUrl: string }>(
+      '/users/me/avatar',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    )
     return response.data
   },
 
@@ -59,8 +63,13 @@ export const profileApi = {
   /**
    * Change user password
    */
-  changePassword: async (data: ChangePasswordRequest): Promise<MessageResponse> => {
-    const response = await apiClient.patch<MessageResponse>('/users/me/password', data)
+  changePassword: async (
+    data: ChangePasswordRequest
+  ): Promise<MessageResponse> => {
+    const response = await apiClient.patch<MessageResponse>(
+      '/users/me/password',
+      data
+    )
     return response.data
   },
 
@@ -76,7 +85,9 @@ export const profileApi = {
    * Revoke a specific session
    */
   revokeSession: async (sessionId: string): Promise<MessageResponse> => {
-    const response = await apiClient.delete<MessageResponse>(`/users/me/sessions/${sessionId}`)
+    const response = await apiClient.delete<MessageResponse>(
+      `/users/me/sessions/${sessionId}`
+    )
     return response.data
   },
 
@@ -84,7 +95,8 @@ export const profileApi = {
    * Revoke all other sessions
    */
   revokeAllSessions: async (): Promise<MessageResponse> => {
-    const response = await apiClient.delete<MessageResponse>('/users/me/sessions')
+    const response =
+      await apiClient.delete<MessageResponse>('/users/me/sessions')
     return response.data
   },
 }

@@ -26,7 +26,11 @@ interface ExpandedRowProps {
  * Expanded category breakdown row
  * Shows detailed category spending for a specific day
  */
-export function ExpandedRow({ categoryBreakdown, expandable, formatCurrency }: ExpandedRowProps) {
+export function ExpandedRow({
+  categoryBreakdown,
+  expandable,
+  formatCurrency,
+}: ExpandedRowProps) {
   return (
     <motion.tr
       initial={{ opacity: 0, height: 0 }}
@@ -54,9 +58,15 @@ export function ExpandedRow({ categoryBreakdown, expandable, formatCurrency }: E
                       className="h-2 w-2 rounded-full"
                       style={{ backgroundColor: cat.categoryColor }}
                     />
-                    <span className="text-sm font-medium">{cat.categoryName}</span>
+                    <span className="text-sm font-medium">
+                      {cat.categoryName}
+                    </span>
                     <span className="text-xs text-muted-foreground">
-                      ({cat.transactionCount} {cat.transactionCount === 1 ? 'transaction' : 'transactions'})
+                      ({cat.transactionCount}{' '}
+                      {cat.transactionCount === 1
+                        ? 'transaction'
+                        : 'transactions'}
+                      )
                     </span>
                   </div>
                   <div className="flex items-center gap-4">

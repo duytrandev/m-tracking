@@ -1,4 +1,4 @@
-import * as crypto from 'crypto';
+import * as crypto from 'crypto'
 
 /**
  * Hash utilities for token fingerprinting and data integrity
@@ -10,7 +10,7 @@ import * as crypto from 'crypto';
  * Returns hex-encoded hash
  */
 export function sha256(input: string): string {
-  return crypto.createHash('sha256').update(input).digest('hex');
+  return crypto.createHash('sha256').update(input).digest('hex')
 }
 
 /**
@@ -19,7 +19,7 @@ export function sha256(input: string): string {
  * Sufficient for blacklist collision resistance
  */
 export function tokenFingerprint(token: string): string {
-  return sha256(token).substring(0, 16);
+  return sha256(token).substring(0, 16)
 }
 
 /**
@@ -28,7 +28,7 @@ export function tokenFingerprint(token: string): string {
  * @returns Hex-encoded random string
  */
 export function randomHex(bytes: number = 32): string {
-  return crypto.randomBytes(bytes).toString('hex');
+  return crypto.randomBytes(bytes).toString('hex')
 }
 
 /**
@@ -38,7 +38,7 @@ export function randomHex(bytes: number = 32): string {
  * @returns Base64url-encoded random string
  */
 export function randomBase64Url(bytes: number = 32): string {
-  return crypto.randomBytes(bytes).toString('base64url');
+  return crypto.randomBytes(bytes).toString('base64url')
 }
 
 /**
@@ -47,16 +47,16 @@ export function randomBase64Url(bytes: number = 32): string {
  * @returns Random alphanumeric string
  */
 export function randomAlphanumeric(length: number = 16): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  const bytes = crypto.randomBytes(length);
-  let result = '';
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  const bytes = crypto.randomBytes(length)
+  let result = ''
   for (let i = 0; i < length; i++) {
-    const byte = bytes[i];
+    const byte = bytes[i]
     if (byte !== undefined) {
-      result += chars[byte % chars.length];
+      result += chars[byte % chars.length]
     }
   }
-  return result;
+  return result
 }
 
 /**
@@ -65,5 +65,5 @@ export function randomAlphanumeric(length: number = 16): string {
  * This is for non-password secrets that need deterministic hashing
  */
 export function hashSecret(secret: string): string {
-  return sha256(secret);
+  return sha256(secret)
 }

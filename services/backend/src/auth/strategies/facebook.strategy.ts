@@ -1,7 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { PassportStrategy } from '@nestjs/passport';
-import { Strategy } from 'passport-facebook';
-import { ConfigService } from '@nestjs/config';
+import { Injectable } from '@nestjs/common'
+import { PassportStrategy } from '@nestjs/passport'
+import { Strategy, Profile } from 'passport-facebook'
+import { ConfigService } from '@nestjs/config'
+import { OAuthProfile } from '../services/oauth.service'
+
+type DoneCallback = (error: Error | null, user?: OAuthProfile | false) => void
 
 /**
  * Facebook OAuth Strategy
@@ -18,32 +21,34 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       profileFields: ['id', 'emails', 'name', 'picture.type(large)'],
       enableProof: true,
       state: true,
-    });
+    })
   }
 
   /**
    * Validate callback after Facebook authenticates user
    * Returns sanitized user profile for OAuthService
    */
-  async validate(
+  validate(
     accessToken: string,
     refreshToken: string,
-    profile: any,
-    done: Function,
-  ): Promise<any> {
-    const { id, emails, name, photos } = profile;
+    profile: Profile,
+    done: DoneCallback
+  ): void {
+    const { id, emails, name, photos } = profile
 
-    const user = {
+    const firstName = name?.givenName || ''
+    const lastName = name?.familyName || ''
+    const user: OAuthProfile = {
       provider: 'facebook',
       providerId: id,
-      email: emails?.[0]?.value || null,
+      email: emails?.[0]?.value || '',
       emailVerified: false, // Facebook doesn't provide verification status
-      name: `${name.givenName} ${name.familyName}`.trim(),
+      name: `${firstName} ${lastName}`.trim(),
       avatar: photos?.[0]?.value || null,
       accessToken,
       refreshToken: refreshToken || null,
-    };
+    }
 
-    done(null, user);
+    done(null, user)
   }
 }

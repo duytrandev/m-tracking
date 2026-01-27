@@ -45,10 +45,12 @@ export function PasswordChangeForm(): React.ReactElement {
       })
       reset()
     },
-    onError: (error) => {
+    onError: error => {
       toast({
         title: 'Password change failed',
-        description: isApiError(error) ? error.response?.data?.message : 'An error occurred',
+        description: isApiError(error)
+          ? error.response?.data?.message
+          : 'An error occurred',
         variant: 'destructive',
       })
     },
@@ -58,7 +60,7 @@ export function PasswordChangeForm(): React.ReactElement {
 
   return (
     <form
-      onSubmit={handleSubmit((data) => mutation.mutate(data))}
+      onSubmit={handleSubmit(data => mutation.mutate(data))}
       className="space-y-6"
     >
       <div className="space-y-2">
@@ -69,7 +71,9 @@ export function PasswordChangeForm(): React.ReactElement {
           {...register('currentPassword')}
         />
         {errors.currentPassword && (
-          <p className="text-sm text-destructive">{errors.currentPassword.message}</p>
+          <p className="text-sm text-destructive">
+            {errors.currentPassword.message}
+          </p>
         )}
       </div>
 
@@ -82,7 +86,9 @@ export function PasswordChangeForm(): React.ReactElement {
         />
         <PasswordStrengthIndicator password={newPassword || ''} />
         {errors.newPassword && (
-          <p className="text-sm text-destructive">{errors.newPassword.message}</p>
+          <p className="text-sm text-destructive">
+            {errors.newPassword.message}
+          </p>
         )}
       </div>
 
@@ -94,7 +100,9 @@ export function PasswordChangeForm(): React.ReactElement {
           {...register('confirmPassword')}
         />
         {errors.confirmPassword && (
-          <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
+          <p className="text-sm text-destructive">
+            {errors.confirmPassword.message}
+          </p>
         )}
       </div>
 

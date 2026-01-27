@@ -31,7 +31,9 @@ export default function OAuthCallbackPage() {
     <AuthCard title="Processing...">
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="mt-4 text-sm text-muted-foreground">Please wait while we complete your sign in...</p>
+        <p className="mt-4 text-sm text-muted-foreground">
+          Please wait while we complete your sign in...
+        </p>
       </div>
     </AuthCard>
   )

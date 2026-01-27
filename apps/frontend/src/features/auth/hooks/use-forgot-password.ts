@@ -25,7 +25,8 @@ export function useForgotPassword(): UseForgotPasswordReturn {
   let error: string | null = null
   if (mutation.error) {
     if (isApiError(mutation.error)) {
-      error = mutation.error.response?.data?.message || 'Failed to send reset link'
+      error =
+        mutation.error.response?.data?.message || 'Failed to send reset link'
     } else {
       error = 'An unexpected error occurred'
     }

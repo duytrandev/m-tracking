@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
+import { Injectable } from '@nestjs/common'
+import * as bcrypt from 'bcrypt'
+import * as crypto from 'crypto'
 
 @Injectable()
 export class PasswordService {
-  private readonly SALT_ROUNDS = 10;
+  private readonly SALT_ROUNDS = 10
 
   /**
    * Hash password using bcrypt
@@ -12,7 +12,7 @@ export class PasswordService {
    * @returns Hashed password
    */
   async hash(password: string): Promise<string> {
-    return bcrypt.hash(password, this.SALT_ROUNDS);
+    return bcrypt.hash(password, this.SALT_ROUNDS)
   }
 
   /**
@@ -22,7 +22,7 @@ export class PasswordService {
    * @returns True if passwords match
    */
   async compare(password: string, hash: string): Promise<boolean> {
-    return bcrypt.compare(password, hash);
+    return bcrypt.compare(password, hash)
   }
 
   /**
@@ -30,7 +30,7 @@ export class PasswordService {
    * @returns Random token
    */
   generateToken(): string {
-    return crypto.randomBytes(32).toString('hex');
+    return crypto.randomBytes(32).toString('hex')
   }
 
   /**
@@ -39,6 +39,6 @@ export class PasswordService {
    * @returns Hashed token
    */
   hashToken(token: string): string {
-    return crypto.createHash('sha256').update(token).digest('hex');
+    return crypto.createHash('sha256').update(token).digest('hex')
   }
 }

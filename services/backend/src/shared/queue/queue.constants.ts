@@ -29,9 +29,9 @@ export const DEFAULT_JOB_OPTIONS = {
   removeOnFail: {
     count: 500, // Keep last 500 failed jobs for debugging
   },
-};
+}
 
 /**
  * Connection identifier for queue Redis instance
  */
-export const QUEUE_CONNECTION_NAME = 'queue';
+export const QUEUE_CONNECTION_NAME = 'queue'

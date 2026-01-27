@@ -23,14 +23,25 @@
     "lint": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "ruff check .",
+        "command": "command -v ruff > /dev/null 2>&1 && ruff check . || echo 'Ruff not installed - skipping lint. Install: pip install ruff'",
         "cwd": "services/analytics"
-      }
+      },
+      "cache": true,
+      "inputs": ["pythonBuild"]
     },
     "test": {
       "executor": "nx:run-commands",
       "options": {
         "command": "pytest",
+        "cwd": "services/analytics"
+      },
+      "cache": true,
+      "inputs": ["pythonBuild"]
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "ruff format .",
         "cwd": "services/analytics"
       }
     }

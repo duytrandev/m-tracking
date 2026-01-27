@@ -1,6 +1,12 @@
 'use client'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 
 /**
@@ -13,7 +19,9 @@ export default function PreferencesSettingsPage(): React.ReactElement {
       <Card>
         <CardHeader>
           <CardTitle>Language & Region</CardTitle>
-          <CardDescription>Choose your preferred language and region settings</CardDescription>
+          <CardDescription>
+            Choose your preferred language and region settings
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -37,7 +45,9 @@ export default function PreferencesSettingsPage(): React.ReactElement {
       <Card>
         <CardHeader>
           <CardTitle>Notifications</CardTitle>
-          <CardDescription>Manage your notification preferences</CardDescription>
+          <CardDescription>
+            Manage your notification preferences
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">

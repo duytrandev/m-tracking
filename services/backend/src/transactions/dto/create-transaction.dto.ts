@@ -1,30 +1,38 @@
-import { IsString, IsNumber, IsEnum, IsOptional, IsDateString, Length, Min } from 'class-validator';
-import { TransactionType } from '../entities/transaction.entity';
+import {
+  IsString,
+  IsNumber,
+  IsEnum,
+  IsOptional,
+  IsDateString,
+  Length,
+  Min,
+} from 'class-validator'
+import { TransactionType } from '../entities/transaction.entity'
 
 export class CreateTransactionDto {
   @IsString()
   @Length(1, 36)
-  categoryId!: string;
+  categoryId!: string
 
   @IsNumber()
   @Min(0.01)
-  amount!: number;
+  amount!: number
 
   @IsEnum(TransactionType)
-  type!: TransactionType;
+  type!: TransactionType
 
   @IsString()
   @Length(1, 255)
-  description!: string;
+  description!: string
 
   @IsDateString()
-  date!: string;
+  date!: string
 
   @IsString()
   @Length(3, 3)
-  currency!: string;
+  currency!: string
 
   @IsOptional()
   @IsString()
-  notes?: string;
+  notes?: string
 }

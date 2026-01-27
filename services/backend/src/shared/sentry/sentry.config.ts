@@ -1,6 +1,5 @@
-import * as Sentry from '@sentry/node';
-// import { ProfilingIntegration } from '@sentry/profiling-node';
-import { ConfigService } from '@nestjs/config';
+import * as Sentry from '@sentry/node'
+import { ConfigService } from '@nestjs/config'
 
 /**
  * Initialize Sentry error tracking and performance monitoring
@@ -14,15 +13,16 @@ import { ConfigService } from '@nestjs/config';
  * @param configService - NestJS ConfigService for environment variables
  */
 export function initializeSentry(configService: ConfigService): void {
-  const dsn = configService.get<string>('SENTRY_DSN');
+  const dsn = configService.get<string>('SENTRY_DSN')
 
   // Skip initialization if DSN is not configured
   if (!dsn) {
-    console.log('⚠️  Sentry DSN not configured - monitoring disabled');
-    return;
+    // eslint-disable-next-line no-console
+    console.log('⚠️  Sentry DSN not configured - monitoring disabled')
+    return
   }
 
-  const environment = configService.get<string>('NODE_ENV') || 'development';
+  const environment = configService.get<string>('NODE_ENV') || 'development'
 
   Sentry.init({
     dsn,
@@ -36,10 +36,8 @@ export function initializeSentry(configService: ConfigService): void {
     integrations: [
       // HTTP request instrumentation
       // new Sentry.Integrations.Http({ tracing: true }),
-
       // Express middleware integration
       // new Sentry.Integrations.Express(),
-
       // Performance profiling
       // new ProfilingIntegration(),
     ],
@@ -51,9 +49,10 @@ export function initializeSentry(configService: ConfigService): void {
 
     // Enable debug mode in development
     debug: environment === 'development',
-  });
+  })
 
-  console.log(`✅ Sentry initialized for ${environment} environment`);
+  // eslint-disable-next-line no-console
+  console.log(`✅ Sentry initialized for ${environment} environment`)
 }
 
 /**

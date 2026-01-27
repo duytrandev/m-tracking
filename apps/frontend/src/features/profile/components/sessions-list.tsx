@@ -29,8 +29,14 @@ function getDeviceName(session: SessionInfo): string {
 }
 
 export function SessionsList(): React.ReactElement {
-  const { sessions, isLoading, revokeSession, isRevoking, revokeAllSessions, isRevokingAll } =
-    useSessions()
+  const {
+    sessions,
+    isLoading,
+    revokeSession,
+    isRevoking,
+    revokeAllSessions,
+    isRevokingAll,
+  } = useSessions()
 
   if (isLoading) {
     return (
@@ -42,16 +48,18 @@ export function SessionsList(): React.ReactElement {
 
   if (sessions.length === 0) {
     return (
-      <p className="text-muted-foreground text-center py-8">No active sessions found.</p>
+      <p className="text-muted-foreground text-center py-8">
+        No active sessions found.
+      </p>
     )
   }
 
-  const otherSessions = sessions.filter((s) => !s.isCurrent)
+  const otherSessions = sessions.filter(s => !s.isCurrent)
 
   return (
     <div className="space-y-6">
       <div className="space-y-4">
-        {sessions.map((session) => (
+        {sessions.map(session => (
           <div
             key={session.id}
             className="flex items-center justify-between p-4 rounded-lg border"
@@ -74,7 +82,9 @@ export function SessionsList(): React.ReactElement {
                   {session.ipAddress}
                   <span>•</span>
                   Last active{' '}
-                  {formatDistanceToNow(new Date(session.lastActiveAt), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(session.lastActiveAt), {
+                    addSuffix: true,
+                  })}
                 </div>
               </div>
             </div>

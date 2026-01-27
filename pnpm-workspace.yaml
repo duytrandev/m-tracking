@@ -3,6 +3,18 @@ packages:
   - "services/*"
   - "libs/*"
 
+# Version catalogs for consistent dependency management
+catalogs:
+  shared:
+    typescript: "5.9.3"
+    eslint: "9.39.2"
+  frontend:
+    react: "19.2.0"
+    next: "16.1.4"
+  backend:
+    "@nestjs/core": "11.1.11"
+    "@nestjs/common": "11.1.11"
+
 # Re-enable strict mode for better dependency management
 strictPeerDependencies: true
 
@@ -11,8 +23,10 @@ pnpm:
   overrides:
     typescript: "5.9.3"
     eslint: "9.39.2"
-    "@swc/helpers": "0.5.17"
+    "@swc/helpers": ">=0.5.17"
   peerDependencyRules:
     allowAny:
       - "@nestjs/common"
       - "@nestjs/core"
+    ignoreMissing:
+      - "@swc/helpers"

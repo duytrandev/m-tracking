@@ -1,4 +1,8 @@
-import axios, { AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
+import axios, {
+  AxiosError,
+  type AxiosInstance,
+  type InternalAxiosRequestConfig,
+} from 'axios'
 import { tokenService } from '@/features/auth/services/token-service'
 import * as Sentry from '@sentry/nextjs'
 
@@ -22,9 +26,10 @@ function emitAuthEvent(type: AuthEventType): void {
   authEvents.dispatchEvent(new Event(type))
 }
 
-const API_BASE_URL = typeof window !== 'undefined'
-  ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1')
-  : (process.env.API_URL || 'http://localhost:4000/api/v1')
+const API_BASE_URL =
+  typeof window !== 'undefined'
+    ? process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1'
+    : process.env.API_URL || 'http://localhost:4000/api/v1'
 
 /**
  * Create axios instance with base configuration
@@ -82,7 +87,10 @@ let failedQueue: Array<{
   reject: (error: Error) => void
 }> = []
 
-const processQueue = (error: Error | null, token: string | null = null): void => {
+const processQueue = (
+  error: Error | null,
+  token: string | null = null
+): void => {
   failedQueue.forEach(promise => {
     if (error) {
       promise.reject(error)
@@ -96,14 +104,20 @@ const processQueue = (error: Error | null, token: string | null = null): void =>
 apiClient.interceptors.response.use(
   response => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean
+    }
 
     // Skip refresh for auth endpoints to prevent loops
     // const isAuthEndpoint = originalRequest.url?.startsWith('/auth/')
     const isRefreshEndpoint = originalRequest.url === '/auth/refresh'
 
     // If 401 and not already retrying and not a refresh request
-    if (error.response?.status === 401 && !originalRequest._retry && !isRefreshEndpoint) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isRefreshEndpoint
+    ) {
       if (isRefreshing) {
         // Queue the request while refreshing
         return new Promise((resolve, reject) => {
@@ -126,7 +140,10 @@ apiClient.interceptors.response.use(
 
       try {
         // Call refresh endpoint (cookie sent automatically)
-        const response = await apiClient.post<{ accessToken: string; expiresIn: number }>('/auth/refresh')
+        const response = await apiClient.post<{
+          accessToken: string
+          expiresIn: number
+        }>('/auth/refresh')
         const { accessToken, expiresIn } = response.data
 
         tokenService.setToken(accessToken, expiresIn)
@@ -143,7 +160,13 @@ apiClient.interceptors.response.use(
         // Emit event instead of redirecting (allows React Router to handle navigation)
         emitAuthEvent('session-expired')
 
-        return Promise.reject(refreshError)
+        return Promise.reject(
+          new Error(
+            refreshError instanceof Error
+              ? refreshError.message
+              : 'Token refresh failed'
+          )
+        )
       } finally {
         isRefreshing = false
       }

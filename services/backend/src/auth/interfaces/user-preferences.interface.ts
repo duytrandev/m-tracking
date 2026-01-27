@@ -1,17 +1,17 @@
 export interface NotificationPreferences {
-  email: boolean;
-  push: boolean;
-  budgetAlerts: boolean;
-  transactionAlerts: boolean;
-  weeklyReport: boolean;
+  email: boolean
+  push: boolean
+  budgetAlerts: boolean
+  transactionAlerts: boolean
+  weeklyReport: boolean
 }
 
 export interface UserPreferences {
-  theme: 'light' | 'dark' | 'system';
-  language: string;
-  currency: string;
-  timezone: string;
-  notifications: NotificationPreferences;
+  theme: 'light' | 'dark' | 'system'
+  language: string
+  currency: string
+  timezone: string
+  notifications: NotificationPreferences
 }
 
 export const DEFAULT_USER_PREFERENCES: UserPreferences = {
@@ -26,4 +26,4 @@ export const DEFAULT_USER_PREFERENCES: UserPreferences = {
     transactionAlerts: true,
     weeklyReport: false,
   },
-};
+}

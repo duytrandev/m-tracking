@@ -41,26 +41,26 @@ export interface AuthState {
  */
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    set => ({
       user: null,
       isAuthenticated: false,
       isLoading: true, // Start loading until we check auth status
       requires2FA: false,
       pendingEmail: undefined,
 
-      setUser: (user) =>
+      setUser: user =>
         set({
           user,
           isAuthenticated: !!user,
           isLoading: false,
         }),
 
-      setLoading: (isLoading) => set({ isLoading }),
+      setLoading: isLoading => set({ isLoading }),
 
       setRequires2FA: (requires2FA, pendingEmail) =>
         set({ requires2FA, pendingEmail }),
 
-      login: (user) =>
+      login: user =>
         set({
           user,
           isAuthenticated: true,
@@ -78,15 +78,15 @@ export const useAuthStore = create<AuthState>()(
           pendingEmail: undefined,
         }),
 
-      updateUser: (updates) =>
-        set((state) => ({
+      updateUser: updates =>
+        set(state => ({
           user: state.user ? { ...state.user, ...updates } : null,
         })),
     }),
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => sessionStorage),
-      partialize: (state) => ({
+      partialize: state => ({
         // Only persist user info, not loading/auth state
         // Auth state is re-validated on app load
         user: state.user,
@@ -96,6 +96,8 @@ export const useAuthStore = create<AuthState>()(
 )
 
 // Selector hooks for common patterns
-export const useUser = (): User | null => useAuthStore((state) => state.user)
-export const useIsAuthenticated = (): boolean => useAuthStore((state) => state.isAuthenticated)
-export const useIsAuthLoading = (): boolean => useAuthStore((state) => state.isLoading)
+export const useUser = (): User | null => useAuthStore(state => state.user)
+export const useIsAuthenticated = (): boolean =>
+  useAuthStore(state => state.isAuthenticated)
+export const useIsAuthLoading = (): boolean =>
+  useAuthStore(state => state.isLoading)

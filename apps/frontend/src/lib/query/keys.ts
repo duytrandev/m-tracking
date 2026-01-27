@@ -39,8 +39,7 @@ export const queryKeys = {
   accounts: {
     all: ['accounts'] as const,
     list: () => [...queryKeys.accounts.all, 'list'] as const,
-    detail: (id: string) =>
-      [...queryKeys.accounts.all, 'detail', id] as const,
+    detail: (id: string) => [...queryKeys.accounts.all, 'detail', id] as const,
     balance: (id: string) =>
       [...queryKeys.accounts.all, 'balance', id] as const,
   },
@@ -49,8 +48,7 @@ export const queryKeys = {
   budgets: {
     all: ['budgets'] as const,
     list: () => [...queryKeys.budgets.all, 'list'] as const,
-    detail: (id: string) =>
-      [...queryKeys.budgets.all, 'detail', id] as const,
+    detail: (id: string) => [...queryKeys.budgets.all, 'detail', id] as const,
     progress: (id: string) =>
       [...queryKeys.budgets.all, 'progress', id] as const,
   },

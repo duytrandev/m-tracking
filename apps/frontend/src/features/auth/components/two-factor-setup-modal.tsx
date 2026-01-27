@@ -50,6 +50,7 @@ export function TwoFactorSetupModal({
       reset()
       startSetup()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen])
 
   const handleClose = (): void => {
@@ -111,29 +112,38 @@ export function TwoFactorSetupModal({
         {step === 'qr' && (
           <div className="space-y-6">
             <p className="text-sm text-muted-foreground">
-              Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
+              Scan this QR code with your authenticator app (Google
+              Authenticator, Authy, etc.)
             </p>
 
             {qrCode && (
               <div className="flex justify-center">
                 <div className="border rounded-lg p-4 bg-white">
-                  <img
-                    src={qrCode}
-                    alt="2FA QR Code"
-                    className="w-48 h-48"
-                  />
+                  <img src={qrCode} alt="2FA QR Code" className="w-48 h-48" />
                 </div>
               </div>
             )}
 
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Can&apos;t scan? Enter this code manually:</p>
+              <p className="text-sm text-muted-foreground">
+                Can&apos;t scan? Enter this code manually:
+              </p>
               <div className="flex items-center gap-2">
                 <code className="flex-1 bg-muted px-3 py-2 rounded-md text-sm font-mono break-all">
                   {secret}
                 </code>
-                <Button variant="outline" size="icon" onClick={copySecret}>
-                  {copiedSecret ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => {
+                    void copySecret()
+                  }}
+                >
+                  {copiedSecret ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
             </div>
@@ -142,7 +152,12 @@ export function TwoFactorSetupModal({
               <Button variant="outline" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button onClick={() => { setStep('verify'); setCode(''); }}>
+              <Button
+                onClick={() => {
+                  setStep('verify')
+                  setCode('')
+                }}
+              >
                 Next
               </Button>
             </div>
@@ -159,7 +174,9 @@ export function TwoFactorSetupModal({
             <CodeInput
               value={code}
               onChange={setCode}
-              onComplete={(value) => verifyCode(value)}
+              onComplete={(value: string) => {
+                verifyCode(value)
+              }}
               disabled={isLoading}
               error={!!error}
             />
@@ -188,8 +205,8 @@ export function TwoFactorSetupModal({
                 Save your backup codes
               </p>
               <p className="text-sm text-amber-700 mt-1">
-                If you lose access to your authenticator app, you can use these codes to sign in.
-                Each code can only be used once.
+                If you lose access to your authenticator app, you can use these
+                codes to sign in. Each code can only be used once.
               </p>
             </div>
 
@@ -199,7 +216,9 @@ export function TwoFactorSetupModal({
               <Checkbox
                 id="saved"
                 checked={hasSavedCodes}
-                onCheckedChange={(checked) => setHasSavedCodes(checked as boolean)}
+                onCheckedChange={checked =>
+                  setHasSavedCodes(checked as boolean)
+                }
               />
               <Label htmlFor="saved" className="text-sm">
                 I have saved these backup codes in a safe place
@@ -207,10 +226,7 @@ export function TwoFactorSetupModal({
             </div>
 
             <div className="flex justify-end">
-              <Button
-                onClick={handleComplete}
-                disabled={!hasSavedCodes}
-              >
+              <Button onClick={handleComplete} disabled={!hasSavedCodes}>
                 Complete Setup
               </Button>
             </div>

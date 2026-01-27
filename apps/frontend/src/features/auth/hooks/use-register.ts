@@ -17,7 +17,9 @@ export function useRegister(): UseRegisterReturn {
     mutationFn: authApi.register,
     onSuccess: (_, variables) => {
       // Navigate to verify email page with email in query
-      router.push(`/auth/verify-email?email=${encodeURIComponent(variables.email)}`)
+      router.push(
+        `/auth/verify-email?email=${encodeURIComponent(variables.email)}`
+      )
     },
   })
 

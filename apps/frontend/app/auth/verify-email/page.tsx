@@ -16,7 +16,7 @@ export default function VerifyEmailPage() {
   const handleResend = () => {
     setCountdown(60)
     const interval = setInterval(() => {
-      setCountdown((prev) => {
+      setCountdown(prev => {
         if (prev <= 1) {
           clearInterval(interval)
           return 0
@@ -35,7 +35,9 @@ export default function VerifyEmailPage() {
 
         <div className="space-y-2">
           <p className="text-muted-foreground">{t('message')}</p>
-          <p className="rounded-md bg-slate-50 px-3 py-2 font-medium text-slate-900">{email}</p>
+          <p className="rounded-md bg-slate-50 px-3 py-2 font-medium text-slate-900">
+            {email}
+          </p>
         </div>
 
         <p className="text-sm text-muted-foreground">{t('instructions')}</p>
@@ -51,7 +53,9 @@ export default function VerifyEmailPage() {
                 disabled={countdown > 0}
                 className="text-primary hover:underline disabled:text-muted-foreground disabled:no-underline"
               >
-                {countdown > 0 ? t('resendAvailable', { seconds: countdown }) : t('resend')}
+                {countdown > 0
+                  ? t('resendAvailable', { seconds: countdown })
+                  : t('resend')}
               </button>
             </li>
           </ul>

@@ -25,7 +25,8 @@ export function RoleGuard({
   const router = useRouter()
 
   // Check if user has any of the required roles
-  const hasRequiredRole = user?.roles.some((role) => roles.includes(role)) ?? false
+  const hasRequiredRole =
+    user?.roles.some(role => roles.includes(role)) ?? false
 
   useEffect(() => {
     if (!hasRequiredRole) {

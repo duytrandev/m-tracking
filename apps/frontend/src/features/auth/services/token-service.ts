@@ -84,19 +84,14 @@ class TokenService {
     this.cancelScheduledRefresh()
 
     // Refresh 60 seconds before expiration
-    const refreshIn = (expiresInSeconds * 1000) - this.REFRESH_BUFFER_MS
+    const refreshIn = expiresInSeconds * 1000 - this.REFRESH_BUFFER_MS
 
     if (refreshIn > 0) {
-      this.refreshTimeoutId = setTimeout(async () => {
+      this.refreshTimeoutId = setTimeout(() => {
         if (this.refreshCallback) {
-          try {
-            const newToken = await this.refreshCallback()
-            if (!newToken) {
-              console.warn('[TokenService] Refresh returned null')
-            }
-          } catch (error) {
-            console.error('[TokenService] Scheduled refresh failed:', error)
-          }
+          this.refreshCallback().catch(() => {
+            // Token refresh failed - will be handled by next API call
+          })
         }
       }, refreshIn)
     }

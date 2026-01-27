@@ -98,6 +98,7 @@ docker-compose.override.yml
 .husky/_/
 .agent
 .claude/
+.opencode/
 .bmad-core/
 .nx
 plans/

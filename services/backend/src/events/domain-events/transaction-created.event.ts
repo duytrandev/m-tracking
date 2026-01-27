@@ -10,6 +10,6 @@ export class TransactionCreatedEvent {
     public readonly userId: string,
     public readonly amount: number,
     public readonly type: 'income' | 'expense',
-    public readonly categoryId: string,
+    public readonly categoryId: string
   ) {}
 }

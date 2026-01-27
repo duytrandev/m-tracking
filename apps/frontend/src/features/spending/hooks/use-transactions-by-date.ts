@@ -52,7 +52,12 @@ export function useTransactionsByDateRange({
     error,
     refetch,
   } = useQuery<Transaction[], Error>({
-    queryKey: ['transactions', 'date-range', formattedStartDate, formattedEndDate],
+    queryKey: [
+      'transactions',
+      'date-range',
+      formattedStartDate,
+      formattedEndDate,
+    ],
     queryFn: () => spendingApi.getAllTransactions(query),
     enabled: enabled && (!!startDate || !!endDate),
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -63,7 +68,9 @@ export function useTransactionsByDateRange({
     isLoading,
     isError,
     error: error ?? null,
-    refetch,
+    refetch: () => {
+      void refetch()
+    },
   }
 }
 

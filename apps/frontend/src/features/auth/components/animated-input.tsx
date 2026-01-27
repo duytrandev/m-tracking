@@ -14,6 +14,8 @@ export const AnimatedInput = forwardRef<HTMLInputElement, InputProps>(
     const [shake, setShake] = useState(false)
     const prefersReducedMotion = useReducedMotion()
 
+    // Trigger shake animation on error - intentional setState in effect for animation
+     
     useEffect(() => {
       if (error && !prefersReducedMotion) {
         setShake(true)
@@ -36,7 +38,7 @@ export const AnimatedInput = forwardRef<HTMLInputElement, InputProps>(
         animate={shake ? { x: [-4, 4, -4, 4, 0] } : { x: 0 }}
         transition={{
           duration: 0.4,
-          ease: 'easeInOut'
+          ease: 'easeInOut',
         }}
       >
         <Input

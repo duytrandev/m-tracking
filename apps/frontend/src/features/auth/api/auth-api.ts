@@ -25,7 +25,10 @@ export const authApi = {
   // Registration
   register: async (data: RegisterRequest): Promise<MessageResponse> => {
     try {
-      const response = await apiClient.post<MessageResponse>('/auth/register', data)
+      const response = await apiClient.post<MessageResponse>(
+        '/auth/register',
+        data
+      )
       return response.data
     } catch (error) {
       const appError = createAppError(error)
@@ -34,7 +37,9 @@ export const authApi = {
         throw new Error(appError.message || 'Please check your input')
       }
       if (appError.code === ApiErrorCode.NETWORK_ERROR) {
-        throw new Error('Unable to connect. Please check your internet connection.')
+        throw new Error(
+          'Unable to connect. Please check your internet connection.'
+        )
       }
 
       throw new Error(appError.message)
@@ -60,7 +65,9 @@ export const authApi = {
         throw new Error(appError.message || 'Please check your input')
       }
       if (appError.code === ApiErrorCode.NETWORK_ERROR) {
-        throw new Error('Unable to connect. Please check your internet connection.')
+        throw new Error(
+          'Unable to connect. Please check your internet connection.'
+        )
       }
 
       throw new Error(appError.message)
@@ -92,23 +99,39 @@ export const authApi = {
 
   // Email verification
   verifyEmail: async (data: VerifyEmailRequest): Promise<MessageResponse> => {
-    const response = await apiClient.post<MessageResponse>('/auth/verify-email', data)
+    const response = await apiClient.post<MessageResponse>(
+      '/auth/verify-email',
+      data
+    )
     return response.data
   },
 
   resendVerification: async (email: string): Promise<MessageResponse> => {
-    const response = await apiClient.post<MessageResponse>('/auth/resend-verification', { email })
+    const response = await apiClient.post<MessageResponse>(
+      '/auth/resend-verification',
+      { email }
+    )
     return response.data
   },
 
   // Password reset
-  forgotPassword: async (data: ForgotPasswordRequest): Promise<MessageResponse> => {
-    const response = await apiClient.post<MessageResponse>('/auth/forgot-password', data)
+  forgotPassword: async (
+    data: ForgotPasswordRequest
+  ): Promise<MessageResponse> => {
+    const response = await apiClient.post<MessageResponse>(
+      '/auth/forgot-password',
+      data
+    )
     return response.data
   },
 
-  resetPassword: async (data: ResetPasswordRequest): Promise<MessageResponse> => {
-    const response = await apiClient.post<MessageResponse>('/auth/reset-password', data)
+  resetPassword: async (
+    data: ResetPasswordRequest
+  ): Promise<MessageResponse> => {
+    const response = await apiClient.post<MessageResponse>(
+      '/auth/reset-password',
+      data
+    )
     return response.data
   },
 
@@ -120,12 +143,18 @@ export const authApi = {
 
   // Magic Link
   requestMagicLink: async (email: string): Promise<MessageResponse> => {
-    const response = await apiClient.post<MessageResponse>('/auth/magic-link/request', { email })
+    const response = await apiClient.post<MessageResponse>(
+      '/auth/magic-link/request',
+      { email }
+    )
     return response.data
   },
 
   verifyMagicLink: async (token: string): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>('/auth/magic-link/verify', { token })
+    const response = await apiClient.post<AuthResponse>(
+      '/auth/magic-link/verify',
+      { token }
+    )
     if (response.data.accessToken) {
       setAuthToken(response.data.accessToken, response.data.expiresIn)
     }
@@ -134,12 +163,18 @@ export const authApi = {
 
   // SMS OTP
   requestOtp: async (phone: string): Promise<MessageResponse> => {
-    const response = await apiClient.post<MessageResponse>('/auth/otp/request', { phone })
+    const response = await apiClient.post<MessageResponse>(
+      '/auth/otp/request',
+      { phone }
+    )
     return response.data
   },
 
   verifyOtp: async (phone: string, code: string): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>('/auth/otp/verify', { phone, code })
+    const response = await apiClient.post<AuthResponse>('/auth/otp/verify', {
+      phone,
+      code,
+    })
     if (response.data.accessToken) {
       setAuthToken(response.data.accessToken, response.data.expiresIn)
     }
@@ -148,27 +183,38 @@ export const authApi = {
 
   // Two-Factor Authentication (2FA)
   enroll2FA: async (): Promise<TwoFactorEnrollResponse> => {
-    const response = await apiClient.post<TwoFactorEnrollResponse>('/auth/2fa/enroll')
+    const response =
+      await apiClient.post<TwoFactorEnrollResponse>('/auth/2fa/enroll')
     return response.data
   },
 
   verify2FASetup: async (code: string): Promise<MessageResponse> => {
-    const response = await apiClient.post<MessageResponse>('/auth/2fa/verify', { code })
+    const response = await apiClient.post<MessageResponse>('/auth/2fa/verify', {
+      code,
+    })
     return response.data
   },
 
   getBackupCodes: async (): Promise<BackupCodesResponse> => {
-    const response = await apiClient.get<BackupCodesResponse>('/auth/2fa/backup-codes')
+    const response = await apiClient.get<BackupCodesResponse>(
+      '/auth/2fa/backup-codes'
+    )
     return response.data
   },
 
   disable2FA: async (code: string): Promise<MessageResponse> => {
-    const response = await apiClient.post<MessageResponse>('/auth/2fa/disable', { code })
+    const response = await apiClient.post<MessageResponse>(
+      '/auth/2fa/disable',
+      { code }
+    )
     return response.data
   },
 
   validate2FA: async (code: string, email: string): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>('/auth/2fa/validate', { code, email })
+    const response = await apiClient.post<AuthResponse>('/auth/2fa/validate', {
+      code,
+      email,
+    })
     if (response.data.accessToken) {
       setAuthToken(response.data.accessToken, response.data.expiresIn)
     }

@@ -1,13 +1,16 @@
 /**
  * Spending feature public API
- * 
+ *
  * Barrel export to prevent deep imports and establish clear feature boundaries.
  * Import from '@/features/spending' instead of deep paths
  */
 
 // Hooks
 export { useSpendingData } from './hooks/use-spending-data'
-export { useTransactionsByDateRange, getDefaultDateRange } from './hooks/use-transactions-by-date'
+export {
+  useTransactionsByDateRange,
+  getDefaultDateRange,
+} from './hooks/use-transactions-by-date'
 
 // Components
 export { TransactionTable } from './components/transaction-table/transaction-table'

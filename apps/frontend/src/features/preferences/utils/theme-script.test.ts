@@ -51,7 +51,7 @@ describe('themeScript', () => {
   it('should be executable as JavaScript', () => {
     // This should not throw when evaluated in a test environment
     expect(() => {
-      // eslint-disable-next-line no-eval
+       
       eval(themeScript)
     }).not.toThrow()
   })

@@ -23,7 +23,7 @@ export function OAuthButtons({
 
   return (
     <div className="grid grid-cols-2 gap-3">
-      {providers.map((provider) => (
+      {providers.map(provider => (
         <OAuthButton
           key={provider}
           provider={provider}

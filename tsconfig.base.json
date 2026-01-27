@@ -18,6 +18,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
 
     // Emit Options
     "declaration": true,
@@ -49,14 +50,8 @@
     // Path Mappings (centralized)
     "baseUrl": ".",
     "paths": {
-      "@m-tracking/common": ["libs/common/src/index.ts"],
-      "@m-tracking/common/*": ["libs/common/src/*"],
-      "@m-tracking/types": ["libs/types/src/index.ts"],
-      "@m-tracking/types/*": ["libs/types/src/*"],
-      "@m-tracking/constants": ["libs/constants/src/index.ts"],
-      "@m-tracking/constants/*": ["libs/constants/src/*"],
-      "@m-tracking/utils": ["libs/utils/src/index.ts"],
-      "@m-tracking/utils/*": ["libs/utils/src/*"]
+      "@m-tracking/shared": ["libs/shared/src/index.ts"],
+      "@m-tracking/shared/*": ["libs/shared/src/*"]
     }
   },
   "exclude": [

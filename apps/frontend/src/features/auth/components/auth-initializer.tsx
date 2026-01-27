@@ -21,7 +21,10 @@ interface AuthInitializerProps {
  * 3. Renders children once auth state is determined
  * 4. Listens for session expiry events and redirects to login
  */
-export function AuthInitializer({ children, fallback }: AuthInitializerProps): React.ReactElement {
+export function AuthInitializer({
+  children,
+  fallback,
+}: AuthInitializerProps): React.ReactElement {
   const { isInitializing } = useAuthInit()
   const logout = useAuthStore(s => s.logout)
   const router = useRouter()

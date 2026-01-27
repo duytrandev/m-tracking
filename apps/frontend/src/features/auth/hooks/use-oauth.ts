@@ -5,9 +5,10 @@ import { authApi } from '../api/auth-api'
 import { setAuthToken } from '@/lib/api-client'
 import type { OAuthProvider } from '@/types/api/auth'
 
-const API_BASE_URL = typeof window !== 'undefined'
-  ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000')
-  : (process.env.API_URL || 'http://localhost:4000')
+const API_BASE_URL =
+  typeof window !== 'undefined'
+    ? process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
+    : process.env.API_URL || 'http://localhost:4000'
 
 interface UseOAuthReturn {
   initiateOAuth: (provider: OAuthProvider) => void
@@ -81,17 +82,18 @@ export function useOAuthCallback(): UseOAuthCallbackReturn {
         login(user)
 
         // Get stored return URL or default to dashboard
-        const returnUrl = sessionStorage.getItem('oauth_return_url') || '/dashboard'
+        const returnUrl =
+          sessionStorage.getItem('oauth_return_url') || '/dashboard'
         sessionStorage.removeItem('oauth_return_url')
 
         router.replace(returnUrl)
-      } catch (err) {
+      } catch {
         setError('Failed to complete authentication')
         setIsProcessing(false)
       }
     }
 
-    processCallback()
+    void processCallback()
   }, [searchParams, router, login])
 
   return {

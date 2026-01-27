@@ -6,7 +6,12 @@ import { format, parseISO } from 'date-fns'
 import { ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Transaction } from '@/types/api/spending'
-import { SortableHeader, type SortField, type SortDirection } from './sortable-header'
+import { TransactionType } from '@/types/api/spending'
+import {
+  SortableHeader,
+  type SortField,
+  type SortDirection,
+} from './sortable-header'
 import { CategoryBadge } from './category-badge'
 import { TableSkeleton } from './table-skeleton'
 import { ExpandedRow } from './expanded-row'
@@ -78,9 +83,10 @@ export function TransactionTable({
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
 
   // Respect user's motion preferences
-  const prefersReducedMotion = typeof window !== 'undefined'
-    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    : false
+  const prefersReducedMotion =
+    typeof window !== 'undefined'
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      : false
 
   /**
    * Group transactions by date
@@ -88,7 +94,7 @@ export function TransactionTable({
   const dailyGroups = useMemo(() => {
     const groups = new Map<string, DailyTransactionGroup>()
 
-    transactions.forEach((transaction) => {
+    transactions.forEach(transaction => {
       const date = transaction.date
       const existing = groups.get(date)
 
@@ -97,7 +103,9 @@ export function TransactionTable({
 
       if (existing) {
         // Add category if not already in list
-        const categoryExists = existing.categories.some((c) => c.id === category.id)
+        const categoryExists = existing.categories.some(
+          c => c.id === category.id
+        )
         if (!categoryExists) {
           existing.categories.push({
             id: category.id,
@@ -108,7 +116,7 @@ export function TransactionTable({
         }
 
         // Update totals
-        if (transaction.type === 'expense') {
+        if (transaction.type === TransactionType.EXPENSE) {
           existing.totalSpend += transaction.amount
         } else {
           existing.totalReceive += transaction.amount
@@ -119,15 +127,26 @@ export function TransactionTable({
       } else {
         groups.set(date, {
           date,
-          categories: [{
-            id: category.id,
-            name: category.name,
-            color: category.color,
-            icon: category.icon || 'help-circle',
-          }],
-          totalSpend: transaction.type === 'expense' ? transaction.amount : 0,
-          totalReceive: transaction.type === 'income' ? transaction.amount : 0,
-          netAmount: transaction.type === 'income' ? transaction.amount : -transaction.amount,
+          categories: [
+            {
+              id: category.id,
+              name: category.name,
+              color: category.color,
+              icon: category.icon || 'help-circle',
+            },
+          ],
+          totalSpend:
+            transaction.type === TransactionType.EXPENSE
+              ? transaction.amount
+              : 0,
+          totalReceive:
+            transaction.type === TransactionType.INCOME
+              ? transaction.amount
+              : 0,
+          netAmount:
+            transaction.type === TransactionType.INCOME
+              ? transaction.amount
+              : -transaction.amount,
           transactionCount: 1,
           transactions: [transaction],
         })
@@ -142,7 +161,7 @@ export function TransactionTable({
    */
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+      setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'))
     } else {
       setSortField(field)
       setSortDirection('desc')
@@ -177,13 +196,13 @@ export function TransactionTable({
     const categoryMap = new Map<string, CategorySpending>()
 
     transactions
-      .filter((t) => t.date === date)
-      .forEach((transaction) => {
+      .filter(t => t.date === date)
+      .forEach(transaction => {
         const category = transaction.category || UNKNOWN_CATEGORY
         const existing = categoryMap.get(category.id)
 
         if (existing) {
-          if (transaction.type === 'expense') {
+          if (transaction.type === TransactionType.EXPENSE) {
             existing.totalSpend += transaction.amount
           } else {
             existing.totalReceive += transaction.amount
@@ -195,14 +214,22 @@ export function TransactionTable({
             categoryName: category.name,
             categoryColor: category.color,
             categoryIcon: category.icon || 'help-circle',
-            totalSpend: transaction.type === 'expense' ? transaction.amount : 0,
-            totalReceive: transaction.type === 'income' ? transaction.amount : 0,
+            totalSpend:
+              transaction.type === TransactionType.EXPENSE
+                ? transaction.amount
+                : 0,
+            totalReceive:
+              transaction.type === TransactionType.INCOME
+                ? transaction.amount
+                : 0,
             transactionCount: 1,
           })
         }
       })
 
-    return Array.from(categoryMap.values()).sort((a, b) => b.totalSpend - a.totalSpend)
+    return Array.from(categoryMap.values()).sort(
+      (a, b) => b.totalSpend - a.totalSpend
+    )
   }
 
   /**
@@ -211,7 +238,7 @@ export function TransactionTable({
   const toggleRowExpansion = (date: string) => {
     if (!expandable) return
 
-    setExpandedRows((prev) => {
+    setExpandedRows(prev => {
       const next = new Set(prev)
       if (next.has(date)) {
         next.delete(date)
@@ -318,7 +345,9 @@ export function TransactionTable({
         <tbody>
           {sortedGroups.map((group, index) => {
             const isExpanded = expandedRows.has(group.date)
-            const categoryBreakdown = expandable ? getCategoryBreakdown(group.date) : []
+            const categoryBreakdown = expandable
+              ? getCategoryBreakdown(group.date)
+              : []
 
             return (
               <>
@@ -327,9 +356,11 @@ export function TransactionTable({
                   key={group.date}
                   initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={prefersReducedMotion
-                    ? { duration: 0 }
-                    : { duration: 0.2, delay: index * 0.02 }}
+                  transition={
+                    prefersReducedMotion
+                      ? { duration: 0 }
+                      : { duration: 0.2, delay: index * 0.02 }
+                  }
                   onClick={() => toggleRowExpansion(group.date)}
                   className={cn(
                     'border-b border-border/10 transition-all duration-200',
@@ -354,15 +385,19 @@ export function TransactionTable({
                   {/* Date */}
                   <td className="py-2.5 text-sm">
                     <div className="flex flex-col">
-                      <span className="font-medium">{formatDate(group.date)}</span>
-                      <span className="text-xs text-muted-foreground">{getWeekday(group.date)}</span>
+                      <span className="font-medium">
+                        {formatDate(group.date)}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {getWeekday(group.date)}
+                      </span>
                     </div>
                   </td>
 
                   {/* Categories */}
                   <td className="py-2.5">
                     <div className="flex flex-wrap gap-1 max-w-[250px]">
-                      {group.categories.slice(0, 3).map((category) => (
+                      {group.categories.slice(0, 3).map(category => (
                         <CategoryBadge key={category.id} category={category} />
                       ))}
                       {group.categories.length > 3 && (
@@ -400,7 +435,9 @@ export function TransactionTable({
                     <span
                       className={cn(
                         'text-sm font-semibold tabular-nums',
-                        group.netAmount >= 0 ? 'text-success' : 'text-foreground'
+                        group.netAmount >= 0
+                          ? 'text-success'
+                          : 'text-foreground'
                       )}
                     >
                       {formatCurrency(group.netAmount)}

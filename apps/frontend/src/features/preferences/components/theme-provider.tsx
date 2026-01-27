@@ -19,13 +19,12 @@ interface ThemeProviderProps {
  * - Ensures theme is applied consistently across the app
  */
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const theme = useUIStore((s) => s.theme)
+  const theme = useUIStore(s => s.theme)
 
   // Initialize theme on mount
   useEffect(() => {
     // The theme is already set from localStorage via Zustand persist
     // This effect is here as a placeholder for future server sync
-
     // TODO: When backend is implemented, uncomment and implement:
     // const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
     // if (isAuthenticated) {

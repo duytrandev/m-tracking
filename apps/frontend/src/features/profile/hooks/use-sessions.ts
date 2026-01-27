@@ -19,14 +19,14 @@ export function useSessions() {
   const revokeMutation = useMutation({
     mutationFn: profileApi.revokeSession,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sessions'] })
+      void queryClient.invalidateQueries({ queryKey: ['sessions'] })
       toast({
         title: 'Session revoked',
         description: 'The session has been signed out.',
         variant: 'success',
       })
     },
-    onError: (error) => {
+    onError: error => {
       toast({
         title: 'Failed to revoke session',
         description: isApiError(error)
@@ -40,7 +40,7 @@ export function useSessions() {
   const revokeAllMutation = useMutation({
     mutationFn: profileApi.revokeAllSessions,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sessions'] })
+      void queryClient.invalidateQueries({ queryKey: ['sessions'] })
       toast({
         title: 'All sessions revoked',
         description: 'All other sessions have been signed out.',

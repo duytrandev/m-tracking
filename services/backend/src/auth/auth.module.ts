@@ -1,9 +1,9 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
-import { PassportModule } from '@nestjs/passport';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { Module } from '@nestjs/common'
+import { TypeOrmModule } from '@nestjs/typeorm'
+import { ConfigModule, ConfigService } from '@nestjs/config'
+import { JwtModule } from '@nestjs/jwt'
+import { PassportModule } from '@nestjs/passport'
+import { ThrottlerModule } from '@nestjs/throttler'
 import {
   User,
   Role,
@@ -12,24 +12,24 @@ import {
   OAuthAccount,
   PasswordResetToken,
   EmailVerificationToken,
-} from './entities';
-import { SharedModule } from '../shared/shared.module';
-import { AuthController } from './controllers/auth.controller';
-import { OAuthController } from './controllers/oauth.controller';
+} from './entities'
+import { SharedModule } from '../shared/shared.module'
+import { AuthController } from './controllers/auth.controller'
+import { OAuthController } from './controllers/oauth.controller'
 import {
   AuthService,
   PasswordService,
   EmailService,
   TokenService,
   SessionService,
-} from './services';
-import { OAuthService } from './services/oauth.service';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { GoogleStrategy } from './strategies/google.strategy';
-import { GitHubStrategy } from './strategies/github.strategy';
-import { FacebookStrategy } from './strategies/facebook.strategy';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import * as fs from 'fs';
+} from './services'
+import { OAuthService } from './services/oauth.service'
+import { JwtStrategy } from './strategies/jwt.strategy'
+import { GoogleStrategy } from './strategies/google.strategy'
+import { GitHubStrategy } from './strategies/github.strategy'
+import { FacebookStrategy } from './strategies/facebook.strategy'
+import { JwtAuthGuard } from './guards/jwt-auth.guard'
+import * as fs from 'fs'
 
 /**
  * Auth Module
@@ -58,8 +58,14 @@ import * as fs from 'fs';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        const privateKeyPath = configService.get<string>('JWT_PRIVATE_KEY_PATH', 'jwt-private-key.pem');
-        const publicKeyPath = configService.get<string>('JWT_PUBLIC_KEY_PATH', 'jwt-public-key.pem');
+        const privateKeyPath = configService.get<string>(
+          'JWT_PRIVATE_KEY_PATH',
+          'jwt-private-key.pem'
+        )
+        const publicKeyPath = configService.get<string>(
+          'JWT_PUBLIC_KEY_PATH',
+          'jwt-public-key.pem'
+        )
 
         return {
           privateKey: fs.readFileSync(privateKeyPath, 'utf8'),
@@ -68,7 +74,7 @@ import * as fs from 'fs';
             algorithm: 'RS256',
             expiresIn: '15m',
           },
-        };
+        }
       },
     }),
     SharedModule,

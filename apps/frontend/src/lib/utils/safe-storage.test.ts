@@ -132,7 +132,9 @@ describe('safeLocalStorage', () => {
     })
 
     it('should handle localStorage errors gracefully', () => {
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const consoleWarnSpy = vi
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {})
       Storage.prototype.getItem = vi.fn(() => {
         throw new Error('Read error')
       })
@@ -224,7 +226,9 @@ describe('safeLocalStorage', () => {
     })
 
     it('should handle localStorage errors gracefully', () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const consoleErrorSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
 
       Storage.prototype.clear = vi.fn(() => {
         throw new Error('Clear error')
@@ -250,7 +254,9 @@ describe('safeLocalStorage', () => {
     })
 
     it('should return null for invalid JSON', () => {
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const consoleWarnSpy = vi
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {})
       originalSetItem.call(localStorage, 'test', 'invalid json {')
 
       expect(safeLocalStorage.getJSON('test')).toBeNull()
@@ -280,7 +286,9 @@ describe('safeLocalStorage', () => {
     })
 
     it('should return false for non-serializable values', () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const consoleErrorSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
       const circular: any = { name: 'test' }
       circular.self = circular // Create circular reference
 
@@ -412,7 +420,9 @@ describe('safeSessionStorage', () => {
     })
 
     it('should return null for invalid JSON', () => {
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const consoleWarnSpy = vi
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {})
       originalSessionSetItem.call(sessionStorage, 'test', 'invalid json {')
 
       expect(safeSessionStorage.getJSON('test')).toBeNull()
@@ -432,7 +442,9 @@ describe('safeSessionStorage', () => {
     })
 
     it('should return false for non-serializable values', () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const consoleErrorSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
       const circular: any = { name: 'test' }
       circular.self = circular
 

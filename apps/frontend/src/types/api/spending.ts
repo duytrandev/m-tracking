@@ -47,7 +47,7 @@ export interface CreateTransactionDto {
   notes?: string
 }
 
-export interface UpdateTransactionDto extends Partial<CreateTransactionDto> {}
+export type UpdateTransactionDto = Partial<CreateTransactionDto>
 
 export interface CreateCategoryDto {
   name: string

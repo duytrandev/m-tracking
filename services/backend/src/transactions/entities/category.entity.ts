@@ -6,36 +6,36 @@ import {
   UpdateDateColumn,
   OneToMany,
   Index,
-} from 'typeorm';
-import { Transaction } from './transaction.entity';
+} from 'typeorm'
+import { Transaction } from './transaction.entity'
 
 @Entity('categories')
 @Index(['userId'])
 export class Category {
   @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  id!: string
 
   @Column({ name: 'user_id', type: 'uuid' })
-  userId!: string;
+  userId!: string
 
   @Column({ length: 100 })
-  name!: string;
+  name!: string
 
   @Column({ length: 7 })
-  color!: string;
+  color!: string
 
   @Column({ length: 50 })
-  icon!: string;
+  icon!: string
 
   @Column({ type: 'text', nullable: true })
-  description!: string;
+  description!: string
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt!: Date;
+  createdAt!: Date
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt!: Date;
+  updatedAt!: Date
 
-  @OneToMany(() => Transaction, (transaction) => transaction.category)
-  transactions!: Transaction[];
+  @OneToMany(() => Transaction, transaction => transaction.category)
+  transactions!: Transaction[]
 }

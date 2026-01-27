@@ -10,7 +10,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { CodeInput } from '@/features/auth/components/code-input'
-import { otpRequestSchema, type OTPRequestInput } from '@/features/auth/validations/auth-schemas'
+import {
+  otpRequestSchema,
+  type OTPRequestInput,
+} from '@/features/auth/validations/auth-schemas'
 import { useOtpRequest } from '@/features/auth/hooks/use-otp-request'
 import { useOtpVerify } from '@/features/auth/hooks/use-otp-verify'
 
@@ -45,17 +48,23 @@ export default function OtpLoginPage(): React.ReactElement {
   })
 
   // Move to verify step on success
+  // Note: This effect synchronously sets state, but it's intentional
+  // to transition between steps based on external state changes
+   
   useEffect(() => {
-    if (requestSuccess && phone) {
+    if (requestSuccess && phone && step === 'request') {
       setStep('verify')
       setResendCooldown(60)
     }
-  }, [requestSuccess, phone])
+  }, [requestSuccess, phone, step])
 
   // Handle resend cooldown
   useEffect(() => {
     if (resendCooldown > 0) {
-      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000)
+      const timer = setTimeout(
+        () => setResendCooldown(resendCooldown - 1),
+        1000
+      )
       return () => clearTimeout(timer)
     }
     return undefined
@@ -80,10 +89,21 @@ export default function OtpLoginPage(): React.ReactElement {
   // Request Step
   if (step === 'request') {
     return (
-      <AuthCard title="Sign in with SMS" description="We'll text you a code to sign in">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <AuthCard
+        title="Sign in with SMS"
+        description="We'll text you a code to sign in"
+      >
+        <form
+          onSubmit={(e) => {
+            void handleSubmit(onSubmit)(e)
+          }}
+          className="space-y-6"
+        >
           {requestError && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive" role="alert">
+            <div
+              className="rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+              role="alert"
+            >
               {requestError}
             </div>
           )}
@@ -105,7 +125,12 @@ export default function OtpLoginPage(): React.ReactElement {
             )}
           </div>
 
-          <Button type="submit" className="w-full" isLoading={isRequesting} loadingText="Sending...">
+          <Button
+            type="submit"
+            className="w-full"
+            isLoading={isRequesting}
+            loadingText="Sending..."
+          >
             Send Code
           </Button>
 
@@ -130,18 +155,23 @@ export default function OtpLoginPage(): React.ReactElement {
             <Smartphone className="h-8 w-8 text-primary" />
           </div>
           <p className="text-muted-foreground">
-            Enter the 6-digit code sent to <span className="font-medium">{phone}</span>
+            Enter the 6-digit code sent to{' '}
+            <span className="font-medium">{phone}</span>
           </p>
         </div>
 
         {verifyError && (
-          <div className="flex items-center gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive" role="alert">
+          <div
+            className="flex items-center gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+            role="alert"
+          >
             <AlertCircle className="h-4 w-4 shrink-0" />
             <div>
               {verifyError}
               {attemptsRemaining !== null && (
                 <span className="block text-xs mt-1">
-                  {attemptsRemaining} {attemptsRemaining === 1 ? 'attempt' : 'attempts'} remaining
+                  {attemptsRemaining}{' '}
+                  {attemptsRemaining === 1 ? 'attempt' : 'attempts'} remaining
                 </span>
               )}
             </div>
@@ -175,7 +205,9 @@ export default function OtpLoginPage(): React.ReactElement {
             onClick={handleResend}
             disabled={resendCooldown > 0}
           >
-            {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend code'}
+            {resendCooldown > 0
+              ? `Resend in ${resendCooldown}s`
+              : 'Resend code'}
           </Button>
         </div>
 

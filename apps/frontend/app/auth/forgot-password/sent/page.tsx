@@ -20,7 +20,9 @@ export default function ResetLinkSentPage() {
 
         <div className="space-y-2">
           <p className="text-muted-foreground">
-            If an account exists for <span className="font-medium text-foreground">{email}</span>, you'll receive a password reset link shortly.
+            If an account exists for{' '}
+            <span className="font-medium text-foreground">{email}</span>, you'll
+            receive a password reset link shortly.
           </p>
         </div>
 

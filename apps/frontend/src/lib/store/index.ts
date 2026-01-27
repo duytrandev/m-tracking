@@ -10,7 +10,12 @@
  */
 
 // Global stores - UI state shared across app
-export { useUIStore, useTheme, useSidebarState, useIsMobileMenuOpen } from './ui-store'
+export {
+  useUIStore,
+  useTheme,
+  useSidebarState,
+  useIsMobileMenuOpen,
+} from './ui-store'
 export type { UIState, Theme, SidebarState } from './ui-store'
 
 // Note: Feature-specific stores remain in their feature directories

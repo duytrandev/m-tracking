@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { NestFactory } from '@nestjs/core'
 import { ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
@@ -37,7 +38,7 @@ async function bootstrap() {
   // Global interceptors
   app.useGlobalInterceptors(
     new LoggingInterceptor(), // Log all requests
-    new TransformInterceptor(), // Wrap responses
+    new TransformInterceptor() // Wrap responses
   )
 
   // Global validation pipe
@@ -46,7 +47,7 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
-    }),
+    })
   )
 
   // Sentry error handler (MUST be before exception filter)
@@ -54,20 +55,21 @@ async function bootstrap() {
 
   // CORS - Use config service
   app.enableCors({
-    origin: configService.get('app.corsOrigin') || 'http://localhost:3000',
+    origin:
+      configService.get<string>('app.corsOrigin') || 'http://localhost:3000',
     credentials: true,
   })
 
   // Global prefix - Use config service
-  const apiPrefix = configService.get('app.apiPrefix') || 'api/v1'
+  const apiPrefix = configService.get<string>('app.apiPrefix') || 'api/v1'
   app.setGlobalPrefix(apiPrefix)
 
-  const port = configService.get('app.port') || 4000
+  const port = configService.get<number>('app.port') || 4000
   await app.listen(port)
 
   console.log(`🚀 Backend service running on http://localhost:${port}`)
   console.log(`📚 API available at http://localhost:${port}/${apiPrefix}`)
-  console.log(`🌍 Environment: ${configService.get('app.nodeEnv')}`)
+  console.log(`🌍 Environment: ${configService.get<string>('app.nodeEnv')}`)
 }
 
-bootstrap()
+void bootstrap()

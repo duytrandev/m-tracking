@@ -1,0 +1,37 @@
+{
+  "name": "@m-tracking/shared",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/src",
+  "projectType": "library",
+  "tags": ["type:lib", "scope:shared"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm build",
+        "cwd": "libs/shared"
+      },
+      "inputs": ["libraryBuild"],
+      "outputs": ["{projectRoot}/dist"],
+      "cache": true
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["libs/shared/src/**/*.ts"]
+      },
+      "inputs": ["default", "{workspaceRoot}/eslint.config.js"],
+      "cache": true
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --dir libs/shared/src",
+        "cwd": "."
+      },
+      "inputs": ["default", "{workspaceRoot}/vitest.workspace.ts"],
+      "cache": true,
+      "outputs": ["{projectRoot}/coverage"]
+    }
+  }
+}

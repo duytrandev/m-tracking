@@ -12,6 +12,11 @@ interface Use2FAVerifyReturn {
   attemptsRemaining: number | null
 }
 
+interface ErrorResponse {
+  message?: string
+  attemptsRemaining?: number
+}
+
 export function use2FAVerify(): Use2FAVerifyReturn {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -24,7 +29,7 @@ export function use2FAVerify(): Use2FAVerifyReturn {
       }
       return authApi.validate2FA(code, pendingEmail)
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       if (data.user) {
         login(data.user)
         setRequires2FA(false)
@@ -38,14 +43,16 @@ export function use2FAVerify(): Use2FAVerifyReturn {
 
   const error = mutation.error
     ? isApiError(mutation.error)
-      ? mutation.error.response?.data?.message || 'Invalid verification code'
+      ? (mutation.error.response?.data?.message ?? 'Invalid verification code')
       : 'An unexpected error occurred'
     : null
 
   // Extract attempts remaining from error response
-  const attemptsRemaining = mutation.error && isApiError(mutation.error)
-    ? (mutation.error.response?.data as any)?.attemptsRemaining ?? null
-    : null
+  const attemptsRemaining =
+    mutation.error && isApiError(mutation.error)
+      ? ((mutation.error.response?.data as ErrorResponse | undefined)
+          ?.attemptsRemaining ?? null)
+      : null
 
   return {
     verify: mutation.mutate,

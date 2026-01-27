@@ -24,22 +24,30 @@ export function AuthLayout({ children }: AuthLayoutProps) {
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#5046E5] to-[#3730A3] flex items-center justify-center">
               <span className="text-white font-bold text-xl">M</span>
             </div>
-            <span className="text-xl font-bold text-gray-900 dark:text-white">M-Tracking</span>
+            <span className="text-xl font-bold text-gray-900 dark:text-white">
+              M-Tracking
+            </span>
           </div>
           <ThemeToggle variant="minimal" size="sm" />
         </div>
 
         {/* Form Content */}
         <div className="flex-1 flex items-center justify-center px-8 py-12">
-          <div className="w-full max-w-md">
-            {children}
-          </div>
+          <div className="w-full max-w-md">{children}</div>
         </div>
 
         {/* Footer */}
         <div className="px-8 py-6 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
           <span>Copyright © 2025 M-Tracking</span>
-          <a href="#" className="hover:text-[#5046E5] transition-colors">Privacy Policy</a>
+          <button
+            type="button"
+            className="hover:text-[#5046E5] transition-colors"
+            onClick={() => {
+              // TODO: Navigate to privacy policy page
+            }}
+          >
+            Privacy Policy
+          </button>
         </div>
       </div>
 
@@ -70,18 +78,26 @@ export function AuthLayout({ children }: AuthLayoutProps) {
                 {/* Metric Cards */}
                 <div className="bg-white/95 rounded-lg p-4 shadow-lg">
                   <div className="text-xs text-gray-600 mb-1">Total Sales</div>
-                  <div className="text-2xl font-bold text-[#5046E5]">$189,374</div>
+                  <div className="text-2xl font-bold text-[#5046E5]">
+                    $189,374
+                  </div>
                   <div className="text-xs text-green-600">+8.2%</div>
                 </div>
                 <div className="bg-white/95 rounded-lg p-4 shadow-lg">
-                  <div className="text-xs text-gray-600 mb-1">Goal Performance</div>
-                  <div className="text-2xl font-bold text-gray-900">00:01:30</div>
+                  <div className="text-xs text-gray-600 mb-1">
+                    Goal Performance
+                  </div>
+                  <div className="text-2xl font-bold text-gray-900">
+                    00:01:30
+                  </div>
                   <div className="h-8 mt-2">
                     <div className="w-full h-full bg-gradient-to-r from-blue-200 to-purple-200 rounded"></div>
                   </div>
                 </div>
                 <div className="bg-white/95 rounded-lg p-4 shadow-lg">
-                  <div className="text-xs text-gray-600 mb-1">Sales Overview</div>
+                  <div className="text-xs text-gray-600 mb-1">
+                    Sales Overview
+                  </div>
                   <div className="flex items-center gap-2 mt-2">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#5046E5] to-[#3730A3]"></div>
                     <div>
@@ -94,13 +110,20 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 
               {/* Data Table */}
               <div className="bg-white/95 rounded-lg p-4 shadow-lg">
-                <div className="text-sm font-semibold text-gray-900 mb-3">Product Transaction</div>
+                <div className="text-sm font-semibold text-gray-900 mb-3">
+                  Product Transaction
+                </div>
                 <div className="space-y-2">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="flex items-center justify-between text-xs">
+                  {[1, 2, 3].map(i => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between text-xs"
+                    >
                       <div className="flex items-center gap-2">
                         <div className="w-6 h-6 rounded bg-gray-200"></div>
-                        <span className="text-gray-700">Order #{950001 + i}</span>
+                        <span className="text-gray-700">
+                          Order #{950001 + i}
+                        </span>
                       </div>
                       <span className="text-gray-600">14 February, 2025</span>
                       <span className="font-semibold text-gray-900">$549</span>

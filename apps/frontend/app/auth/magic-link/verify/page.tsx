@@ -38,7 +38,9 @@ export default function MagicLinkVerifyPage(): React.ReactElement {
       <AuthCard title="Verifying...">
         <div className="flex flex-col items-center gap-4 py-8">
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <p className="text-muted-foreground">Please wait while we sign you in...</p>
+          <p className="text-muted-foreground">
+            Please wait while we sign you in...
+          </p>
         </div>
       </AuthCard>
     )

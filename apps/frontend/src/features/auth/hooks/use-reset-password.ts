@@ -17,14 +17,17 @@ export function useResetPassword(token: string): UseResetPasswordReturn {
     mutationFn: (data: Omit<ResetPasswordRequest, 'token'>) =>
       authApi.resetPassword({ ...data, token }),
     onSuccess: () => {
-      router.push('/auth/login?message=Password+reset+successfully.+Please+log+in.')
+      router.push(
+        '/auth/login?message=Password+reset+successfully.+Please+log+in.'
+      )
     },
   })
 
   let error: string | null = null
   if (mutation.error) {
     if (isApiError(mutation.error)) {
-      error = mutation.error.response?.data?.message || 'Failed to reset password'
+      error =
+        mutation.error.response?.data?.message || 'Failed to reset password'
     } else {
       error = 'An unexpected error occurred'
     }

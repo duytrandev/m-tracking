@@ -73,9 +73,7 @@ export function DashboardCharts({ period }: DashboardChartsProps) {
 
           {/* Category Breakdown */}
           <div className="rounded-lg border border-border/20 bg-background/20 p-4">
-            <h3 className="mb-3 text-sm font-medium">
-              Category Breakdown
-            </h3>
+            <h3 className="mb-3 text-sm font-medium">Category Breakdown</h3>
             {isLoading ? (
               <div className="h-[250px] animate-pulse rounded-lg bg-background/50" />
             ) : summary && summary.categoryBreakdown.length > 0 ? (

@@ -90,7 +90,7 @@ describe('useTheme', () => {
     })
 
     // Wait for effect to run
-    await new Promise((resolve) => setTimeout(resolve, 0))
+    await new Promise(resolve => setTimeout(resolve, 0))
 
     expect(mediaQueryListMock.addEventListener).toHaveBeenCalledWith(
       'change',
@@ -123,14 +123,14 @@ describe('useTheme', () => {
     })
 
     // Wait for effect to run
-    await new Promise((resolve) => setTimeout(resolve, 0))
+    await new Promise(resolve => setTimeout(resolve, 0))
 
     act(() => {
       result.current.setTheme('dark')
     })
 
     // Wait for effect to run
-    await new Promise((resolve) => setTimeout(resolve, 0))
+    await new Promise(resolve => setTimeout(resolve, 0))
 
     expect(mediaQueryListMock.removeEventListener).toHaveBeenCalled()
   })

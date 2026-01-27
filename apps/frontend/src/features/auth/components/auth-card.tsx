@@ -12,7 +12,12 @@ interface AuthCardProps {
   className?: string
 }
 
-export function AuthCard({ title, description, children, className }: AuthCardProps) {
+export function AuthCard({
+  title,
+  description,
+  children,
+  className,
+}: AuthCardProps) {
   const prefersReducedMotion = useReducedMotion()
 
   return (
@@ -21,19 +26,15 @@ export function AuthCard({ title, description, children, className }: AuthCardPr
       animate={{ opacity: 1, y: 0 }}
       transition={{
         duration: prefersReducedMotion ? 0 : 0.4,
-        ease: 'easeOut'
+        ease: 'easeOut',
       }}
       className={cn('w-full', className)}
     >
       {/* Title Section */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          {title}
-        </h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
         {description && (
-          <p className="text-gray-600 text-base">
-            {description}
-          </p>
+          <p className="text-gray-600 text-base">{description}</p>
         )}
       </div>
 

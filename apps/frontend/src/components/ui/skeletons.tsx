@@ -20,7 +20,7 @@ export function DashboardSkeleton() {
 
       {/* Statistics cards skeleton */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
+        {Array.from({ length: 4 }, (_, i) => (
           <div
             key={i}
             className="h-24 animate-pulse rounded-lg bg-card/40 backdrop-blur-xl"
@@ -47,7 +47,7 @@ export function DashboardSkeleton() {
 export function StatisticsCardsSkeleton() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {[...Array(4)].map((_, i) => (
+      {Array.from({ length: 4 }, (_, i) => (
         <div
           key={i}
           className="h-24 animate-pulse rounded-lg bg-card/40 backdrop-blur-xl"
@@ -79,7 +79,7 @@ export function ChartSectionSkeleton() {
 export function TransactionTableSkeleton() {
   return (
     <div className="space-y-2">
-      {[...Array(8)].map((_, i) => (
+      {Array.from({ length: 8 }, (_, i) => (
         <div
           key={i}
           className="h-16 animate-pulse rounded-lg bg-card/40"
@@ -128,7 +128,7 @@ export function PageHeaderSkeleton() {
 export function ContentSkeleton({ rows = 3 }: { rows?: number }) {
   return (
     <div className="space-y-4">
-      {[...Array(rows)].map((_, i) => (
+      {Array.from({ length: rows }, (_, i) => (
         <div
           key={i}
           className="h-24 animate-pulse rounded-lg bg-card/40"

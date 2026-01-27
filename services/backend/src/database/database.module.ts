@@ -24,17 +24,24 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
-        const ssl = configService.get('database.ssl')
+        const ssl = configService.get<
+          boolean | { rejectUnauthorized: boolean }
+        >('database.ssl')
         return {
-          type: 'postgres',
-          host: configService.get('database.host'),
-          port: configService.get('database.port'),
-          username: configService.get('database.username'),
-          password: configService.get('database.password'),
-          database: configService.get('database.database'),
-          ssl: typeof ssl === 'object' ? ssl : ssl === true ? { rejectUnauthorized: false } : false,
-          synchronize: configService.get('database.synchronize'),
-          logging: configService.get('database.logging'),
+          type: 'postgres' as const,
+          host: configService.get<string>('database.host'),
+          port: configService.get<number>('database.port'),
+          username: configService.get<string>('database.username'),
+          password: configService.get<string>('database.password'),
+          database: configService.get<string>('database.database'),
+          ssl:
+            typeof ssl === 'object'
+              ? ssl
+              : ssl === true
+                ? { rejectUnauthorized: false }
+                : false,
+          synchronize: configService.get<boolean>('database.synchronize'),
+          logging: configService.get<boolean>('database.logging'),
           autoLoadEntities: true,
           entities: [__dirname + '/../**/*.entity{.ts,.js}'],
         }

@@ -15,16 +15,18 @@ const buttonVariants = cva(
           'bg-[#5046E5] text-white',
           'hover:bg-[#4338CA]',
           'hover:scale-[1.01]',
-          'hover:shadow-lg'
+          'hover:shadow-lg',
         ],
         destructive: [
           'bg-destructive text-destructive-foreground',
           'hover:bg-destructive/90',
           'hover:scale-[1.02]',
-          'hover:shadow-[0_0_30px_rgba(239,68,68,0.5)]'
+          'hover:shadow-[0_0_30px_rgba(239,68,68,0.5)]',
         ],
-        outline: 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900 hover:scale-[1.01]',
-        secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 hover:scale-[1.01]',
+        outline:
+          'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900 hover:scale-[1.01]',
+        secondary:
+          'bg-gray-100 text-gray-900 hover:bg-gray-200 hover:scale-[1.01]',
         ghost: 'hover:bg-gray-100 hover:text-gray-900 hover:scale-100',
         link: 'text-[#5046E5] underline-offset-4 hover:underline hover:scale-100 active:scale-100',
       },
@@ -43,7 +45,8 @@ const buttonVariants = cva(
 )
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean
   isLoading?: boolean
@@ -51,7 +54,20 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, isLoading, loadingText, children, disabled, ...props }, ref) => {
+  (
+    {
+      className,
+      variant,
+      size,
+      asChild = false,
+      isLoading,
+      loadingText,
+      children,
+      disabled,
+      ...props
+    },
+    ref
+  ) => {
     const Comp = asChild ? Slot : 'button'
     return (
       <Comp

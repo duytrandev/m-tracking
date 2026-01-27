@@ -34,10 +34,30 @@ export class HttpExceptionFilter implements ExceptionFilter {
         ? exception.getResponse()
         : 'Internal server error'
 
+    interface HttpExceptionResponse {
+      message: string
+      error?: string
+    }
+
+    const getErrorMessage = (msg: string | object): string => {
+      if (typeof msg === 'string') return msg
+      if (msg && typeof msg === 'object' && 'message' in msg) {
+        return String((msg as HttpExceptionResponse).message)
+      }
+      return 'An error occurred'
+    }
+
+    const getErrorType = (msg: string | object): string | undefined => {
+      if (typeof msg === 'object' && msg && 'error' in msg) {
+        return String((msg as HttpExceptionResponse).error)
+      }
+      return undefined
+    }
+
     const errorResponse = {
       statusCode: status,
-      message: typeof message === 'string' ? message : (message as any).message,
-      error: typeof message === 'object' ? (message as any).error : undefined,
+      message: getErrorMessage(message),
+      error: getErrorType(message),
       timestamp: new Date().toISOString(),
       path: request.url,
     }
@@ -45,7 +65,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     // Log error
     this.logger.error(
       `${request.method} ${request.url} ${status}`,
-      exception instanceof Error ? exception.stack : undefined,
+      exception instanceof Error ? exception.stack : undefined
     )
 
     // Capture 5xx errors (server errors) in Sentry

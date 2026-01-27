@@ -28,7 +28,9 @@ export function useMagicLinkVerify(): UseMagicLinkVerifyReturn {
   let error: string | null = null
   if (mutation.error) {
     if (isApiError(mutation.error)) {
-      error = mutation.error.response?.data?.message || 'Invalid or expired magic link'
+      error =
+        mutation.error.response?.data?.message ||
+        'Invalid or expired magic link'
     } else {
       error = 'An unexpected error occurred'
     }

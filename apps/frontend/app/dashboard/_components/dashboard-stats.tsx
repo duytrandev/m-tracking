@@ -3,12 +3,7 @@
 import { StatisticsCard } from '@/features/spending/components/statistics-card'
 import { useSpendingData } from '@/features/spending/hooks/use-spending-data'
 import { TimePeriod } from '@/types/api/spending'
-import {
-  Wallet,
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-} from 'lucide-react'
+import { Wallet, TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
 
 interface DashboardStatsProps {
   period: TimePeriod
@@ -33,7 +28,7 @@ export function DashboardStats({ period }: DashboardStatsProps) {
   if (isLoading) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
+        {Array.from({ length: 4 }, (_, i) => (
           <div
             key={i}
             className="h-24 animate-pulse rounded-lg bg-card/40 backdrop-blur-xl"
@@ -64,14 +59,10 @@ export function DashboardStats({ period }: DashboardStatsProps) {
       <StatisticsCard
         title="Net Balance"
         value={formatCurrency(summary?.netBalance || 0)}
-        subtitle={
-          (summary?.netBalance || 0) >= 0 ? 'Positive' : 'Negative'
-        }
+        subtitle={(summary?.netBalance || 0) >= 0 ? 'Positive' : 'Negative'}
         icon={Wallet}
         iconColor={
-          (summary?.netBalance || 0) >= 0
-            ? 'text-success'
-            : 'text-destructive'
+          (summary?.netBalance || 0) >= 0 ? 'text-success' : 'text-destructive'
         }
         delay={0.2}
       />

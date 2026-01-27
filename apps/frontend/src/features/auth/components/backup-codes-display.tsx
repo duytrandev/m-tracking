@@ -6,7 +6,9 @@ interface BackupCodesDisplayProps {
   codes: string[]
 }
 
-export function BackupCodesDisplay({ codes }: BackupCodesDisplayProps): React.ReactElement {
+export function BackupCodesDisplay({
+  codes,
+}: BackupCodesDisplayProps): React.ReactElement {
   const [copied, setCopied] = useState(false)
 
   const copyToClipboard = async (): Promise<void> => {
@@ -51,8 +53,18 @@ export function BackupCodesDisplay({ codes }: BackupCodesDisplayProps): React.Re
       </div>
 
       <div className="flex gap-3">
-        <Button variant="outline" className="flex-1" onClick={copyToClipboard}>
-          {copied ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
+        <Button
+          variant="outline"
+          className="flex-1"
+          onClick={() => {
+            void copyToClipboard()
+          }}
+        >
+          {copied ? (
+            <Check className="h-4 w-4 mr-2" />
+          ) : (
+            <Copy className="h-4 w-4 mr-2" />
+          )}
           {copied ? 'Copied!' : 'Copy'}
         </Button>
         <Button variant="outline" className="flex-1" onClick={downloadCodes}>

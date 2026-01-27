@@ -10,20 +10,25 @@ import {
   Req,
   Res,
   UseGuards,
-} from '@nestjs/common';
-import { Throttle } from '@nestjs/throttler';
-import { Request, Response } from 'express';
-import { AuthService } from '../services/auth.service';
+} from '@nestjs/common'
+import { Throttle } from '@nestjs/throttler'
+import { Request, Response } from 'express'
+import { AuthService } from '../services/auth.service'
 import {
   RegisterDto,
   LoginDto,
   VerifyEmailDto,
   ForgotPasswordDto,
   ResetPasswordDto,
-} from '../dto';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { Public } from '../decorators/public.decorator';
-import { CurrentUser } from '../decorators/current-user.decorator';
+} from '../dto'
+import { JwtAuthGuard } from '../guards/jwt-auth.guard'
+import { Public } from '../decorators/public.decorator'
+import { CurrentUser } from '../decorators/current-user.decorator'
+
+interface JwtPayload {
+  userId: string
+  email: string
+}
 
 @Controller('auth')
 @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
@@ -40,7 +45,7 @@ export class AuthController {
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto);
+    return this.authService.register(dto)
   }
 
   /**
@@ -51,7 +56,7 @@ export class AuthController {
   @Post('verify-email')
   @HttpCode(HttpStatus.OK)
   async verifyEmail(@Body() dto: VerifyEmailDto) {
-    return this.authService.verifyEmail(dto.token);
+    return this.authService.verifyEmail(dto.token)
   }
 
   /**
@@ -67,21 +72,21 @@ export class AuthController {
   async login(
     @Body() dto: LoginDto,
     @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
+    @Res({ passthrough: true }) res: Response
   ) {
-    const user = await this.authService.validateUser(dto.email, dto.password);
+    const user = await this.authService.validateUser(dto.email, dto.password)
 
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Invalid credentials')
     }
 
     const deviceInfo = {
       userAgent: req.headers['user-agent'],
       platform: req.headers['sec-ch-ua-platform'] || 'unknown',
-    };
-    const ipAddress = req.ip || 'unknown';
+    }
+    const ipAddress = req.ip || 'unknown'
 
-    const tokens = await this.authService.login(user, deviceInfo, ipAddress);
+    const tokens = await this.authService.login(user, deviceInfo, ipAddress)
 
     // Set refresh token in httpOnly cookie
     res.cookie('refreshToken', tokens.refreshToken, {
@@ -89,13 +94,13 @@ export class AuthController {
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    })
 
     return {
       accessToken: tokens.accessToken,
       expiresIn: tokens.expiresIn,
       user: tokens.user,
-    };
+    }
   }
 
   /**
@@ -106,14 +111,18 @@ export class AuthController {
   @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const refreshToken = req.cookies?.refreshToken;
+  async refresh(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const refreshToken = (req.cookies as Record<string, string> | undefined)
+      ?.refreshToken
 
     if (!refreshToken) {
-      throw new UnauthorizedException('Refresh token not found');
+      throw new UnauthorizedException('Refresh token not found')
     }
 
-    const tokens = await this.authService.refresh(refreshToken);
+    const tokens = await this.authService.refresh(refreshToken)
 
     // Set new refresh token
     res.cookie('refreshToken', tokens.refreshToken, {
@@ -121,12 +130,12 @@ export class AuthController {
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    })
 
     return {
       accessToken: tokens.accessToken,
       expiresIn: tokens.expiresIn,
-    };
+    }
   }
 
   /**
@@ -138,18 +147,19 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   async logout(
-    @CurrentUser() user: any,
+    @CurrentUser() user: JwtPayload,
     @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
+    @Res({ passthrough: true }) res: Response
   ) {
-    const refreshToken = req.cookies?.refreshToken;
-    const accessToken = req.headers.authorization?.split(' ')[1];
+    const refreshToken = (req.cookies as Record<string, string> | undefined)
+      ?.refreshToken
+    const accessToken = req.headers.authorization?.split(' ')[1]
 
-    await this.authService.logout(user.userId, refreshToken, accessToken);
+    await this.authService.logout(user.userId, refreshToken, accessToken)
 
-    res.clearCookie('refreshToken');
+    res.clearCookie('refreshToken')
 
-    return { message: 'Logged out successfully' };
+    return { message: 'Logged out successfully' }
   }
 
   /**
@@ -162,7 +172,7 @@ export class AuthController {
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
-    return this.authService.forgotPassword(dto.email);
+    return this.authService.forgotPassword(dto.email)
   }
 
   /**
@@ -173,6 +183,6 @@ export class AuthController {
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   async resetPassword(@Body() dto: ResetPasswordDto) {
-    return this.authService.resetPassword(dto.token, dto.password);
+    return this.authService.resetPassword(dto.token, dto.password)
   }
 }

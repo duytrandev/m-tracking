@@ -9,11 +9,15 @@ import { AuthCard } from '@/features/auth/components/auth-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { magicLinkSchema, type MagicLinkInput } from '@/features/auth/validations/auth-schemas'
+import {
+  magicLinkSchema,
+  type MagicLinkInput,
+} from '@/features/auth/validations/auth-schemas'
 import { useMagicLinkRequest } from '@/features/auth/hooks/use-magic-link-request'
 
 export default function MagicLinkPage(): React.ReactElement {
-  const { requestMagicLink, isLoading, isSuccess, error, email } = useMagicLinkRequest()
+  const { requestMagicLink, isLoading, isSuccess, error, email } =
+    useMagicLinkRequest()
   const [resendCooldown, setResendCooldown] = useState(0)
 
   const {
@@ -27,7 +31,10 @@ export default function MagicLinkPage(): React.ReactElement {
   // Handle resend cooldown
   useEffect(() => {
     if (resendCooldown > 0) {
-      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000)
+      const timer = setTimeout(
+        () => setResendCooldown(resendCooldown - 1),
+        1000
+      )
       return () => clearTimeout(timer)
     }
     return undefined
@@ -55,11 +62,14 @@ export default function MagicLinkPage(): React.ReactElement {
 
           <div className="space-y-2">
             <p className="text-muted-foreground">We sent a sign-in link to:</p>
-            <p className="font-medium bg-muted px-3 py-2 rounded-md inline-block break-all">{email}</p>
+            <p className="font-medium bg-muted px-3 py-2 rounded-md inline-block break-all">
+              {email}
+            </p>
           </div>
 
           <p className="text-sm text-muted-foreground">
-            Click the link in the email to sign in. The link expires in 15 minutes.
+            Click the link in the email to sign in. The link expires in 15
+            minutes.
           </p>
 
           <div className="space-y-2 text-sm">
@@ -70,11 +80,16 @@ export default function MagicLinkPage(): React.ReactElement {
               onClick={handleResend}
               disabled={resendCooldown > 0}
             >
-              {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend magic link'}
+              {resendCooldown > 0
+                ? `Resend in ${resendCooldown}s`
+                : 'Resend magic link'}
             </Button>
           </div>
 
-          <Link href="/auth/login" className="text-sm text-primary hover:underline block">
+          <Link
+            href="/auth/login"
+            className="text-sm text-primary hover:underline block"
+          >
             Back to login
           </Link>
         </div>
@@ -83,10 +98,21 @@ export default function MagicLinkPage(): React.ReactElement {
   }
 
   return (
-    <AuthCard title="Sign in with magic link" description="We'll email you a link to sign in instantly">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <AuthCard
+      title="Sign in with magic link"
+      description="We'll email you a link to sign in instantly"
+    >
+      <form
+        onSubmit={(e) => {
+          void handleSubmit(onSubmit)(e)
+        }}
+        className="space-y-6"
+      >
         {error && (
-          <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive" role="alert">
+          <div
+            className="rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+            role="alert"
+          >
             {error}
           </div>
         )}
@@ -108,7 +134,12 @@ export default function MagicLinkPage(): React.ReactElement {
           )}
         </div>
 
-        <Button type="submit" className="w-full" isLoading={isLoading} loadingText="Sending...">
+        <Button
+          type="submit"
+          className="w-full"
+          isLoading={isLoading}
+          loadingText="Sending..."
+        >
           Send Magic Link
         </Button>
 

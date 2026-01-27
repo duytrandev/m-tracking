@@ -5,9 +5,11 @@ export default defineWorkspace([
   'services/backend/vitest.config.ts',
   {
     test: {
+      name: 'libs/shared',
       globals: true,
       environment: 'node',
-      include: ['libs/**/*.spec.ts'],
+      include: ['libs/shared/**/*.spec.ts'],
+      root: '.',
     },
   },
 ])

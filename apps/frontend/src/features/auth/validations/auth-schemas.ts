@@ -63,7 +63,7 @@ export const resetPasswordSchema = z
       .regex(/[^a-zA-Z0-9]/, 'Password must contain a special character'),
     confirmPassword: z.string().min(1, 'Please confirm your password'),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine(data => data.password === data.confirmPassword, {
     message: 'Passwords do not match',
     path: ['confirmPassword'],
   })
@@ -116,7 +116,7 @@ export const changePasswordSchema = z
       .regex(/[^a-zA-Z0-9]/, 'Password must contain a special character'),
     confirmPassword: z.string().min(1, 'Please confirm your password'),
   })
-  .refine((data) => data.newPassword === data.confirmPassword, {
+  .refine(data => data.newPassword === data.confirmPassword, {
     message: 'Passwords do not match',
     path: ['confirmPassword'],
   })

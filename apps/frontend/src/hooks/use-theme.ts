@@ -1,7 +1,11 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useUIStore, type Theme, type ResolvedTheme } from '@/lib/store/ui-store'
+import {
+  useUIStore,
+  type Theme,
+  type ResolvedTheme,
+} from '@/lib/store/ui-store'
 
 interface UseThemeReturn {
   theme: Theme
@@ -20,10 +24,10 @@ interface UseThemeReturn {
  * - Listen for system preference changes when theme is "system"
  */
 export function useTheme(): UseThemeReturn {
-  const theme = useUIStore((s) => s.theme)
-  const resolvedTheme = useUIStore((s) => s.resolvedTheme)
-  const setTheme = useUIStore((s) => s.setTheme)
-  const setResolvedTheme = useUIStore((s) => s.setResolvedTheme)
+  const theme = useUIStore(s => s.theme)
+  const resolvedTheme = useUIStore(s => s.resolvedTheme)
+  const setTheme = useUIStore(s => s.setTheme)
+  const setResolvedTheme = useUIStore(s => s.setResolvedTheme)
 
   // Listen for system preference changes when theme is "system"
   useEffect(() => {

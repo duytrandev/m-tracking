@@ -97,7 +97,7 @@ export function Toaster() {
                 ? 'border-green-200 bg-green-50 text-green-900'
                 : ''
           }
-          onOpenChange={(open) => !open && removeToast(id)}
+          onOpenChange={open => !open && removeToast(id)}
         >
           <div className="grid gap-1">
             <ToastTitle>{title}</ToastTitle>

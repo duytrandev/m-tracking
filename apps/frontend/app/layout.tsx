@@ -21,7 +21,8 @@ const openSans = Open_Sans({
 
 export const metadata = {
   title: 'M-Tracking - Personal Finance Management',
-  description: 'Track your expenses, manage budgets, and achieve financial goals',
+  description:
+    'Track your expenses, manage budgets, and achieve financial goals',
 }
 
 export default async function RootLayout({

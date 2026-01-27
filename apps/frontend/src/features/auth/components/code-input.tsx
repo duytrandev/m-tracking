@@ -20,12 +20,15 @@ export function CodeInput({
   disabled = false,
 }: CodeInputProps): React.ReactElement {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
-  const [localValues, setLocalValues] = useState<string[]>(Array(length).fill(''))
+  const [localValues, setLocalValues] = useState<string[]>(
+    Array(length).fill('')
+  )
 
-  // Sync external value to local state
+  // Sync external value to local state - intentional controlled component pattern
+   
   useEffect(() => {
     const values = value.padEnd(length, ' ').slice(0, length).split('')
-    setLocalValues(values.map(v => v === ' ' ? '' : v))
+    setLocalValues(values.map(v => (v === ' ' ? '' : v)))
   }, [value, length])
 
   // Check for completion
@@ -81,14 +84,18 @@ export function CodeInput({
     if (disabled) return
 
     e.preventDefault()
-    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, length)
+    const pastedData = e.clipboardData
+      .getData('text')
+      .replace(/\D/g, '')
+      .slice(0, length)
     const newValues = pastedData.padEnd(length, '').split('')
 
-    setLocalValues(newValues.map(v => v === ' ' ? '' : v))
+    setLocalValues(newValues.map(v => (v === ' ' ? '' : v)))
     onChange(pastedData)
 
     // Focus last filled input or first empty
-    const lastIndex = pastedData.length < length ? pastedData.length : length - 1
+    const lastIndex =
+      pastedData.length < length ? pastedData.length : length - 1
     focusInput(lastIndex)
   }
 
@@ -97,15 +104,15 @@ export function CodeInput({
       {Array.from({ length }, (_, index) => (
         <input
           key={index}
-          ref={(el) => {
+          ref={el => {
             inputRefs.current[index] = el
           }}
           type="text"
           inputMode="numeric"
           maxLength={1}
           value={localValues[index] || ''}
-          onChange={(e) => handleChange(index, e.target.value)}
-          onKeyDown={(e) => handleKeyDown(index, e)}
+          onChange={e => handleChange(index, e.target.value)}
+          onKeyDown={e => handleKeyDown(index, e)}
           onPaste={handlePaste}
           disabled={disabled}
           aria-label={`Digit ${index + 1}`}

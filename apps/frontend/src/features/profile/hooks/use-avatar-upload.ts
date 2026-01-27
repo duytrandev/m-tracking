@@ -14,9 +14,9 @@ export function useAvatarUpload() {
 
   const uploadMutation = useMutation({
     mutationFn: profileApi.uploadAvatar,
-    onSuccess: (data) => {
+    onSuccess: data => {
       updateUser({ avatar: data.avatarUrl })
-      queryClient.invalidateQueries({ queryKey: ['profile'] })
+      void queryClient.invalidateQueries({ queryKey: ['profile'] })
       toast({
         title: 'Avatar updated',
         description: 'Your profile picture has been changed.',
@@ -36,7 +36,7 @@ export function useAvatarUpload() {
     mutationFn: profileApi.deleteAvatar,
     onSuccess: () => {
       updateUser({ avatar: undefined })
-      queryClient.invalidateQueries({ queryKey: ['profile'] })
+      void queryClient.invalidateQueries({ queryKey: ['profile'] })
       toast({
         title: 'Avatar removed',
         description: 'Your profile picture has been removed.',

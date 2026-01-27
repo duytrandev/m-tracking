@@ -51,7 +51,10 @@ export function RegisterForm() {
 
       {/* Global Error */}
       {error && (
-        <div className="flex items-center gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive" role="alert">
+        <div
+          className="flex items-center gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+          role="alert"
+        >
           <AlertCircle className="h-4 w-4" />
           {error}
         </div>
@@ -103,26 +106,40 @@ export function RegisterForm() {
           placeholder="Create a strong password"
           autoComplete="new-password"
           error={!!errors.password}
-          aria-describedby={errors.password ? 'password-error' : 'password-strength'}
+          aria-describedby={
+            errors.password ? 'password-error' : 'password-strength'
+          }
           {...register('password')}
         />
         <PasswordStrengthIndicator password={password} />
         {errors.password && (
-          <p id="password-error" className="text-sm text-destructive" role="alert">
+          <p
+            id="password-error"
+            className="text-sm text-destructive"
+            role="alert"
+          >
             {errors.password.message}
           </p>
         )}
       </div>
 
       {/* Submit Button */}
-      <Button type="submit" className="w-full" isLoading={isLoading} loadingText="Creating account...">
+      <Button
+        type="submit"
+        className="w-full"
+        isLoading={isLoading}
+        loadingText="Creating account..."
+      >
         Create Account
       </Button>
 
       {/* Login Link */}
       <p className="text-center text-sm text-muted-foreground">
         Already have an account?{' '}
-        <Link href="/auth/login" className="font-medium text-primary hover:underline">
+        <Link
+          href="/auth/login"
+          className="font-medium text-primary hover:underline"
+        >
           Log in
         </Link>
       </p>
@@ -130,9 +147,13 @@ export function RegisterForm() {
       {/* Terms */}
       <p className="text-center text-xs text-muted-foreground">
         By signing up, you agree to our{' '}
-        <Link href="/terms" className="text-primary hover:underline">Terms of Service</Link>
-        {' '}and{' '}
-        <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
+        <Link href="/terms" className="text-primary hover:underline">
+          Terms of Service
+        </Link>{' '}
+        and{' '}
+        <Link href="/privacy" className="text-primary hover:underline">
+          Privacy Policy
+        </Link>
       </p>
     </form>
   )

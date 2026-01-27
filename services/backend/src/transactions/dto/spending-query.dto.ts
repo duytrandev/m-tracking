@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional, IsDateString } from 'class-validator';
+import { IsEnum, IsOptional, IsDateString } from 'class-validator'
 
 export enum TimePeriod {
   DAY = 'day',
@@ -10,13 +10,13 @@ export enum TimePeriod {
 
 export class SpendingQueryDto {
   @IsEnum(TimePeriod)
-  period!: TimePeriod;
+  period!: TimePeriod
 
   @IsOptional()
   @IsDateString()
-  startDate?: string;
+  startDate?: string
 
   @IsOptional()
   @IsDateString()
-  endDate?: string;
+  endDate?: string
 }

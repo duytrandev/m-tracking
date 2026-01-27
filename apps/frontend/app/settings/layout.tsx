@@ -27,13 +27,15 @@ export default function SettingsLayout({
     <div className="space-y-6 p-6">
       <div>
         <h1 className="text-2xl font-semibold">Settings</h1>
-        <p className="text-muted-foreground">Manage your account settings and preferences</p>
+        <p className="text-muted-foreground">
+          Manage your account settings and preferences
+        </p>
       </div>
 
       <div className="flex flex-col gap-6 lg:flex-row">
         {/* Sidebar Navigation */}
         <nav className="flex lg:flex-col gap-2 overflow-x-auto lg:w-48">
-          {settingsNav.map((item) => {
+          {settingsNav.map(item => {
             const Icon = item.icon
             const isActive = pathname === item.href
 

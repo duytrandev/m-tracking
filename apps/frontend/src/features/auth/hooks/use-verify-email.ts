@@ -17,7 +17,8 @@ export function useVerifyEmail(): UseVerifyEmailReturn {
   let error: string | null = null
   if (mutation.error) {
     if (isApiError(mutation.error)) {
-      error = mutation.error.response?.data?.message || 'Email verification failed'
+      error =
+        mutation.error.response?.data?.message || 'Email verification failed'
     } else {
       error = 'An unexpected error occurred'
     }

@@ -1,5 +1,5 @@
-import { Module, Global } from '@nestjs/common';
-import { SentryService } from './sentry.service';
+import { Module, Global } from '@nestjs/common'
+import { SentryService } from './sentry.service'
 
 /**
  * Sentry module for dependency injection

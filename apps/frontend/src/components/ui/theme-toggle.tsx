@@ -24,12 +24,13 @@ interface ThemeToggleProps {
 export function ThemeToggle({
   variant = 'default',
   size = 'md',
-  showLabel = false
+  showLabel = false,
 }: ThemeToggleProps) {
   const { setTheme, isDark } = useTheme()
   const [mounted, setMounted] = useState(false)
 
-  // Prevent hydration mismatch
+  // Prevent hydration mismatch - standard Next.js pattern
+   
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -53,13 +54,41 @@ export function ThemeToggle({
   // Render based on variant
   switch (variant) {
     case 'sliding':
-      return <SlidingToggle isDark={isDark} toggleTheme={toggleTheme} size={size} showLabel={showLabel} />
+      return (
+        <SlidingToggle
+          isDark={isDark}
+          toggleTheme={toggleTheme}
+          size={size}
+          showLabel={showLabel}
+        />
+      )
     case 'minimal':
-      return <MinimalToggle isDark={isDark} toggleTheme={toggleTheme} size={size} showLabel={showLabel} />
+      return (
+        <MinimalToggle
+          isDark={isDark}
+          toggleTheme={toggleTheme}
+          size={size}
+          showLabel={showLabel}
+        />
+      )
     case 'morphing':
-      return <MorphingToggle isDark={isDark} toggleTheme={toggleTheme} size={size} showLabel={showLabel} />
+      return (
+        <MorphingToggle
+          isDark={isDark}
+          toggleTheme={toggleTheme}
+          size={size}
+          showLabel={showLabel}
+        />
+      )
     default:
-      return <DefaultToggle isDark={isDark} toggleTheme={toggleTheme} size={size} showLabel={showLabel} />
+      return (
+        <DefaultToggle
+          isDark={isDark}
+          toggleTheme={toggleTheme}
+          size={size}
+          showLabel={showLabel}
+        />
+      )
   }
 }
 
@@ -68,7 +97,7 @@ function DefaultToggle({
   isDark,
   toggleTheme,
   size,
-  showLabel
+  showLabel,
 }: {
   isDark: boolean
   toggleTheme: () => void
@@ -83,9 +112,10 @@ function DefaultToggle({
         group relative flex items-center gap-2
         ${getSizeClasses(size)}
         bg-gradient-to-br
-        ${isDark
-          ? 'from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800'
-          : 'from-white to-gray-50 hover:from-gray-50 hover:to-gray-100'
+        ${
+          isDark
+            ? 'from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800'
+            : 'from-white to-gray-50 hover:from-gray-50 hover:to-gray-100'
         }
         border ${isDark ? 'border-slate-700' : 'border-gray-200'}
         rounded-lg shadow-sm hover:shadow-md
@@ -104,9 +134,10 @@ function DefaultToggle({
             text-amber-500
             transition-all duration-300 ease-out
             motion-reduce:transition-none
-            ${isDark
-              ? 'rotate-90 scale-0 opacity-0'
-              : 'rotate-0 scale-100 opacity-100'
+            ${
+              isDark
+                ? 'rotate-90 scale-0 opacity-0'
+                : 'rotate-0 scale-100 opacity-100'
             }
           `}
         />
@@ -116,9 +147,10 @@ function DefaultToggle({
             text-blue-400
             transition-all duration-300 ease-out
             motion-reduce:transition-none
-            ${isDark
-              ? 'rotate-0 scale-100 opacity-100'
-              : '-rotate-90 scale-0 opacity-0'
+            ${
+              isDark
+                ? 'rotate-0 scale-100 opacity-100'
+                : '-rotate-90 scale-0 opacity-0'
             }
           `}
         />
@@ -126,11 +158,13 @@ function DefaultToggle({
 
       {/* Optional label */}
       {showLabel && (
-        <span className={`
+        <span
+          className={`
           text-sm font-medium
           ${isDark ? 'text-gray-200' : 'text-gray-700'}
           transition-colors duration-300
-        `}>
+        `}
+        >
           {isDark ? 'Dark' : 'Light'}
         </span>
       )}
@@ -143,7 +177,7 @@ function SlidingToggle({
   isDark,
   toggleTheme,
   size: _size,
-  showLabel
+  showLabel,
 }: {
   isDark: boolean
   toggleTheme: () => void
@@ -165,18 +199,22 @@ function SlidingToggle({
       `}
     >
       {/* Track */}
-      <div className={`
+      <div
+        className={`
         relative w-14 h-7 rounded-full
         transition-all duration-300 ease-out
         motion-reduce:transition-none
-        ${isDark
-          ? 'bg-gradient-to-r from-blue-900 to-indigo-900'
-          : 'bg-gradient-to-r from-amber-200 to-orange-200'
+        ${
+          isDark
+            ? 'bg-gradient-to-r from-blue-900 to-indigo-900'
+            : 'bg-gradient-to-r from-amber-200 to-orange-200'
         }
         shadow-inner
-      `}>
+      `}
+      >
         {/* Thumb with icon */}
-        <div className={`
+        <div
+          className={`
           absolute top-0.5
           ${isDark ? 'left-[28px]' : 'left-0.5'}
           w-6 h-6 rounded-full
@@ -185,7 +223,8 @@ function SlidingToggle({
           transition-all duration-300 ease-out
           motion-reduce:transition-none
           group-hover:scale-110
-        `}>
+        `}
+        >
           <Sun
             className={`
               absolute w-3.5 h-3.5 text-amber-500
@@ -213,10 +252,12 @@ function SlidingToggle({
 
       {/* Optional label */}
       {showLabel && (
-        <span className={`
+        <span
+          className={`
           text-sm font-medium
           ${isDark ? 'text-gray-200' : 'text-gray-700'}
-        `}>
+        `}
+        >
           {isDark ? 'Dark Mode' : 'Light Mode'}
         </span>
       )}
@@ -229,7 +270,7 @@ function MinimalToggle({
   isDark,
   toggleTheme,
   size,
-  showLabel
+  showLabel,
 }: {
   isDark: boolean
   toggleTheme: () => void
@@ -244,9 +285,10 @@ function MinimalToggle({
         group relative flex items-center gap-2
         ${getSizeClasses(size)}
         rounded-lg
-        ${isDark
-          ? 'text-gray-200 hover:text-white hover:bg-slate-800/50'
-          : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+        ${
+          isDark
+            ? 'text-gray-200 hover:text-white hover:bg-slate-800/50'
+            : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
         }
         cursor-pointer
         transition-all duration-200 ease-out
@@ -273,9 +315,7 @@ function MinimalToggle({
       />
 
       {showLabel && (
-        <span className="text-sm font-medium">
-          {isDark ? 'Dark' : 'Light'}
-        </span>
+        <span className="text-sm font-medium">{isDark ? 'Dark' : 'Light'}</span>
       )}
     </button>
   )
@@ -285,8 +325,8 @@ function MinimalToggle({
 function MorphingToggle({
   isDark,
   toggleTheme,
-  size: _size, // eslint-disable-line @typescript-eslint/no-unused-vars
-  showLabel: _showLabel // eslint-disable-line @typescript-eslint/no-unused-vars
+  size: _size,
+  showLabel: _showLabel,
 }: {
   isDark: boolean
   toggleTheme: () => void
@@ -306,23 +346,27 @@ function MorphingToggle({
       `}
     >
       {/* Orb container */}
-      <div className={`
+      <div
+        className={`
         relative w-12 h-12 rounded-full
         bg-gradient-to-br
-        ${isDark
-          ? 'from-blue-600 via-indigo-600 to-purple-700'
-          : 'from-amber-400 via-orange-400 to-yellow-500'
+        ${
+          isDark
+            ? 'from-blue-600 via-indigo-600 to-purple-700'
+            : 'from-amber-400 via-orange-400 to-yellow-500'
         }
         shadow-lg
-        ${isDark
-          ? 'shadow-blue-500/50 hover:shadow-blue-400/60'
-          : 'shadow-orange-400/50 hover:shadow-orange-300/60'
+        ${
+          isDark
+            ? 'shadow-blue-500/50 hover:shadow-blue-400/60'
+            : 'shadow-orange-400/50 hover:shadow-orange-300/60'
         }
         transition-all duration-500 ease-out
         group-hover:scale-110
         motion-reduce:transition-none
         overflow-hidden
-      `}>
+      `}
+      >
         {/* Icon overlay */}
         <div className="absolute inset-0 flex items-center justify-center">
           <Sun
@@ -330,9 +374,10 @@ function MorphingToggle({
               absolute w-6 h-6 text-white
               transition-all duration-500 ease-out
               motion-reduce:transition-none
-              ${isDark
-                ? 'rotate-180 scale-0 opacity-0'
-                : 'rotate-0 scale-100 opacity-100'
+              ${
+                isDark
+                  ? 'rotate-180 scale-0 opacity-0'
+                  : 'rotate-0 scale-100 opacity-100'
               }
             `}
           />
@@ -341,29 +386,34 @@ function MorphingToggle({
               absolute w-6 h-6 text-white
               transition-all duration-500 ease-out
               motion-reduce:transition-none
-              ${isDark
-                ? 'rotate-0 scale-100 opacity-100'
-                : '-rotate-180 scale-0 opacity-0'
+              ${
+                isDark
+                  ? 'rotate-0 scale-100 opacity-100'
+                  : '-rotate-180 scale-0 opacity-0'
               }
             `}
           />
         </div>
 
         {/* Glow effect */}
-        <div className={`
+        <div
+          className={`
           absolute inset-0 rounded-full
           bg-gradient-to-br from-white/20 to-transparent
           transition-opacity duration-500
           ${isDark ? 'opacity-30' : 'opacity-50'}
-        `} />
+        `}
+        />
       </div>
 
       {/* Optional label */}
       {_showLabel && (
-        <span className={`
+        <span
+          className={`
           text-sm font-medium
           ${isDark ? 'text-gray-200' : 'text-gray-700'}
-        `}>
+        `}
+        >
           {isDark ? 'Dark Mode' : 'Light Mode'}
         </span>
       )}

@@ -37,13 +37,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@m-tracking/common': path.resolve(__dirname, '../../libs/common/src'),
-      '@m-tracking/types': path.resolve(__dirname, '../../libs/types/src'),
-      '@m-tracking/utils': path.resolve(__dirname, '../../libs/utils/src'),
-      '@m-tracking/constants': path.resolve(
-        __dirname,
-        '../../libs/constants/src'
-      ),
+      '@m-tracking/shared': path.resolve(__dirname, '../../libs/shared/src'),
     },
   },
 })

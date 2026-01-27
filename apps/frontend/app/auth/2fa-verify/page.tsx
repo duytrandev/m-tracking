@@ -55,7 +55,8 @@ export default function TwoFactorVerifyPage(): React.ReactElement {
               {error}
               {attemptsRemaining !== null && (
                 <span className="block text-xs mt-1">
-                  {attemptsRemaining} {attemptsRemaining === 1 ? 'attempt' : 'attempts'} remaining
+                  {attemptsRemaining}{' '}
+                  {attemptsRemaining === 1 ? 'attempt' : 'attempts'} remaining
                 </span>
               )}
             </div>
@@ -89,7 +90,7 @@ export default function TwoFactorVerifyPage(): React.ReactElement {
               <Input
                 id="backupCode"
                 value={backupCode}
-                onChange={(e) => setBackupCode(e.target.value)}
+                onChange={e => setBackupCode(e.target.value)}
                 placeholder="XXXX-XXXX-XXXX"
                 className="font-mono text-center"
                 disabled={isLoading}

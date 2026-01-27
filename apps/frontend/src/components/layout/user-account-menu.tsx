@@ -56,9 +56,9 @@ export function UserAccountMenu({ className }: UserAccountMenuProps) {
 
   const userInitial = user?.name?.charAt(0).toUpperCase() || 'U'
 
-  const handleLogout = async () => {
+  const handleLogout = (): void => {
     setOpen(false)
-    await logout()
+    logout()
   }
 
   const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
@@ -87,7 +87,9 @@ export function UserAccountMenu({ className }: UserAccountMenuProps) {
         {/* User Info */}
         <div className="min-w-0 flex-1 text-left">
           <p className="truncate text-sm font-medium">{user?.name || 'User'}</p>
-          <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
+          <p className="truncate text-xs text-muted-foreground">
+            {user?.email}
+          </p>
         </div>
 
         {/* Chevron Icon */}
@@ -119,7 +121,7 @@ export function UserAccountMenu({ className }: UserAccountMenuProps) {
             <DropdownMenuSubContent>
               <DropdownMenuRadioGroup
                 value={theme}
-                onValueChange={(value) =>
+                onValueChange={value =>
                   handleThemeChange(value as 'light' | 'dark' | 'system')
                 }
               >

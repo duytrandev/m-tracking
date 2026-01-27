@@ -90,7 +90,10 @@ export const safeLocalStorage = {
           localStorage.setItem(key, value)
           return true
         } catch (retryError) {
-          console.error(`Failed to save to localStorage after clearing (key: ${key}):`, retryError)
+          console.error(
+            `Failed to save to localStorage after clearing (key: ${key}):`,
+            retryError
+          )
           return false
         }
       } else {
@@ -143,7 +146,10 @@ export const safeLocalStorage = {
     try {
       return JSON.parse(item) as T
     } catch (error) {
-      console.warn(`Failed to parse JSON from localStorage (key: ${key}):`, error)
+      console.warn(
+        `Failed to parse JSON from localStorage (key: ${key}):`,
+        error
+      )
       return null
     }
   },
@@ -157,7 +163,10 @@ export const safeLocalStorage = {
       const serialized = JSON.stringify(value)
       return this.setItem(key, serialized)
     } catch (error) {
-      console.error(`Failed to serialize JSON for localStorage (key: ${key}):`, error)
+      console.error(
+        `Failed to serialize JSON for localStorage (key: ${key}):`,
+        error
+      )
       return false
     }
   },
@@ -241,7 +250,10 @@ export const safeSessionStorage = {
     try {
       return JSON.parse(item) as T
     } catch (error) {
-      console.warn(`Failed to parse JSON from sessionStorage (key: ${key}):`, error)
+      console.warn(
+        `Failed to parse JSON from sessionStorage (key: ${key}):`,
+        error
+      )
       return null
     }
   },
@@ -255,7 +267,10 @@ export const safeSessionStorage = {
       const serialized = JSON.stringify(value)
       return this.setItem(key, serialized)
     } catch (error) {
-      console.error(`Failed to serialize JSON for sessionStorage (key: ${key}):`, error)
+      console.error(
+        `Failed to serialize JSON for sessionStorage (key: ${key}):`,
+        error
+      )
       return false
     }
   },

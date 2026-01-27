@@ -50,17 +50,19 @@ export function useAuthInit(): UseAuthInitReturn {
           }
         }
       } catch (err) {
-        // Silently fail - user will need to login
-        console.debug('[useAuthInit] Auth initialization failed:', err)
+        // Auth initialization can fail silently - user will need to login
         logout()
-        setError(err instanceof Error ? err : new Error('Auth initialization failed'))
+        setError(
+          err instanceof Error ? err : new Error('Auth initialization failed')
+        )
       } finally {
         setLoading(false)
         setIsInitializing(false)
       }
     }
 
-    initializeAuth()
+    void initializeAuth()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // Only run once on mount
 
   return { isInitializing, error }

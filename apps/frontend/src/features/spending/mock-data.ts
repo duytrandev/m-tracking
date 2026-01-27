@@ -676,14 +676,14 @@ const generateDailyTrend = () => {
   const trend = []
   for (let i = 29; i >= 0; i--) {
     const date = getDateDaysAgo(i)
-    const dayTransactions = mockTransactions.filter((t) => t.date === date)
+    const dayTransactions = mockTransactions.filter(t => t.date === date)
 
     const expense = dayTransactions
-      .filter((t) => t.type === 'expense')
+      .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0)
 
     const income = dayTransactions
-      .filter((t) => t.type === 'income')
+      .filter(t => t.type === 'income')
       .reduce((sum, t) => sum + t.amount, 0)
 
     trend.push({
@@ -704,8 +704,8 @@ const generateCategoryBreakdown = () => {
   >()
 
   mockTransactions
-    .filter((t) => t.type === 'expense')
-    .forEach((transaction) => {
+    .filter(t => t.type === 'expense')
+    .forEach(transaction => {
       const existing = categoryMap.get(transaction.categoryId)
 
       if (existing) {
@@ -722,7 +722,7 @@ const generateCategoryBreakdown = () => {
 
   const breakdown = Array.from(categoryMap.values())
     .sort((a, b) => b.total - a.total)
-    .map((item) => ({
+    .map(item => ({
       categoryId: item.category.id,
       categoryName: item.category.name,
       categoryColor: item.category.color,
@@ -733,7 +733,7 @@ const generateCategoryBreakdown = () => {
     }))
 
   const totalExpense = breakdown.reduce((sum, item) => sum + item.total, 0)
-  breakdown.forEach((item) => {
+  breakdown.forEach(item => {
     item.percentage = (item.total / totalExpense) * 100
   })
 
@@ -746,24 +746,24 @@ export const mockSpendingSummary: SpendingSummary = {
   startDate: getDateDaysAgo(29),
   endDate: getDateDaysAgo(0),
   totalExpense: mockTransactions
-    .filter((t) => t.type === 'expense')
+    .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + t.amount, 0),
   totalIncome: mockTransactions
-    .filter((t) => t.type === 'income')
+    .filter(t => t.type === 'income')
     .reduce((sum, t) => sum + t.amount, 0),
   netBalance:
     mockTransactions
-      .filter((t) => t.type === 'income')
+      .filter(t => t.type === 'income')
       .reduce((sum, t) => sum + t.amount, 0) -
     mockTransactions
-      .filter((t) => t.type === 'expense')
+      .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0),
   transactionCount: mockTransactions.length,
   averageExpense:
     mockTransactions
-      .filter((t) => t.type === 'expense')
+      .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0) /
-    mockTransactions.filter((t) => t.type === 'expense').length,
+    mockTransactions.filter(t => t.type === 'expense').length,
   categoryBreakdown: generateCategoryBreakdown(),
   dailyTrend: generateDailyTrend(),
 }

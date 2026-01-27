@@ -15,34 +15,44 @@ export function AuthDecorative() {
   return (
     <div className="hidden lg:flex lg:w-[45%] xl:w-[50%] relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600">
       {/* Animated gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/30 via-purple-500/30 to-pink-500/30 animate-pulse"
-           style={{ animationDuration: '8s' }} />
+      <div
+        className="absolute inset-0 bg-gradient-to-tr from-blue-500/30 via-purple-500/30 to-pink-500/30 animate-pulse"
+        style={{ animationDuration: '8s' }}
+      />
 
       {/* Decorative circles */}
       <m.div
         className="absolute top-20 right-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"
-        animate={prefersReducedMotion ? {} : {
-          scale: [1, 1.2, 1],
-          opacity: [0.3, 0.5, 0.3]
-        }}
+        animate={
+          prefersReducedMotion
+            ? {}
+            : {
+                scale: [1, 1.2, 1],
+                opacity: [0.3, 0.5, 0.3],
+              }
+        }
         transition={{
           duration: 8,
           repeat: Infinity,
-          ease: "easeInOut"
+          ease: 'easeInOut',
         }}
       />
 
       <m.div
         className="absolute bottom-32 left-32 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl"
-        animate={prefersReducedMotion ? {} : {
-          scale: [1, 1.1, 1],
-          opacity: [0.2, 0.4, 0.2]
-        }}
+        animate={
+          prefersReducedMotion
+            ? {}
+            : {
+                scale: [1, 1.1, 1],
+                opacity: [0.2, 0.4, 0.2],
+              }
+        }
         transition={{
           duration: 10,
           repeat: Infinity,
-          ease: "easeInOut",
-          delay: 1
+          ease: 'easeInOut',
+          delay: 1,
         }}
       />
 
@@ -59,7 +69,9 @@ export function AuthDecorative() {
             <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30">
               <span className="text-2xl font-bold text-white">M</span>
             </div>
-            <span className="text-2xl font-semibold text-white">M-Tracking</span>
+            <span className="text-2xl font-semibold text-white">
+              M-Tracking
+            </span>
           </div>
         </m.div>
 
@@ -91,18 +103,18 @@ export function AuthDecorative() {
             {
               icon: Shield,
               title: 'Enterprise Security',
-              description: 'Bank-level encryption and GDPR compliance'
+              description: 'Bank-level encryption and GDPR compliance',
             },
             {
               icon: Zap,
               title: 'Real-time Analytics',
-              description: 'Track campaigns with millisecond precision'
+              description: 'Track campaigns with millisecond precision',
             },
             {
               icon: BarChart3,
               title: 'Advanced Insights',
-              description: 'AI-powered recommendations for growth'
-            }
+              description: 'AI-powered recommendations for growth',
+            },
           ].map((feature, index) => (
             <m.div
               key={feature.title}
@@ -134,7 +146,8 @@ export function AuthDecorative() {
           className="mt-12 pt-8 border-t border-white/20"
         >
           <p className="text-white/90 italic mb-3">
-            "M-Tracking transformed how we understand our customers. Best decision we made this year."
+            "M-Tracking transformed how we understand our customers. Best
+            decision we made this year."
           </p>
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full border border-white/30 flex items-center justify-center">
@@ -154,7 +167,7 @@ export function AuthDecorative() {
         style={{
           backgroundImage: `linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px),
                            linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)`,
-          backgroundSize: '50px 50px'
+          backgroundSize: '50px 50px',
         }}
       />
     </div>

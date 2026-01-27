@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
@@ -33,8 +33,8 @@ export function LoginForm() {
     watch,
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
-    mode: 'onBlur', // Validate on blur for initial entry
-    reValidateMode: 'onChange', // Re-validate immediately on change after error
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
     defaultValues: {
       email: '',
       password: '',
@@ -44,15 +44,19 @@ export function LoginForm() {
 
   const rememberMe = watch('rememberMe')
 
-  const onSubmit = async (data: LoginInput): Promise<void> => {
-    setFormState('submitting')
-    try {
-      await login(data)
-      setFormState('success')
-    } catch {
+  // Handle form state based on mutation status
+  useEffect(() => {
+    if (error && formState === 'submitting') {
       setFormState('error')
-      setTimeout(() => setFormState('idle'), 3000)
+      const timer = setTimeout(() => setFormState('idle'), 3000)
+      return () => clearTimeout(timer)
     }
+    return undefined
+  }, [error, formState])
+
+  const onSubmit = (data: LoginInput): void => {
+    setFormState('submitting')
+    login(data)
   }
 
   // Success state UI
@@ -76,7 +80,9 @@ export function LoginForm() {
         </m.div>
         <div>
           <p className="text-lg font-medium text-gray-900">Welcome back!</p>
-          <p className="text-sm text-gray-600 mt-1">Redirecting to your dashboard...</p>
+          <p className="text-sm text-gray-600 mt-1">
+            Redirecting to your dashboard...
+          </p>
         </div>
       </m.div>
     )
@@ -89,7 +95,7 @@ export function LoginForm() {
         animate={error ? { x: [-4, 4, -4, 4, 0] } : {}}
         transition={{
           duration: prefersReducedMotion ? 0 : 0.4,
-          ease: 'easeInOut'
+          ease: 'easeInOut',
         }}
         className="space-y-6"
       >
@@ -152,60 +158,65 @@ export function LoginForm() {
           />
         </FormField>
 
-      {/* Remember Me & Forgot Password */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="rememberMe"
-            checked={rememberMe}
-            onCheckedChange={(checked) => setValue('rememberMe', checked as boolean)}
-          />
-          <Label htmlFor="rememberMe" className="text-sm font-normal cursor-pointer text-gray-700">
-            Remember Me
-          </Label>
+        {/* Remember Me & Forgot Password */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="rememberMe"
+              checked={rememberMe}
+              onCheckedChange={checked =>
+                setValue('rememberMe', checked as boolean)
+              }
+            />
+            <Label
+              htmlFor="rememberMe"
+              className="text-sm font-normal cursor-pointer text-gray-700"
+            >
+              Remember Me
+            </Label>
+          </div>
+          <Link
+            href="/auth/forgot-password"
+            className="text-sm font-medium text-[#5046E5] hover:text-[#4338CA] hover:underline transition-colors"
+          >
+            Forgot Your Password?
+          </Link>
         </div>
-        <Link
-          href="/auth/forgot-password"
-          className="text-sm font-medium text-[#5046E5] hover:text-[#4338CA] hover:underline transition-colors"
+
+        {/* Submit Button */}
+        <Button
+          type="submit"
+          className="w-full h-12 text-base"
+          isLoading={isLoading}
+          loadingText="Signing in..."
+          disabled={isLoading}
         >
-          Forgot Your Password?
-        </Link>
-      </div>
+          Log In
+        </Button>
 
-      {/* Submit Button */}
-      <Button
-        type="submit"
-        className="w-full h-12 text-base"
-        isLoading={isLoading}
-        loadingText="Signing in..."
-        disabled={isLoading}
-      >
-        Log In
-      </Button>
-
-      {/* Divider */}
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-300"></div>
+        {/* Divider */}
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-gray-500">Or Login With</span>
+          </div>
         </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-white text-gray-500">Or Login With</span>
-        </div>
-      </div>
 
-      {/* OAuth Buttons */}
-      <OAuthButtons />
+        {/* OAuth Buttons */}
+        <OAuthButtons />
 
-      {/* Sign Up Link */}
-      <p className="text-center text-sm text-gray-600">
-        Don't Have An Account?{' '}
-        <Link
-          href="/auth/register"
-          className="font-semibold text-[#5046E5] hover:text-[#4338CA] hover:underline transition-colors"
-        >
-          Register Now.
-        </Link>
-      </p>
+        {/* Sign Up Link */}
+        <p className="text-center text-sm text-gray-600">
+          Don't Have An Account?{' '}
+          <Link
+            href="/auth/register"
+            className="font-semibold text-[#5046E5] hover:text-[#4338CA] hover:underline transition-colors"
+          >
+            Register Now.
+          </Link>
+        </p>
       </m.form>
     </AnimatedFormWrapper>
   )

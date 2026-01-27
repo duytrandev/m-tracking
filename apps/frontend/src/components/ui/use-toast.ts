@@ -19,23 +19,23 @@ interface ToastState {
   removeToast: (id: string) => void
 }
 
-export const useToastStore = create<ToastState>((set) => ({
+export const useToastStore = create<ToastState>(set => ({
   toasts: [],
-  addToast: (toast) => {
+  addToast: toast => {
     const id = Math.random().toString(36).substr(2, 9)
     const newToast = { ...toast, id }
-    set((state) => ({ toasts: [...state.toasts, newToast] }))
+    set(state => ({ toasts: [...state.toasts, newToast] }))
 
     // Auto-remove after duration
     setTimeout(() => {
-      set((state) => ({
-        toasts: state.toasts.filter((t) => t.id !== id),
+      set(state => ({
+        toasts: state.toasts.filter(t => t.id !== id),
       }))
     }, toast.duration || 5000)
   },
-  removeToast: (id) => {
-    set((state) => ({
-      toasts: state.toasts.filter((t) => t.id !== id),
+  removeToast: id => {
+    set(state => ({
+      toasts: state.toasts.filter(t => t.id !== id),
     }))
   },
 }))
@@ -45,7 +45,7 @@ export const useToastStore = create<ToastState>((set) => ({
  * Returns a toast function to show notifications
  */
 export function useToast() {
-  const addToast = useToastStore((state) => state.addToast)
+  const addToast = useToastStore(state => state.addToast)
 
   return {
     toast: addToast,

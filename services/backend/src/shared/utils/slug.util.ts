@@ -1,4 +1,4 @@
-import * as crypto from 'crypto';
+import * as crypto from 'crypto'
 
 /**
  * Slug utilities for URL-safe identifiers and reference generation
@@ -12,10 +12,10 @@ import * as crypto from 'crypto';
  * @returns URL-safe unique slug
  */
 export function generateSlug(prefix?: string): string {
-  const timestamp = Date.now().toString(36);
-  const random = crypto.randomBytes(4).toString('hex');
-  const slug = `${timestamp}-${random}`;
-  return prefix ? `${prefix}-${slug}` : slug;
+  const timestamp = Date.now().toString(36)
+  const random = crypto.randomBytes(4).toString('hex')
+  const slug = `${timestamp}-${random}`
+  return prefix ? `${prefix}-${slug}` : slug
 }
 
 /**
@@ -28,7 +28,7 @@ export function toKebabCase(text: string): string {
   return text
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .replace(/^-+|-+$/g, '')
 }
 
 /**
@@ -37,9 +37,9 @@ export function toKebabCase(text: string): string {
  * @returns Unique transaction reference
  */
 export function generateTransactionRef(): string {
-  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  const random = crypto.randomBytes(3).toString('hex').toUpperCase();
-  return `TXN-${date}-${random}`;
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+  const random = crypto.randomBytes(3).toString('hex').toUpperCase()
+  return `TXN-${date}-${random}`
 }
 
 /**
@@ -48,9 +48,9 @@ export function generateTransactionRef(): string {
  * @returns Unique order reference
  */
 export function generateOrderRef(): string {
-  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  const random = crypto.randomBytes(3).toString('hex').toUpperCase();
-  return `ORD-${date}-${random}`;
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+  const random = crypto.randomBytes(3).toString('hex').toUpperCase()
+  return `ORD-${date}-${random}`
 }
 
 /**
@@ -59,9 +59,9 @@ export function generateOrderRef(): string {
  * @returns Unique invoice reference
  */
 export function generateInvoiceRef(): string {
-  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  const random = crypto.randomBytes(3).toString('hex').toUpperCase();
-  return `INV-${date}-${random}`;
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+  const random = crypto.randomBytes(3).toString('hex').toUpperCase()
+  return `INV-${date}-${random}`
 }
 
 /**
@@ -70,5 +70,5 @@ export function generateInvoiceRef(): string {
  * @returns Short unique ID
  */
 export function generateShortId(): string {
-  return crypto.randomBytes(6).toString('base64url');
+  return crypto.randomBytes(6).toString('base64url')
 }

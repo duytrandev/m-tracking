@@ -11,6 +11,6 @@ export class BudgetExceededEvent {
     public readonly categoryId: string,
     public readonly limit: number,
     public readonly currentAmount: number,
-    public readonly percentage: number,
+    public readonly percentage: number
   ) {}
 }

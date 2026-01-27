@@ -14,10 +14,14 @@ interface AvatarUploadProps {
   name: string
 }
 
-export function AvatarUpload({ currentAvatar, name }: AvatarUploadProps): React.ReactElement {
+export function AvatarUpload({
+  currentAvatar,
+  name,
+}: AvatarUploadProps): React.ReactElement {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [preview, setPreview] = useState<string | null>(null)
-  const { uploadAvatar, isUploading, deleteAvatar, isDeleting } = useAvatarUpload()
+  const { uploadAvatar, isUploading, deleteAvatar, isDeleting } =
+    useAvatarUpload()
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const file = e.target.files?.[0]
@@ -64,7 +68,11 @@ export function AvatarUpload({ currentAvatar, name }: AvatarUploadProps): React.
           )}
         >
           {displayAvatar ? (
-            <img src={displayAvatar} alt={name} className="h-full w-full object-cover" />
+            <img
+              src={displayAvatar}
+              alt={name}
+              className="h-full w-full object-cover"
+            />
           ) : (
             <User className="h-12 w-12 text-muted-foreground" />
           )}
@@ -112,7 +120,9 @@ export function AvatarUpload({ currentAvatar, name }: AvatarUploadProps): React.
           </Button>
         )}
 
-        <p className="text-xs text-muted-foreground">JPG, PNG or GIF. Max 5MB.</p>
+        <p className="text-xs text-muted-foreground">
+          JPG, PNG or GIF. Max 5MB.
+        </p>
       </div>
     </div>
   )

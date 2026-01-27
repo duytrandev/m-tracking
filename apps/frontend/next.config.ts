@@ -46,4 +46,4 @@ const sentryWebpackPluginOptions = {
 export default withSentryConfig(
   withBundleAnalyzer(withNextIntl(nextConfig)),
   sentryWebpackPluginOptions
-) as NextConfig
+)

@@ -4,7 +4,6 @@
   "projectType": "application",
   "root": "apps/frontend",
   "sourceRoot": "apps/frontend/src",
-  "prefix": "app",
   "tags": ["type:app", "scope:frontend"],
   "targets": {
     "build": {
@@ -45,13 +44,6 @@
         }
       },
       "defaultConfiguration": "development"
-    },
-    "dev": {
-      "executor": "@nx/next:server",
-      "options": {
-        "dev": true,
-        "port": 3000
-      }
     },
     "start": {
       "executor": "@nx/next:server",
@@ -97,6 +89,13 @@
         "cwd": "apps/frontend"
       },
       "cache": true
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json}\" \"app/**/*.{ts,tsx}\"",
+        "cwd": "apps/frontend"
+      }
     }
   }
 }

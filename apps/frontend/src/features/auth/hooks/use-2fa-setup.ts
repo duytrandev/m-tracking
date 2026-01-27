@@ -34,7 +34,7 @@ export function use2FASetup(): Use2FASetupReturn {
   // Enroll mutation (Step 1)
   const enrollMutation = useMutation({
     mutationFn: authApi.enroll2FA,
-    onSuccess: (data) => {
+    onSuccess: data => {
       setQrCode(data.qrCode)
       setSecret(data.secret)
     },
@@ -81,11 +81,23 @@ export function use2FASetup(): Use2FASetupReturn {
 
   const isLoading = enrollMutation.isPending || verifyMutation.isPending
 
-  const error = enrollMutation.error || verifyMutation.error
-    ? isApiError(enrollMutation.error || verifyMutation.error)
-      ? (enrollMutation.error || verifyMutation.error as any).response?.data?.message || 'An error occurred'
-      : 'An unexpected error occurred'
-    : null
+  interface ErrorResponse {
+    message?: string
+  }
+
+  const getErrorMessage = (): string | null => {
+    const mutationError = enrollMutation.error ?? verifyMutation.error
+    if (!mutationError) return null
+    if (isApiError(mutationError)) {
+      return (
+        (mutationError.response?.data as ErrorResponse | undefined)?.message ??
+        'An error occurred'
+      )
+    }
+    return 'An unexpected error occurred'
+  }
+
+  const error = getErrorMessage()
 
   return {
     step,

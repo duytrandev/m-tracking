@@ -6,13 +6,7 @@ import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { UserAccountMenu } from '@/components/layout/user-account-menu'
-import {
-  LayoutDashboard,
-  CreditCard,
-  PiggyBank,
-  Menu,
-  X,
-} from 'lucide-react'
+import { LayoutDashboard, CreditCard, PiggyBank, Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
@@ -43,7 +37,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           onClick={() => setSidebarOpen(!sidebarOpen)}
           aria-label="Toggle sidebar"
         >
-          {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {sidebarOpen ? (
+            <X className="h-6 w-6" />
+          ) : (
+            <Menu className="h-6 w-6" />
+          )}
         </Button>
         <div className="flex-1">
           <span className="font-semibold">M-Tracking</span>
@@ -63,14 +61,17 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         >
           {/* Logo - Fixed Height */}
           <div className="flex h-16 flex-shrink-0 items-center border-b px-6">
-            <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-2 font-semibold"
+            >
               <span className="text-xl">M-Tracking</span>
             </Link>
           </div>
 
           {/* Navigation - Scrollable */}
           <nav className="flex-1 overflow-y-auto space-y-1 p-4">
-            {navItems.map((item) => {
+            {navItems.map(item => {
               const isActive = pathname === item.href
               return (
                 <Link
@@ -99,9 +100,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Overlay for mobile */}
         {sidebarOpen && (
-          <div
+          <button
+            type="button"
             className="fixed inset-0 z-40 bg-black/50 lg:hidden"
             onClick={() => setSidebarOpen(false)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                setSidebarOpen(false)
+              }
+            }}
+            aria-label="Close sidebar"
           />
         )}
 

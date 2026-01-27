@@ -30,9 +30,10 @@ export function useSpendingData(period: TimePeriod = TimePeriod.MONTH) {
   })
 
   const createTransaction = useMutation({
-    mutationFn: (data: CreateTransactionDto) => spendingApi.createTransaction(data),
+    mutationFn: (data: CreateTransactionDto) =>
+      spendingApi.createTransaction(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.spending.all })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.spending.all })
     },
   })
 
@@ -40,29 +41,29 @@ export function useSpendingData(period: TimePeriod = TimePeriod.MONTH) {
     mutationFn: ({ id, data }: { id: string; data: UpdateTransactionDto }) =>
       spendingApi.updateTransaction(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.spending.all })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.spending.all })
     },
   })
 
   const deleteTransaction = useMutation({
     mutationFn: (id: string) => spendingApi.deleteTransaction(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.spending.all })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.spending.all })
     },
   })
 
   const createCategory = useMutation({
     mutationFn: (data: CreateCategoryDto) => spendingApi.createCategory(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.categories.all })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.categories.all })
     },
   })
 
   const deleteCategory = useMutation({
     mutationFn: (id: string) => spendingApi.deleteCategory(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.categories.all })
-      queryClient.invalidateQueries({ queryKey: queryKeys.spending.all })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.categories.all })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.spending.all })
     },
   })
 

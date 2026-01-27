@@ -2,7 +2,15 @@
 
 import { useState } from 'react'
 import { motion } from 'motion/react'
-import { format, subDays, startOfMonth, endOfMonth, isAfter, isBefore, isValid } from 'date-fns'
+import {
+  format,
+  subDays,
+  startOfMonth,
+  endOfMonth,
+  isAfter,
+  isBefore,
+  isValid,
+} from 'date-fns'
 import { Calendar, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -75,12 +83,15 @@ export function DateRangePicker({
   showPresets = true,
   className,
 }: DateRangePickerProps) {
-  const [activePreset, setActivePreset] = useState<PresetKey | null>('last30days')
+  const [activePreset, setActivePreset] = useState<PresetKey | null>(
+    'last30days'
+  )
 
   // Respect user's motion preferences
-  const prefersReducedMotion = typeof window !== 'undefined'
-    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    : false
+  const prefersReducedMotion =
+    typeof window !== 'undefined'
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      : false
 
   /**
    * Format date for input value (yyyy-MM-dd)
@@ -156,7 +167,7 @@ export function DateRangePicker({
       {/* Preset Buttons */}
       {showPresets && (
         <div className="flex flex-wrap gap-2">
-          {presets.map((preset) => (
+          {presets.map(preset => (
             <button
               key={preset.key}
               onClick={() => handlePresetClick(preset)}
@@ -172,9 +183,11 @@ export function DateRangePicker({
                 <motion.div
                   layoutId="date-preset-indicator"
                   className="absolute inset-0 rounded-md bg-primary/20 border border-primary/40"
-                  transition={prefersReducedMotion
-                    ? { duration: 0 }
-                    : { type: 'spring', stiffness: 500, damping: 35 }}
+                  transition={
+                    prefersReducedMotion
+                      ? { duration: 0 }
+                      : { type: 'spring', stiffness: 500, damping: 35 }
+                  }
                 />
               )}
               <span className="relative z-10">{preset.label}</span>
@@ -204,7 +217,9 @@ export function DateRangePicker({
           />
         </div>
 
-        <span className="text-muted-foreground text-sm hidden sm:block">to</span>
+        <span className="text-muted-foreground text-sm hidden sm:block">
+          to
+        </span>
 
         <div className="relative flex-1 w-full">
           <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />

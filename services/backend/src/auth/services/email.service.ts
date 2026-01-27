@@ -1,24 +1,32 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Resend } from 'resend';
+import { Injectable, Logger } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { Resend } from 'resend'
 
 @Injectable()
 export class EmailService {
-  private readonly logger = new Logger(EmailService.name);
-  private resend: Resend;
-  private readonly fromEmail: string;
-  private readonly frontendUrl: string;
+  private readonly logger = new Logger(EmailService.name)
+  private resend: Resend
+  private readonly fromEmail: string
+  private readonly frontendUrl: string
 
   constructor(private configService: ConfigService) {
-    const apiKey = this.configService.get<string>('RESEND_API_KEY');
+    const apiKey = this.configService.get<string>('RESEND_API_KEY')
 
     if (!apiKey) {
-      this.logger.warn('RESEND_API_KEY not configured. Email service will not work.');
+      this.logger.warn(
+        'RESEND_API_KEY not configured. Email service will not work.'
+      )
     }
 
-    this.resend = new Resend(apiKey);
-    this.fromEmail = this.configService.get<string>('EMAIL_FROM', 'M-Tracking <noreply@m-tracking.com>');
-    this.frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:3000');
+    this.resend = new Resend(apiKey)
+    this.fromEmail = this.configService.get<string>(
+      'EMAIL_FROM',
+      'M-Tracking <noreply@m-tracking.com>'
+    )
+    this.frontendUrl = this.configService.get<string>(
+      'FRONTEND_URL',
+      'http://localhost:3000'
+    )
   }
 
   /**
@@ -27,7 +35,7 @@ export class EmailService {
    * @param token Verification token
    */
   async sendVerificationEmail(email: string, token: string): Promise<void> {
-    const verificationUrl = `${this.frontendUrl}/verify-email?token=${token}`;
+    const verificationUrl = `${this.frontendUrl}/verify-email?token=${token}`
 
     try {
       await this.resend.emails.send({
@@ -35,12 +43,12 @@ export class EmailService {
         to: email,
         subject: 'Verify your email address',
         html: this.getVerificationEmailTemplate(verificationUrl),
-      });
+      })
 
-      this.logger.log(`Verification email sent to ${email}`);
+      this.logger.log(`Verification email sent to ${email}`)
     } catch (error) {
-      this.logger.error(`Failed to send verification email to ${email}`, error);
-      throw new Error('Failed to send verification email');
+      this.logger.error(`Failed to send verification email to ${email}`, error)
+      throw new Error('Failed to send verification email')
     }
   }
 
@@ -50,7 +58,7 @@ export class EmailService {
    * @param token Reset token
    */
   async sendPasswordResetEmail(email: string, token: string): Promise<void> {
-    const resetUrl = `${this.frontendUrl}/reset-password?token=${token}`;
+    const resetUrl = `${this.frontendUrl}/reset-password?token=${token}`
 
     try {
       await this.resend.emails.send({
@@ -58,12 +66,15 @@ export class EmailService {
         to: email,
         subject: 'Reset your password',
         html: this.getPasswordResetEmailTemplate(resetUrl),
-      });
+      })
 
-      this.logger.log(`Password reset email sent to ${email}`);
+      this.logger.log(`Password reset email sent to ${email}`)
     } catch (error) {
-      this.logger.error(`Failed to send password reset email to ${email}`, error);
-      throw new Error('Failed to send password reset email');
+      this.logger.error(
+        `Failed to send password reset email to ${email}`,
+        error
+      )
+      throw new Error('Failed to send password reset email')
     }
   }
 
@@ -109,7 +120,7 @@ export class EmailService {
   </div>
 </body>
 </html>
-    `;
+    `
   }
 
   /**
@@ -154,6 +165,6 @@ export class EmailService {
   </div>
 </body>
 </html>
-    `;
+    `
   }
 }

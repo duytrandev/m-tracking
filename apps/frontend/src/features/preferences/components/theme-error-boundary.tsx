@@ -31,15 +31,15 @@ export class ThemeErrorBoundary extends Component<Props, State> {
     }
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log error to monitoring service (e.g., Sentry)
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // Log error for debugging - this is intentional for error boundaries
     console.error('ThemeProvider error:', error, errorInfo)
 
     // In production, you might want to report this to an error tracking service
     // Example: reportError(error, errorInfo)
   }
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       // Render fallback UI or just pass through children
       // The theme will fallback to system preference via FOUC prevention script

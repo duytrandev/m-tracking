@@ -1,8 +1,8 @@
-import { Global, Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { RedisService } from './redis/redis.service';
-import { LoggerService } from './logger/logger.service';
-import { QueueService } from './queue/queue.service';
+import { Global, Module } from '@nestjs/common'
+import { ConfigModule } from '@nestjs/config'
+import { RedisService } from './redis/redis.service'
+import { LoggerService } from './logger/logger.service'
+import { QueueService } from './queue/queue.service'
 
 /**
  * Shared Module

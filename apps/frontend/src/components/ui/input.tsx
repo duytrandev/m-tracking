@@ -28,13 +28,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           error && [
             'border-red-500',
             'focus-visible:ring-red-500',
-            'focus-visible:border-red-500'
+            'focus-visible:border-red-500',
           ],
-          success && !error && [
-            'border-green-500',
-            'focus-visible:ring-green-500',
-            'focus-visible:border-green-500'
-          ],
+          success &&
+            !error && [
+              'border-green-500',
+              'focus-visible:ring-green-500',
+              'focus-visible:border-green-500',
+            ],
           !error && !success && 'border-gray-300',
           className
         )}

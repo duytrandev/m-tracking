@@ -13,7 +13,10 @@ export function PasswordlessLinks() {
         Magic Link
       </Link>
       <span className="text-muted-foreground">|</span>
-      <Link href="/auth/otp" className="text-primary hover:underline transition-colors">
+      <Link
+        href="/auth/otp"
+        className="text-primary hover:underline transition-colors"
+      >
         SMS Code
       </Link>
     </div>

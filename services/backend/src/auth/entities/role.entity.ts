@@ -6,33 +6,33 @@ import {
   ManyToMany,
   JoinTable,
   Index,
-} from 'typeorm';
-import { User } from './user.entity';
-import { Permission } from './permission.entity';
+} from 'typeorm'
+import { User } from './user.entity'
+import { Permission } from './permission.entity'
 
 @Entity('roles')
 @Index(['name'], { unique: true })
 export class Role {
   @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  id!: string
 
   @Column({ unique: true, length: 50 })
-  name!: string;
+  name!: string
 
   @Column({ type: 'text', nullable: true })
-  description!: string;
+  description!: string
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt!: Date;
+  createdAt!: Date
 
-  @ManyToMany(() => User, (user) => user.roles)
-  users!: User[];
+  @ManyToMany(() => User, user => user.roles)
+  users!: User[]
 
-  @ManyToMany(() => Permission, (permission) => permission.roles)
+  @ManyToMany(() => Permission, permission => permission.roles)
   @JoinTable({
     name: 'role_permissions',
     joinColumn: { name: 'role_id', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'permission_id', referencedColumnName: 'id' },
   })
-  permissions!: Permission[];
+  permissions!: Permission[]
 }

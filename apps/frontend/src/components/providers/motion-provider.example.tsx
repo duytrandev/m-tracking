@@ -41,11 +41,7 @@ export function HoverAnimationExample() {
           ? undefined
           : { scale: 1.05, transition: { duration: 0.2 } }
       }
-      whileTap={
-        prefersReducedMotion
-          ? undefined
-          : { scale: 0.95 }
-      }
+      whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
     >
       Click Me
     </m.button>
@@ -103,9 +99,5 @@ export function LayoutAnimationExample() {
  * Wrap your app root with MotionProvider:
  */
 export function AppRootExample({ children }: { children: React.ReactNode }) {
-  return (
-    <MotionProvider>
-      {children}
-    </MotionProvider>
-  )
+  return <MotionProvider>{children}</MotionProvider>
 }

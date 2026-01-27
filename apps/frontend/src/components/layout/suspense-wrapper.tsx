@@ -14,7 +14,7 @@ interface SuspenseWrapperProps {
 /**
  * SuspenseWrapper component
  * Wraps content with Suspense boundary for granular loading states
- * 
+ *
  * Usage:
  * ```tsx
  * <SuspenseWrapper fallback={<DashboardSkeleton />}>
@@ -41,7 +41,7 @@ interface SuspenseSectionsProps {
 /**
  * SuspenseSections component
  * Creates multiple independent Suspense boundaries
- * 
+ *
  * Usage:
  * ```tsx
  * <SuspenseSections
@@ -55,7 +55,7 @@ interface SuspenseSectionsProps {
 export function SuspenseSections({ sections }: SuspenseSectionsProps) {
   return (
     <>
-      {sections.map((section) => (
+      {sections.map(section => (
         <Suspense key={section.key} fallback={section.fallback}>
           {section.content}
         </Suspense>

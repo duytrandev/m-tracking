@@ -7,13 +7,20 @@ import {
   Query,
   Delete,
   Param,
-} from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { ConfigService } from '@nestjs/config';
-import { Response } from 'express';
-import { OAuthService } from '../services/oauth.service';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { CurrentUser } from '../decorators/current-user.decorator';
+} from '@nestjs/common'
+import { AuthGuard } from '@nestjs/passport'
+import { ConfigService } from '@nestjs/config'
+import type { Response } from 'express'
+import { OAuthService, OAuthProfile } from '../services/oauth.service'
+import { JwtAuthGuard } from '../guards/jwt-auth.guard'
+import { CurrentUser } from '../decorators/current-user.decorator'
+
+interface OAuthRequest {
+  user: OAuthProfile
+  headers: Record<string, string | string[] | undefined>
+  ip?: string
+  connection?: { remoteAddress?: string }
+}
 
 /**
  * OAuth Controller
@@ -23,7 +30,7 @@ import { CurrentUser } from '../decorators/current-user.decorator';
 export class OAuthController {
   constructor(
     private oauthService: OAuthService,
-    private configService: ConfigService,
+    private configService: ConfigService
   ) {}
 
   /**
@@ -40,23 +47,20 @@ export class OAuthController {
    */
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  async googleCallback(@Req() req: any, @Res() res: Response) {
+  async googleCallback(@Req() req: OAuthRequest, @Res() res: Response) {
     try {
-      const result = await this.oauthService.handleOAuthCallback(
-        req.user,
-        req,
-      );
+      const result = await this.oauthService.handleOAuthCallback(req.user, req)
 
       // Redirect to frontend with tokens
-      const frontendUrl = this.configService.get<string>('FRONTEND_URL');
-      const redirectUrl = `${frontendUrl}/auth/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}`;
+      const frontendUrl = this.configService.get<string>('FRONTEND_URL')
+      const redirectUrl = `${frontendUrl}/auth/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}`
 
-      return res.redirect(redirectUrl);
+      return res.redirect(redirectUrl)
     } catch (error) {
       // Redirect to frontend with error
-      const frontendUrl = this.configService.get<string>('FRONTEND_URL');
-      const errorUrl = `${frontendUrl}/auth/error?message=${encodeURIComponent((error as Error).message)}`;
-      return res.redirect(errorUrl);
+      const frontendUrl = this.configService.get<string>('FRONTEND_URL')
+      const errorUrl = `${frontendUrl}/auth/error?message=${encodeURIComponent((error as Error).message)}`
+      return res.redirect(errorUrl)
     }
   }
 
@@ -74,21 +78,18 @@ export class OAuthController {
    */
   @Get('github/callback')
   @UseGuards(AuthGuard('github'))
-  async githubCallback(@Req() req: any, @Res() res: Response) {
+  async githubCallback(@Req() req: OAuthRequest, @Res() res: Response) {
     try {
-      const result = await this.oauthService.handleOAuthCallback(
-        req.user,
-        req,
-      );
+      const result = await this.oauthService.handleOAuthCallback(req.user, req)
 
-      const frontendUrl = this.configService.get<string>('FRONTEND_URL');
-      const redirectUrl = `${frontendUrl}/auth/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}`;
+      const frontendUrl = this.configService.get<string>('FRONTEND_URL')
+      const redirectUrl = `${frontendUrl}/auth/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}`
 
-      return res.redirect(redirectUrl);
+      return res.redirect(redirectUrl)
     } catch (error) {
-      const frontendUrl = this.configService.get<string>('FRONTEND_URL');
-      const errorUrl = `${frontendUrl}/auth/error?message=${encodeURIComponent((error as Error).message)}`;
-      return res.redirect(errorUrl);
+      const frontendUrl = this.configService.get<string>('FRONTEND_URL')
+      const errorUrl = `${frontendUrl}/auth/error?message=${encodeURIComponent((error as Error).message)}`
+      return res.redirect(errorUrl)
     }
   }
 
@@ -106,21 +107,18 @@ export class OAuthController {
    */
   @Get('facebook/callback')
   @UseGuards(AuthGuard('facebook'))
-  async facebookCallback(@Req() req: any, @Res() res: Response) {
+  async facebookCallback(@Req() req: OAuthRequest, @Res() res: Response) {
     try {
-      const result = await this.oauthService.handleOAuthCallback(
-        req.user,
-        req,
-      );
+      const result = await this.oauthService.handleOAuthCallback(req.user, req)
 
-      const frontendUrl = this.configService.get<string>('FRONTEND_URL');
-      const redirectUrl = `${frontendUrl}/auth/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}`;
+      const frontendUrl = this.configService.get<string>('FRONTEND_URL')
+      const redirectUrl = `${frontendUrl}/auth/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}`
 
-      return res.redirect(redirectUrl);
+      return res.redirect(redirectUrl)
     } catch (error) {
-      const frontendUrl = this.configService.get<string>('FRONTEND_URL');
-      const errorUrl = `${frontendUrl}/auth/error?message=${encodeURIComponent((error as Error).message)}`;
-      return res.redirect(errorUrl);
+      const frontendUrl = this.configService.get<string>('FRONTEND_URL')
+      const errorUrl = `${frontendUrl}/auth/error?message=${encodeURIComponent((error as Error).message)}`
+      return res.redirect(errorUrl)
     }
   }
 
@@ -130,15 +128,15 @@ export class OAuthController {
   @Get('oauth/accounts')
   @UseGuards(JwtAuthGuard)
   async getLinkedAccounts(@CurrentUser('id') userId: string) {
-    const accounts = await this.oauthService.getLinkedAccounts(userId);
+    const accounts = await this.oauthService.getLinkedAccounts(userId)
     return {
-      accounts: accounts.map((account) => ({
+      accounts: accounts.map(account => ({
         id: account.id,
         provider: account.provider,
         email: account.providerEmail,
         linkedAt: account.createdAt,
       })),
-    };
+    }
   }
 
   /**
@@ -148,11 +146,11 @@ export class OAuthController {
   @UseGuards(JwtAuthGuard)
   async unlinkAccount(
     @CurrentUser('id') userId: string,
-    @Param('provider') provider: string,
+    @Param('provider') provider: string
   ) {
-    await this.oauthService.unlinkOAuthAccount(userId, provider);
+    await this.oauthService.unlinkOAuthAccount(userId, provider)
     return {
       message: `${provider} account unlinked successfully`,
-    };
+    }
   }
 }

@@ -1,7 +1,18 @@
-import { Injectable } from '@nestjs/common';
-import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, VerifyCallback } from 'passport-google-oauth20';
-import { ConfigService } from '@nestjs/config';
+import { Injectable } from '@nestjs/common'
+import { PassportStrategy } from '@nestjs/passport'
+import { Strategy, VerifyCallback, Profile } from 'passport-google-oauth20'
+import { ConfigService } from '@nestjs/config'
+
+interface OAuthUserProfile {
+  provider: string
+  providerId: string
+  email: string
+  emailVerified: boolean
+  name: string
+  avatar: string | null
+  accessToken: string
+  refreshToken: string | null
+}
 
 /**
  * Google OAuth 2.1 Strategy with PKCE support
@@ -19,32 +30,36 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       state: true,
       pkce: true,
       passReqToCallback: false,
-    });
+    })
   }
 
   /**
    * Validate callback after Google authenticates user
    * Returns sanitized user profile for OAuthService
    */
-  async validate(
+  validate(
     accessToken: string,
     refreshToken: string,
-    profile: any,
-    done: VerifyCallback,
-  ): Promise<any> {
-    const { id, emails, displayName, photos } = profile;
+    profile: Profile,
+    done: VerifyCallback
+  ): void {
+    const { id, emails, displayName, photos } = profile
 
-    const user = {
+    const email = emails?.[0]?.value ?? ''
+    const emailVerified = emails?.[0]?.verified ?? false
+    const avatarUrl = photos?.[0]?.value ?? null
+
+    const user: OAuthUserProfile = {
       provider: 'google',
       providerId: id,
-      email: emails[0].value,
-      emailVerified: emails[0].verified,
-      name: displayName,
-      avatar: photos[0]?.value || null,
+      email,
+      emailVerified,
+      name: displayName ?? '',
+      avatar: avatarUrl,
       accessToken,
-      refreshToken: refreshToken || null,
-    };
+      refreshToken: refreshToken ?? null,
+    }
 
-    done(null, user);
+    done(null, user)
   }
 }

@@ -28,7 +28,8 @@ import { useEffect, useState } from 'react'
  * ```
  */
 export function useReducedMotion(): boolean {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState<boolean>(false)
+  const [prefersReducedMotion, setPrefersReducedMotion] =
+    useState<boolean>(false)
 
   useEffect(() => {
     // Check if window is available (client-side only)

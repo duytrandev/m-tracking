@@ -6,8 +6,8 @@ import {
   ManyToOne,
   JoinColumn,
   Index,
-} from 'typeorm';
-import { User } from './user.entity';
+} from 'typeorm'
+import { User } from './user.entity'
 
 @Entity('sessions')
 @Index(['userId'])
@@ -15,30 +15,34 @@ import { User } from './user.entity';
 @Index(['expiresAt'])
 export class Session {
   @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  id!: string
 
   @Column({ name: 'user_id', type: 'uuid' })
-  userId!: string;
+  userId!: string
 
   @Column({ name: 'refresh_token_hash', length: 255 })
-  refreshTokenHash!: string;
+  refreshTokenHash!: string
 
   @Column({ name: 'device_info', type: 'jsonb', nullable: true })
-  deviceInfo!: Record<string, any>;
+  deviceInfo!: Record<string, string | string[] | number | boolean | null>
 
   @Column({ name: 'ip_address', length: 45, nullable: true })
-  ipAddress!: string;
+  ipAddress!: string
 
   @Column({ name: 'expires_at', type: 'timestamp' })
-  expiresAt!: Date;
+  expiresAt!: Date
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt!: Date;
+  createdAt!: Date
 
-  @Column({ name: 'last_active_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  lastActiveAt!: Date;
+  @Column({
+    name: 'last_active_at',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  lastActiveAt!: Date
 
-  @ManyToOne(() => User, (user) => user.sessions, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, user => user.sessions, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-  user!: User;
+  user!: User
 }

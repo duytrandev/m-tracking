@@ -7,9 +7,9 @@ import {
   ManyToOne,
   JoinColumn,
   Index,
-} from 'typeorm';
-import { Category } from './category.entity';
-import { User } from '../../auth/entities/user.entity';
+} from 'typeorm'
+import { Category } from './category.entity'
+import { User } from '../../auth/entities/user.entity'
 
 export enum TransactionType {
   EXPENSE = 'expense',
@@ -23,43 +23,47 @@ export enum TransactionType {
 @Index(['userId', 'date'])
 export class Transaction {
   @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  id!: string
 
   @Column({ name: 'user_id', type: 'uuid' })
-  userId!: string;
+  userId!: string
 
   @Column({ name: 'category_id', type: 'uuid' })
-  categoryId!: string;
+  categoryId!: string
 
   @Column({ type: 'decimal', precision: 12, scale: 2 })
-  amount!: number;
+  amount!: number
 
-  @Column({ type: 'enum', enum: TransactionType, default: TransactionType.EXPENSE })
-  type!: TransactionType;
+  @Column({
+    type: 'enum',
+    enum: TransactionType,
+    default: TransactionType.EXPENSE,
+  })
+  type!: TransactionType
 
   @Column({ length: 255 })
-  description!: string;
+  description!: string
 
   @Column({ type: 'date' })
-  date!: Date;
+  date!: Date
 
   @Column({ length: 3, default: 'USD' })
-  currency!: string;
+  currency!: string
 
   @Column({ type: 'text', nullable: true })
-  notes!: string;
+  notes!: string
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt!: Date;
+  createdAt!: Date
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt!: Date;
+  updatedAt!: Date
 
-  @ManyToOne(() => Category, (category) => category.transactions)
+  @ManyToOne(() => Category, category => category.transactions)
   @JoinColumn({ name: 'category_id' })
-  category!: Category;
+  category!: Category
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'user_id' })
-  user!: User;
+  user!: User
 }

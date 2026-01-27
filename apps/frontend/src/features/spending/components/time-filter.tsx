@@ -18,7 +18,7 @@ const periods: { value: TimePeriod; label: string }[] = [
 export function TimeFilter({ selected, onChange }: TimeFilterProps) {
   return (
     <div className="inline-flex items-center rounded-lg border border-border/40 bg-card/40 backdrop-blur-xl p-1">
-      {periods.map((period) => (
+      {periods.map(period => (
         <button
           key={period.value}
           onClick={() => onChange(period.value)}

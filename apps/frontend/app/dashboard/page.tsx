@@ -8,7 +8,10 @@ import { TimeFilter } from '@/features/spending/components/time-filter'
 import { TimePeriod } from '@/types/api/spending'
 import { DashboardStats } from './_components/dashboard-stats'
 import { DashboardCharts } from './_components/dashboard-charts'
-import { StatisticsCardsSkeleton, ChartSectionSkeleton } from '@/components/ui/skeletons'
+import {
+  StatisticsCardsSkeleton,
+  ChartSectionSkeleton,
+} from '@/components/ui/skeletons'
 
 /**
  * Dashboard page with manual Suspense boundaries

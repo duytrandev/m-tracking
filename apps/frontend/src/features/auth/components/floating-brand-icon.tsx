@@ -15,11 +15,7 @@ export function FloatingBrandIcon() {
   return (
     <div className="flex justify-center mb-8">
       <m.div
-        animate={
-          prefersReducedMotion
-            ? {}
-            : { y: [0, -10, 0] }
-        }
+        animate={prefersReducedMotion ? {} : { y: [0, -10, 0] }}
         transition={{
           duration: 3,
           repeat: Infinity,

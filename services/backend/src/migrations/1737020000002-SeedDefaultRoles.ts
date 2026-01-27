@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class SeedDefaultRoles1737020000002 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -9,7 +9,7 @@ export class SeedDefaultRoles1737020000002 implements MigrationInterface {
       ('00000000-0000-0000-0000-000000000002', 'user', 'Standard user access with basic permissions'),
       ('00000000-0000-0000-0000-000000000003', 'guest', 'Limited read-only access')
       ON CONFLICT (name) DO NOTHING;
-    `);
+    `)
 
     // Insert default permissions
     await queryRunner.query(`
@@ -33,7 +33,7 @@ export class SeedDefaultRoles1737020000002 implements MigrationInterface {
       ('admin:access', 'Access admin dashboard'),
       ('admin:manage-users', 'Manage all users')
       ON CONFLICT (name) DO NOTHING;
-    `);
+    `)
 
     // Assign permissions to admin role (all permissions)
     await queryRunner.query(`
@@ -43,7 +43,7 @@ export class SeedDefaultRoles1737020000002 implements MigrationInterface {
         id as permission_id
       FROM permissions
       ON CONFLICT DO NOTHING;
-    `);
+    `)
 
     // Assign permissions to user role (standard permissions)
     await queryRunner.query(`
@@ -67,7 +67,7 @@ export class SeedDefaultRoles1737020000002 implements MigrationInterface {
         'settings:read'
       )
       ON CONFLICT DO NOTHING;
-    `);
+    `)
 
     // Assign permissions to guest role (read-only)
     await queryRunner.query(`
@@ -84,20 +84,20 @@ export class SeedDefaultRoles1737020000002 implements MigrationInterface {
         'reports:read'
       )
       ON CONFLICT DO NOTHING;
-    `);
+    `)
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     // Delete role permissions
-    await queryRunner.query(`DELETE FROM role_permissions`);
+    await queryRunner.query(`DELETE FROM role_permissions`)
 
     // Delete permissions
-    await queryRunner.query(`DELETE FROM permissions`);
+    await queryRunner.query(`DELETE FROM permissions`)
 
     // Delete user roles
-    await queryRunner.query(`DELETE FROM user_roles`);
+    await queryRunner.query(`DELETE FROM user_roles`)
 
     // Delete roles
-    await queryRunner.query(`DELETE FROM roles`);
+    await queryRunner.query(`DELETE FROM roles`)
   }
 }

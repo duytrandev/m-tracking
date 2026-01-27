@@ -1,11 +1,11 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { CacheModule } from '@nestjs/cache-manager';
-import { redisStore } from 'cache-manager-redis-yet';
-import { TransactionsController } from './transactions.controller';
-import { TransactionsService } from './transactions.service';
-import { Transaction } from './entities/transaction.entity';
-import { Category } from './entities/category.entity';
+import { Module } from '@nestjs/common'
+import { TypeOrmModule } from '@nestjs/typeorm'
+import { CacheModule } from '@nestjs/cache-manager'
+import { redisStore } from 'cache-manager-redis-yet'
+import { TransactionsController } from './transactions.controller'
+import { TransactionsService } from './transactions.service'
+import { Transaction } from './entities/transaction.entity'
+import { Category } from './entities/category.entity'
 
 /**
  * Transactions Module

@@ -10,7 +10,10 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { PasswordInput } from '@/features/auth/components/password-input'
 import { PasswordStrengthIndicator } from '@/features/auth/components/password-strength'
-import { resetPasswordSchema, type ResetPasswordInput } from '@/features/auth/validations/auth-schemas'
+import {
+  resetPasswordSchema,
+  type ResetPasswordInput,
+} from '@/features/auth/validations/auth-schemas'
 import { useResetPassword } from '@/features/auth/hooks/use-reset-password'
 import { useEffect } from 'react'
 
@@ -35,6 +38,9 @@ export default function ResetPasswordPage() {
     },
   })
 
+  // Note: React Hook Form's watch() function is designed to work this way
+  // and cannot be memoized. This is expected behavior.
+   
   const password = watch('password')
 
   useEffect(() => {
@@ -43,15 +49,23 @@ export default function ResetPasswordPage() {
     }
   }, [token, router])
 
-  const onSubmit = (data: ResetPasswordInput) => {
+  const onSubmit = (data: ResetPasswordInput): void => {
     resetPassword(data)
   }
 
   return (
     <AuthCard title={t('title')}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form
+        onSubmit={(e) => {
+          void handleSubmit(onSubmit)(e)
+        }}
+        className="space-y-6"
+      >
         {error && (
-          <div className="flex items-center gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive" role="alert">
+          <div
+            className="flex items-center gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+            role="alert"
+          >
             <AlertCircle className="h-4 w-4" />
             {error}
           </div>
@@ -64,12 +78,18 @@ export default function ResetPasswordPage() {
             placeholder="Create a strong password"
             autoComplete="new-password"
             error={!!errors.password}
-            aria-describedby={errors.password ? 'password-error' : 'password-strength'}
+            aria-describedby={
+              errors.password ? 'password-error' : 'password-strength'
+            }
             {...register('password')}
           />
           <PasswordStrengthIndicator password={password} />
           {errors.password && (
-            <p id="password-error" className="text-sm text-destructive" role="alert">
+            <p
+              id="password-error"
+              className="text-sm text-destructive"
+              role="alert"
+            >
               {errors.password.message}
             </p>
           )}
@@ -82,17 +102,28 @@ export default function ResetPasswordPage() {
             placeholder="Confirm your password"
             autoComplete="new-password"
             error={!!errors.confirmPassword}
-            aria-describedby={errors.confirmPassword ? 'confirm-password-error' : undefined}
+            aria-describedby={
+              errors.confirmPassword ? 'confirm-password-error' : undefined
+            }
             {...register('confirmPassword')}
           />
           {errors.confirmPassword && (
-            <p id="confirm-password-error" className="text-sm text-destructive" role="alert">
+            <p
+              id="confirm-password-error"
+              className="text-sm text-destructive"
+              role="alert"
+            >
               {errors.confirmPassword.message}
             </p>
           )}
         </div>
 
-        <Button type="submit" className="w-full" isLoading={isLoading} loadingText="Resetting...">
+        <Button
+          type="submit"
+          className="w-full"
+          isLoading={isLoading}
+          loadingText="Resetting..."
+        >
           {t('resetButton')}
         </Button>
       </form>

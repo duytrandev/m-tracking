@@ -19,7 +19,7 @@ export function MSWProvider({ children }: { children: React.ReactNode }) {
         })
         setIsReady(true)
       }
-      initMocks()
+      void initMocks()
     } else {
       // If mocking is disabled, we are ready immediately (using real API)
       setIsReady(true)

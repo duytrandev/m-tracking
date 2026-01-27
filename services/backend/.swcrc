@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json.schemastore.org/swcrc",
+  "jsc": {
+    "parser": {
+      "syntax": "typescript",
+      "decorators": true,
+      "dynamicImport": true
+    },
+    "transform": {
+      "legacyDecorator": true,
+      "decoratorMetadata": true
+    },
+    "target": "es2022",
+    "keepClassNames": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["*"],
+      "@gateway/*": ["gateway/*"],
+      "@auth/*": ["auth/*"],
+      "@transactions/*": ["transactions/*"],
+      "@banking/*": ["banking/*"],
+      "@budgets/*": ["budgets/*"],
+      "@notifications/*": ["notifications/*"],
+      "@shared/*": ["shared/*"],
+      "@integrations/*": ["integrations/*"],
+      "@m-tracking/shared": ["../../libs/shared/src/index.ts"],
+      "@m-tracking/shared/*": ["../../libs/shared/src/*"]
+    },
+    "minify": {
+      "compress": false,
+      "mangle": false
+    }
+  },
+  "module": {
+    "type": "commonjs",
+    "strict": false,
+    "strictMode": true,
+    "lazy": false,
+    "noInterop": false
+  },
+  "minify": false,
+  "sourceMaps": true
+}

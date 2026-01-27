@@ -16,7 +16,9 @@ interface UseOtpVerifyReturn {
 export function useOtpVerify(phone: string): UseOtpVerifyReturn {
   const router = useRouter()
   const { login } = useAuthStore()
-  const [attemptsRemaining, setAttemptsRemaining] = useState<number | null>(null)
+  const [attemptsRemaining, setAttemptsRemaining] = useState<number | null>(
+    null
+  )
 
   const mutation = useMutation({
     mutationFn: (code: string) => authApi.verifyOtp(phone, code),
@@ -26,9 +28,11 @@ export function useOtpVerify(phone: string): UseOtpVerifyReturn {
         router.push('/dashboard')
       }
     },
-    onError: (error) => {
+    onError: error => {
       if (isApiError(error) && error.response?.data) {
-        const remaining = (error.response.data as { attemptsRemaining?: number }).attemptsRemaining
+        const remaining = (
+          error.response.data as { attemptsRemaining?: number }
+        ).attemptsRemaining
         if (typeof remaining === 'number') {
           setAttemptsRemaining(remaining)
         }

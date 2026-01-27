@@ -4,17 +4,17 @@
   "projectType": "application",
   "root": "services/backend",
   "sourceRoot": "services/backend/src",
-  "prefix": "api",
   "tags": ["type:app", "scope:backend"],
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
+      "executor": "@nx/js:swc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/services/backend",
         "main": "services/backend/src/main.ts",
         "tsConfig": "services/backend/tsconfig.json",
-        "assets": ["services/backend/src/assets"]
+        "assets": ["services/backend/src/assets"],
+        "swcrc": "services/backend/.swcrc"
       },
       "configurations": {
         "production": {
@@ -23,13 +23,6 @@
       }
     },
     "serve": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "pnpm dev",
-        "cwd": "services/backend"
-      }
-    },
-    "dev": {
       "executor": "nx:run-commands",
       "options": {
         "command": "pnpm dev",
@@ -46,7 +39,8 @@
     "lint": {
       "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": ["services/backend/src/**/*.ts"]
+        "lintFilePatterns": ["services/backend/src/**/*.ts"],
+        "fix": true
       },
       "cache": true
     },
@@ -73,6 +67,13 @@
         "cwd": "services/backend"
       },
       "cache": true
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prettier --write \"src/**/*.ts\"",
+        "cwd": "services/backend"
+      }
     }
   }
 }

@@ -11,7 +11,7 @@ export type SidebarState = 'expanded' | 'collapsed'
  * Includes client-side guards for SSR compatibility.
  */
 const safeLocalStorage: StateStorage = {
-  getItem: (name) => {
+  getItem: name => {
     // Guard: Only access localStorage in browser environment
     if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
       return null
@@ -19,8 +19,8 @@ const safeLocalStorage: StateStorage = {
 
     try {
       return localStorage.getItem(name)
-    } catch (error) {
-      console.warn('Failed to read from localStorage:', error)
+    } catch {
+      // Storage access failed - return null gracefully
       return null
     }
   },
@@ -39,20 +39,18 @@ const safeLocalStorage: StateStorage = {
         (error.name === 'QuotaExceededError' ||
           error.name === 'NS_ERROR_DOM_QUOTA_REACHED')
       ) {
-        console.warn('localStorage quota exceeded. Theme will not persist.')
-        // Try to clear old data and retry
+        // Storage quota exceeded - try to clear and retry
         try {
           localStorage.clear()
           localStorage.setItem(name, value)
-        } catch (retryError) {
-          console.error('Failed to save to localStorage after clearing:', retryError)
+        } catch {
+          // Failed to save after clearing - theme will not persist
         }
-      } else {
-        console.error('Failed to write to localStorage:', error)
       }
+      // Failed to write to localStorage - theme will not persist
     }
   },
-  removeItem: (name) => {
+  removeItem: name => {
     // Guard: Only access localStorage in browser environment
     if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
       return
@@ -60,8 +58,8 @@ const safeLocalStorage: StateStorage = {
 
     try {
       localStorage.removeItem(name)
-    } catch (error) {
-      console.warn('Failed to remove from localStorage:', error)
+    } catch {
+      // Failed to remove from localStorage - ignore
     }
   },
 }
@@ -106,41 +104,41 @@ function applyTheme(resolvedTheme: ResolvedTheme): void {
 
 export const useUIStore = create<UIState>()(
   persist(
-    (set) => ({
+    set => ({
       theme: 'system',
       resolvedTheme: 'light',
       sidebarState: 'expanded',
       isMobileMenuOpen: false,
 
-      setTheme: (theme) => {
+      setTheme: theme => {
         const resolvedTheme = resolveTheme(theme)
         applyTheme(resolvedTheme)
         set({ theme, resolvedTheme })
       },
 
-      setResolvedTheme: (resolvedTheme) => {
+      setResolvedTheme: resolvedTheme => {
         applyTheme(resolvedTheme)
         set({ resolvedTheme })
       },
 
       toggleSidebar: () =>
-        set((state) => ({
+        set(state => ({
           sidebarState:
             state.sidebarState === 'expanded' ? 'collapsed' : 'expanded',
         })),
 
-      setSidebarState: (sidebarState) => set({ sidebarState }),
+      setSidebarState: sidebarState => set({ sidebarState }),
 
-      setMobileMenuOpen: (isMobileMenuOpen) => set({ isMobileMenuOpen }),
+      setMobileMenuOpen: isMobileMenuOpen => set({ isMobileMenuOpen }),
     }),
     {
       name: 'ui-storage',
       storage: createJSONStorage(() => safeLocalStorage),
-      partialize: (state) => ({
+      partialize: state => ({
         theme: state.theme,
         sidebarState: state.sidebarState,
       }),
-      onRehydrateStorage: () => (state) => {
+      onRehydrateStorage: () => state => {
         // After hydration, resolve and apply theme
         if (state) {
           const resolved = resolveTheme(state.theme)
@@ -152,10 +150,10 @@ export const useUIStore = create<UIState>()(
 )
 
 // Selector hooks for optimized re-renders
-export const useTheme = (): Theme => useUIStore((s) => s.theme)
+export const useTheme = (): Theme => useUIStore(s => s.theme)
 export const useResolvedTheme = (): ResolvedTheme =>
-  useUIStore((s) => s.resolvedTheme)
+  useUIStore(s => s.resolvedTheme)
 export const useSidebarState = (): SidebarState =>
-  useUIStore((s) => s.sidebarState)
+  useUIStore(s => s.sidebarState)
 export const useIsMobileMenuOpen = (): boolean =>
-  useUIStore((s) => s.isMobileMenuOpen)
+  useUIStore(s => s.isMobileMenuOpen)

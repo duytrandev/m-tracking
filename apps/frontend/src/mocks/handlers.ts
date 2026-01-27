@@ -14,7 +14,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
 
 export const handlers = [
   // Auth Handlers
-  http.post(`${API_URL}/auth/login`, async () => {
+  http.post(`${API_URL}/auth/login`, () => {
     return HttpResponse.json({
       accessToken: 'mock-access-token-' + Date.now(),
       expiresIn: 3600,
@@ -27,19 +27,19 @@ export const handlers = [
     })
   }),
 
-  http.post(`${API_URL}/auth/register`, async () => {
+  http.post(`${API_URL}/auth/register`, () => {
     return HttpResponse.json({
       message: 'Registration successful',
     })
   }),
 
-  http.post(`${API_URL}/auth/logout`, async () => {
+  http.post(`${API_URL}/auth/logout`, () => {
     return HttpResponse.json({
       message: 'Logged out successfully',
     })
   }),
 
-  http.post(`${API_URL}/auth/refresh`, async () => {
+  http.post(`${API_URL}/auth/refresh`, () => {
     return HttpResponse.json({
       accessToken: 'mock-refreshed-token-' + Date.now(),
       expiresIn: 3600,
@@ -47,7 +47,7 @@ export const handlers = [
   }),
 
   // User Handlers
-  http.get(`${API_URL}/users/me`, async () => {
+  http.get(`${API_URL}/users/me`, () => {
     return HttpResponse.json({
       id: 'user-123',
       email: 'test@example.com',
@@ -99,7 +99,7 @@ export const handlers = [
     return HttpResponse.json(newTransaction, { status: 201 })
   }),
 
-  http.get(`${API_URL}/transactions/:id`, async ({ params }) => {
+  http.get(`${API_URL}/transactions/:id`, ({ params }) => {
     const { id } = params
     const transaction = mockTransactions.find(t => t.id === id)
 
@@ -135,7 +135,7 @@ export const handlers = [
     return HttpResponse.json(updatedTransaction)
   }),
 
-  http.delete(`${API_URL}/transactions/:id`, async ({ params }) => {
+  http.delete(`${API_URL}/transactions/:id`, ({ params }) => {
     const { id } = params
     const transaction = mockTransactions.find(t => t.id === id)
 
@@ -164,7 +164,7 @@ export const handlers = [
     return HttpResponse.json(newCategory, { status: 201 })
   }),
 
-  http.get(`${API_URL}/transactions/categories/:id`, async ({ params }) => {
+  http.get(`${API_URL}/transactions/categories/:id`, ({ params }) => {
     const { id } = params
     const category = mockCategories.find(c => c.id === id)
 
@@ -178,7 +178,7 @@ export const handlers = [
     return HttpResponse.json(category)
   }),
 
-  http.delete(`${API_URL}/transactions/categories/:id`, async ({ params }) => {
+  http.delete(`${API_URL}/transactions/categories/:id`, ({ params }) => {
     const { id } = params
     const category = mockCategories.find(c => c.id === id)
 

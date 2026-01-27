@@ -1,6 +1,12 @@
 'use client'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { ProfileForm } from '@/features/profile/components/profile-form'
 import { AvatarUpload } from '@/features/profile/components/avatar-upload'
 import { useProfile } from '@/features/profile/hooks/use-profile'
@@ -29,7 +35,10 @@ export default function ProfileSettingsPage(): React.ReactElement {
           <CardDescription>Update your profile picture</CardDescription>
         </CardHeader>
         <CardContent>
-          <AvatarUpload currentAvatar={profile?.avatar} name={profile?.name || 'User'} />
+          <AvatarUpload
+            currentAvatar={profile?.avatar}
+            name={profile?.name || 'User'}
+          />
         </CardContent>
       </Card>
 

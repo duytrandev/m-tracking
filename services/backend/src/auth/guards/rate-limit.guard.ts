@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { ThrottlerGuard } from '@nestjs/throttler';
+import { Injectable } from '@nestjs/common'
+import { ThrottlerGuard } from '@nestjs/throttler'
 
 /**
  * Rate limiting guard for sensitive auth endpoints

@@ -33,7 +33,10 @@ export function createAppError(error: unknown): AppError {
     }
 
     const status = error.response.status
-    const message = error.response.data?.message || error.message
+    const responseData = error.response.data as
+      | { message?: string; errors?: Record<string, unknown> }
+      | undefined
+    const message = responseData?.message ?? error.message
 
     switch (status) {
       case 401:
@@ -48,11 +51,15 @@ export function createAppError(error: unknown): AppError {
           code: ApiErrorCode.VALIDATION,
           message,
           statusCode: status,
-          details: error.response.data?.errors,
+          details: responseData?.errors,
         }
       default:
         if (status >= 500) {
-          return { code: ApiErrorCode.SERVER_ERROR, message, statusCode: status }
+          return {
+            code: ApiErrorCode.SERVER_ERROR,
+            message,
+            statusCode: status,
+          }
         }
         return { code: ApiErrorCode.UNKNOWN, message, statusCode: status }
     }

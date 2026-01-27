@@ -1,5 +1,5 @@
-import { Injectable, Scope } from '@nestjs/common';
-import * as Sentry from '@sentry/node';
+import { Injectable, Scope } from '@nestjs/common'
+import * as Sentry from '@sentry/node'
 
 /**
  * Sentry service for manual error tracking and context enrichment
@@ -33,10 +33,14 @@ export class SentryService {
    * @param context - Additional context to attach to the error
    * @returns Event ID for tracking the error in Sentry
    */
-  captureException(exception: Error, context?: Record<string, any>): string {
-    return Sentry.captureException(exception, {
-      contexts: context,
-    });
+  captureException(
+    exception: Error,
+    context?: Record<string, unknown>
+  ): string {
+    // Sentry's EventHint interface expects contexts to be typed differently
+    // We use type assertion here as context is a valid Sentry option
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+    return Sentry.captureException(exception, { contexts: context } as any)
   }
 
   /**
@@ -46,8 +50,11 @@ export class SentryService {
    * @param level - Severity level (info, warning, error, fatal)
    * @returns Event ID
    */
-  captureMessage(message: string, level: Sentry.SeverityLevel = 'info'): string {
-    return Sentry.captureMessage(message, level);
+  captureMessage(
+    message: string,
+    level: Sentry.SeverityLevel = 'info'
+  ): string {
+    return Sentry.captureMessage(message, level)
   }
 
   /**
@@ -67,7 +74,7 @@ export class SentryService {
    * });
    */
   addBreadcrumb(breadcrumb: Sentry.Breadcrumb): void {
-    Sentry.addBreadcrumb(breadcrumb);
+    Sentry.addBreadcrumb(breadcrumb)
   }
 
   /**
@@ -83,14 +90,14 @@ export class SentryService {
       id: user.id,
       email: user.email,
       username: user.username,
-    });
+    })
   }
 
   /**
    * Clear user context (e.g., on logout)
    */
   clearUser(): void {
-    Sentry.setUser(null);
+    Sentry.setUser(null)
   }
 
   /**
@@ -106,7 +113,7 @@ export class SentryService {
    * });
    */
   setTags(tags: Record<string, string>): void {
-    Sentry.setTags(tags);
+    Sentry.setTags(tags)
   }
 
   /**
@@ -122,8 +129,8 @@ export class SentryService {
    *   sync_mode: 'automatic'
    * });
    */
-  setContext(name: string, context: Record<string, any>): void {
-    Sentry.setContext(name, context);
+  setContext(name: string, context: Record<string, unknown>): void {
+    Sentry.setContext(name, context)
   }
 
   /**
@@ -148,8 +155,11 @@ export class SentryService {
    *   transaction.finish();
    * }
    */
-  startTransaction(name: string, op: string): any {
+  startTransaction(
+    name: string,
+    op: string
+  ): { name: string; op: string; finish: () => void; setStatus: () => void } {
     // return Sentry.startTransaction({ name, op });
-    return { name, op, finish: () => {}, setStatus: () => {} };
+    return { name, op, finish: () => {}, setStatus: () => {} }
   }
 }

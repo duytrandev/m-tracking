@@ -1,12 +1,17 @@
 /**
  * Auth feature public API
- * 
+ *
  * Barrel export to prevent deep imports and establish clear feature boundaries.
  * Import from '@/features/auth' instead of '@/features/auth/store/auth-store'
  */
 
 // Store
-export { useAuthStore, useUser, useIsAuthenticated, useIsAuthLoading } from './store/auth-store'
+export {
+  useAuthStore,
+  useUser,
+  useIsAuthenticated,
+  useIsAuthLoading,
+} from './store/auth-store'
 export type { User, AuthState } from './store/auth-store'
 
 // Hooks

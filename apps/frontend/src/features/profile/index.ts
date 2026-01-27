@@ -1,6 +1,6 @@
 /**
  * Profile feature public API
- * 
+ *
  * Barrel export to prevent deep imports and establish clear feature boundaries.
  */
 
