@@ -4,6 +4,7 @@
  * These utilities ensure localStorage/sessionStorage are only accessed
  * in browser environments, preventing SSR errors in Next.js.
  */
+ 
 
 /**
  * Checks if we're in a browser environment
