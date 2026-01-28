@@ -19,7 +19,9 @@ export class SessionService {
   async createSession(
     userId: string,
     refreshToken: string,
-    deviceInfo: string | Record<string, string | string[] | number | boolean | null | undefined>,
+    deviceInfo:
+      | string
+      | Record<string, string | string[] | number | boolean | null | undefined>,
     ipAddress: string
   ): Promise<Session> {
     const tokenHash = this.hashToken(refreshToken)
