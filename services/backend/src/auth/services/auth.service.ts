@@ -314,7 +314,10 @@ export class AuthService {
    */
   async login(
     user: User,
-    deviceInfo: Record<string, string | string[] | number | boolean | null | undefined>,
+    deviceInfo: Record<
+      string,
+      string | string[] | number | boolean | null | undefined
+    >,
     ipAddress: string
   ) {
     this.logger.log(`Generating tokens for user: ${user.id}`)

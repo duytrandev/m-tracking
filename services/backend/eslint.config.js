@@ -1,5 +1,10 @@
 import { defineConfig } from 'eslint/config'
 import rootConfig from '../../eslint.config.js'
+import {
+  nestjsRules,
+  migrationRules,
+  sharedUtilityRules,
+} from '../../tooling/eslint/index.js'
 
 export default defineConfig(
   // Extend root config
@@ -17,41 +22,18 @@ export default defineConfig(
         tsconfigRootDir: import.meta.dirname,
       },
     },
-    rules: {
-      // Allow I prefix for interfaces (NestJS convention)
-      '@typescript-eslint/interface-name-prefix': 'off',
-      // Allow decorated classes (NestJS modules, controllers, etc.)
-      '@typescript-eslint/no-extraneous-class': [
-        'error',
-        { allowEmpty: true, allowWithDecorator: true, allowStaticOnly: true },
-      ],
-    },
+    rules: nestjsRules,
   },
 
   // Less strict rules for migrations
   {
     files: ['**/migrations/**/*.ts', 'src/migrations/**/*.ts'],
-    rules: {
-      'no-console': 'off',
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-    },
+    rules: migrationRules,
   },
 
   // Less strict rules for shared utilities
   {
     files: ['**/shared/**/*.ts'],
-    rules: {
-      'no-console': 'warn',
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-unsafe-argument': 'warn',
-      '@typescript-eslint/no-unsafe-assignment': 'warn',
-      '@typescript-eslint/no-unsafe-member-access': 'warn',
-      '@typescript-eslint/no-unsafe-call': 'warn',
-      '@typescript-eslint/no-unsafe-return': 'warn',
-      '@typescript-eslint/restrict-template-expressions': 'warn',
-      '@typescript-eslint/no-base-to-string': 'warn',
-      '@typescript-eslint/no-redundant-type-constituents': 'warn',
-    },
+    rules: sharedUtilityRules,
   }
 )

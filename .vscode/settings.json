@@ -2,7 +2,6 @@
   // AI Assistant Settings
   "chat.agent.enabled": true,
   "chat.agent.maxRequests": 15,
-  "github.copilot.chat.agent.runTasks": true,
   "chat.mcp.discovery.enabled": {
     "claude-desktop": true,
     "windsurf": true,
@@ -10,7 +9,6 @@
     "cursor-workspace": true
   },
   "github.copilot.chat.agent.autoFix": true,
-  "chat.tools.autoApprove": false,
 
   // Editor Settings
   "editor.formatOnSave": true,
@@ -24,10 +22,12 @@
   "typescript.enablePromptUseWorkspaceTsdk": true,
 
   // ESLint Settings
+  "eslint.useFlatConfig": true,
   "eslint.workingDirectories": [
-    {
-      "mode": "auto"
-    }
+    { "pattern": "./" },
+    { "pattern": "./apps/*" },
+    { "pattern": "./libs/*" },
+    { "pattern": "./services/*" }
   ],
 
   // File Explorer
