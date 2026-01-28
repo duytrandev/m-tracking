@@ -52,7 +52,7 @@ export default defineConfig(
     },
   },
   {
-    files: consoleAllowList.map((pattern) => `apps/frontend/${pattern}`),
+    files: consoleAllowList.map(pattern => `apps/frontend/${pattern}`),
     rules: { 'no-console': 'off' },
   },
 
@@ -97,4 +97,3 @@ export default defineConfig(
     rules: testRules,
   }
 )
-

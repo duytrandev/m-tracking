@@ -11,6 +11,7 @@
 Comprehensive testing strategy for M-Tracking covering unit tests, integration tests, end-to-end tests, and quality assurance processes.
 
 **Testing Philosophy:**
+
 - **Test behavior, not implementation**
 - **Write tests alongside code (TDD encouraged)**
 - **Maintain 80%+ code coverage**
@@ -111,15 +112,15 @@ apps/frontend/
 
 ```typescript
 // auth.service.spec.ts
-import { Test, TestingModule } from '@nestjs/testing';
-import { AuthService } from './auth.service';
-import { UsersRepository } from '../users/users.repository';
-import { JwtService } from '@nestjs/jwt';
+import { Test, TestingModule } from '@nestjs/testing'
+import { AuthService } from './auth.service'
+import { UsersRepository } from '../users/users.repository'
+import { JwtService } from '@nestjs/jwt'
 
 describe('AuthService', () => {
-  let service: AuthService;
-  let usersRepository: jest.Mocked<UsersRepository>;
-  let jwtService: jest.Mocked<JwtService>;
+  let service: AuthService
+  let usersRepository: jest.Mocked<UsersRepository>
+  let jwtService: jest.Mocked<JwtService>
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -140,56 +141,56 @@ describe('AuthService', () => {
           },
         },
       ],
-    }).compile();
+    }).compile()
 
-    service = module.get<AuthService>(AuthService);
-    usersRepository = module.get(UsersRepository);
-    jwtService = module.get(JwtService);
-  });
+    service = module.get<AuthService>(AuthService)
+    usersRepository = module.get(UsersRepository)
+    jwtService = module.get(JwtService)
+  })
 
   describe('login', () => {
     it('should return access token when credentials are valid', async () => {
       // Arrange
-      const email = 'test@example.com';
-      const password = 'password123';
-      const user = { id: '1', email, passwordHash: 'hashed' };
+      const email = 'test@example.com'
+      const password = 'password123'
+      const user = { id: '1', email, passwordHash: 'hashed' }
 
-      usersRepository.findByEmail.mockResolvedValue(user);
-      jwtService.sign.mockReturnValue('mock-token');
+      usersRepository.findByEmail.mockResolvedValue(user)
+      jwtService.sign.mockReturnValue('mock-token')
 
       // Act
-      const result = await service.login(email, password);
+      const result = await service.login(email, password)
 
       // Assert
-      expect(result).toEqual({ accessToken: 'mock-token' });
-      expect(usersRepository.findByEmail).toHaveBeenCalledWith(email);
-    });
+      expect(result).toEqual({ accessToken: 'mock-token' })
+      expect(usersRepository.findByEmail).toHaveBeenCalledWith(email)
+    })
 
     it('should throw UnauthorizedException when user not found', async () => {
       // Arrange
-      usersRepository.findByEmail.mockResolvedValue(null);
+      usersRepository.findByEmail.mockResolvedValue(null)
 
       // Act & Assert
       await expect(
         service.login('invalid@example.com', 'password')
-      ).rejects.toThrow('Invalid credentials');
-    });
-  });
-});
+      ).rejects.toThrow('Invalid credentials')
+    })
+  })
+})
 ```
 
 #### Controller Testing
 
 ```typescript
 // auth.controller.spec.ts
-import { Test, TestingModule } from '@nestjs/testing';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
+import { Test, TestingModule } from '@nestjs/testing'
+import { AuthController } from './auth.controller'
+import { AuthService } from './auth.service'
+import { LoginDto } from './dto/login.dto'
 
 describe('AuthController', () => {
-  let controller: AuthController;
-  let service: jest.Mocked<AuthService>;
+  let controller: AuthController
+  let service: jest.Mocked<AuthService>
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -203,28 +204,28 @@ describe('AuthController', () => {
           },
         },
       ],
-    }).compile();
+    }).compile()
 
-    controller = module.get<AuthController>(AuthController);
-    service = module.get(AuthService);
-  });
+    controller = module.get<AuthController>(AuthController)
+    service = module.get(AuthService)
+  })
 
   describe('POST /auth/login', () => {
     it('should return tokens when login succeeds', async () => {
       // Arrange
-      const dto: LoginDto = { email: 'test@example.com', password: 'pass' };
-      const expectedResult = { accessToken: 'token', refreshToken: 'refresh' };
-      service.login.mockResolvedValue(expectedResult);
+      const dto: LoginDto = { email: 'test@example.com', password: 'pass' }
+      const expectedResult = { accessToken: 'token', refreshToken: 'refresh' }
+      service.login.mockResolvedValue(expectedResult)
 
       // Act
-      const result = await controller.login(dto);
+      const result = await controller.login(dto)
 
       // Assert
-      expect(result).toEqual(expectedResult);
-      expect(service.login).toHaveBeenCalledWith(dto.email, dto.password);
-    });
-  });
-});
+      expect(result).toEqual(expectedResult)
+      expect(service.login).toHaveBeenCalledWith(dto.email, dto.password)
+    })
+  })
+})
 ```
 
 ### Frontend Unit Tests (Vitest)
@@ -263,27 +264,27 @@ describe('Button', () => {
 
 ```typescript
 // useAuth.test.ts
-import { renderHook, waitFor } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
-import { useAuth } from './useAuth';
+import { renderHook, waitFor } from '@testing-library/react'
+import { describe, it, expect } from 'vitest'
+import { useAuth } from './useAuth'
 
 describe('useAuth', () => {
   it('should return null user initially', () => {
-    const { result } = renderHook(() => useAuth());
-    expect(result.current.user).toBeNull();
-  });
+    const { result } = renderHook(() => useAuth())
+    expect(result.current.user).toBeNull()
+  })
 
   it('should login user successfully', async () => {
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth())
 
-    await result.current.login('test@example.com', 'password');
+    await result.current.login('test@example.com', 'password')
 
     await waitFor(() => {
-      expect(result.current.user).not.toBeNull();
-      expect(result.current.isAuthenticated).toBe(true);
-    });
-  });
-});
+      expect(result.current.user).not.toBeNull()
+      expect(result.current.isAuthenticated).toBe(true)
+    })
+  })
+})
 ```
 
 ### Running Unit Tests
@@ -315,15 +316,15 @@ pytest -k "test_categorize"             # Pattern match
 
 ```typescript
 // auth.integration.spec.ts
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
-import { AppModule } from '../../app.module';
-import { PostgreSqlContainer } from '@testcontainers/postgresql';
+import { Test, TestingModule } from '@nestjs/testing'
+import { INestApplication } from '@nestjs/common'
+import * as request from 'supertest'
+import { AppModule } from '../../app.module'
+import { PostgreSqlContainer } from '@testcontainers/postgresql'
 
 describe('Auth Integration Tests', () => {
-  let app: INestApplication;
-  let postgresContainer: PostgreSqlContainer;
+  let app: INestApplication
+  let postgresContainer: PostgreSqlContainer
 
   beforeAll(async () => {
     // Start PostgreSQL container
@@ -331,7 +332,7 @@ describe('Auth Integration Tests', () => {
       .withDatabase('test_db')
       .withUsername('test_user')
       .withPassword('test_pass')
-      .start();
+      .start()
 
     // Create app with test database
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -339,16 +340,16 @@ describe('Auth Integration Tests', () => {
     })
       .overrideProvider('DATABASE_URL')
       .useValue(postgresContainer.getConnectionUri())
-      .compile();
+      .compile()
 
-    app = moduleFixture.createNestApplication();
-    await app.init();
-  });
+    app = moduleFixture.createNestApplication()
+    await app.init()
+  })
 
   afterAll(async () => {
-    await app.close();
-    await postgresContainer.stop();
-  });
+    await app.close()
+    await postgresContainer.stop()
+  })
 
   describe('POST /auth/register', () => {
     it('should register new user and return tokens', async () => {
@@ -359,15 +360,15 @@ describe('Auth Integration Tests', () => {
           password: 'StrongPass123!',
           name: 'Test User',
         })
-        .expect(201);
+        .expect(201)
 
-      expect(response.body).toHaveProperty('accessToken');
-      expect(response.body).toHaveProperty('refreshToken');
+      expect(response.body).toHaveProperty('accessToken')
+      expect(response.body).toHaveProperty('refreshToken')
       expect(response.body.user).toMatchObject({
         email: 'newuser@example.com',
         name: 'Test User',
-      });
-    });
+      })
+    })
 
     it('should return 400 when email is invalid', async () => {
       await request(app.getHttpServer())
@@ -376,20 +377,18 @@ describe('Auth Integration Tests', () => {
           email: 'invalid-email',
           password: 'password',
         })
-        .expect(400);
-    });
-  });
+        .expect(400)
+    })
+  })
 
   describe('POST /auth/login', () => {
     beforeEach(async () => {
       // Create test user
-      await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({
-          email: 'existing@example.com',
-          password: 'password123',
-        });
-    });
+      await request(app.getHttpServer()).post('/auth/register').send({
+        email: 'existing@example.com',
+        password: 'password123',
+      })
+    })
 
     it('should login with correct credentials', async () => {
       const response = await request(app.getHttpServer())
@@ -398,10 +397,10 @@ describe('Auth Integration Tests', () => {
           email: 'existing@example.com',
           password: 'password123',
         })
-        .expect(200);
+        .expect(200)
 
-      expect(response.body).toHaveProperty('accessToken');
-    });
+      expect(response.body).toHaveProperty('accessToken')
+    })
 
     it('should return 401 with wrong password', async () => {
       await request(app.getHttpServer())
@@ -410,10 +409,10 @@ describe('Auth Integration Tests', () => {
           email: 'existing@example.com',
           password: 'wrongpassword',
         })
-        .expect(401);
-    });
-  });
-});
+        .expect(401)
+    })
+  })
+})
 ```
 
 ### Running Integration Tests
@@ -434,49 +433,49 @@ docker ps  # Verify containers start/stop properly
 
 ```typescript
 // e2e/auth.spec.ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from '@playwright/test'
 
 test.describe('Authentication Flow', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000');
-  });
+    await page.goto('http://localhost:3000')
+  })
 
   test('should allow user to register', async ({ page }) => {
     // Navigate to register page
-    await page.click('text=Sign Up');
+    await page.click('text=Sign Up')
 
     // Fill registration form
-    await page.fill('input[name="email"]', 'test@example.com');
-    await page.fill('input[name="password"]', 'StrongPass123!');
-    await page.fill('input[name="confirmPassword"]', 'StrongPass123!');
-    await page.fill('input[name="name"]', 'Test User');
+    await page.fill('input[name="email"]', 'test@example.com')
+    await page.fill('input[name="password"]', 'StrongPass123!')
+    await page.fill('input[name="confirmPassword"]', 'StrongPass123!')
+    await page.fill('input[name="name"]', 'Test User')
 
     // Submit form
-    await page.click('button[type="submit"]');
+    await page.click('button[type="submit"]')
 
     // Verify redirect to dashboard
-    await expect(page).toHaveURL(/.*dashboard/);
-    await expect(page.locator('text=Welcome, Test User')).toBeVisible();
-  });
+    await expect(page).toHaveURL(/.*dashboard/)
+    await expect(page.locator('text=Welcome, Test User')).toBeVisible()
+  })
 
   test('should allow user to login', async ({ page }) => {
-    await page.click('text=Login');
-    await page.fill('input[name="email"]', 'existing@example.com');
-    await page.fill('input[name="password"]', 'password123');
-    await page.click('button[type="submit"]');
+    await page.click('text=Login')
+    await page.fill('input[name="email"]', 'existing@example.com')
+    await page.fill('input[name="password"]', 'password123')
+    await page.click('button[type="submit"]')
 
-    await expect(page).toHaveURL(/.*dashboard/);
-  });
+    await expect(page).toHaveURL(/.*dashboard/)
+  })
 
   test('should show error with invalid credentials', async ({ page }) => {
-    await page.click('text=Login');
-    await page.fill('input[name="email"]', 'invalid@example.com');
-    await page.fill('input[name="password"]', 'wrongpass');
-    await page.click('button[type="submit"]');
+    await page.click('text=Login')
+    await page.fill('input[name="email"]', 'invalid@example.com')
+    await page.fill('input[name="password"]', 'wrongpass')
+    await page.click('button[type="submit"]')
 
-    await expect(page.locator('text=Invalid credentials')).toBeVisible();
-  });
-});
+    await expect(page.locator('text=Invalid credentials')).toBeVisible()
+  })
+})
 ```
 
 ### Running E2E Tests
@@ -539,20 +538,22 @@ open htmlcov/index.html
 ### General Principles
 
 1. **AAA Pattern** (Arrange, Act, Assert)
+
    ```typescript
    it('should do something', () => {
      // Arrange - Setup test data
-     const input = { value: 10 };
+     const input = { value: 10 }
 
      // Act - Execute the code
-     const result = calculate(input);
+     const result = calculate(input)
 
      // Assert - Verify result
-     expect(result).toBe(20);
-   });
+     expect(result).toBe(20)
+   })
    ```
 
 2. **Test Naming**
+
    ```typescript
    // ✅ Good - Descriptive
    it('should return 401 when token is expired')
@@ -564,46 +565,53 @@ open htmlcov/index.html
    ```
 
 3. **One Assertion Per Test** (when possible)
+
    ```typescript
    // ✅ Good
    it('should set user email', () => {
-     expect(user.email).toBe('test@example.com');
-   });
+     expect(user.email).toBe('test@example.com')
+   })
 
    it('should set user name', () => {
-     expect(user.name).toBe('Test User');
-   });
+     expect(user.name).toBe('Test User')
+   })
 
    // ⚠️ Acceptable for related properties
    it('should create user with correct properties', () => {
-     expect(user.email).toBe('test@example.com');
-     expect(user.name).toBe('Test User');
-     expect(user.role).toBe('user');
-   });
+     expect(user.email).toBe('test@example.com')
+     expect(user.name).toBe('Test User')
+     expect(user.role).toBe('user')
+   })
    ```
 
 4. **Avoid Test Interdependence**
+
    ```typescript
    // ✅ Good - Independent tests
    describe('UserService', () => {
      beforeEach(() => {
        // Fresh setup for each test
-       user = createTestUser();
-     });
-   });
+       user = createTestUser()
+     })
+   })
 
    // ❌ Bad - Tests depend on order
-   it('creates user', () => { /* ... */ });
-   it('updates user', () => { /* depends on previous test */ });
+   it('creates user', () => {
+     /* ... */
+   })
+   it('updates user', () => {
+     /* depends on previous test */
+   })
    ```
 
 5. **Mock External Dependencies**
+
    ```typescript
    // ✅ Good - Mock external API
-   jest.mock('./plaid.service');
+   jest.mock('./plaid.service')
 
    // ❌ Bad - Real API calls in tests
-   const response = await fetch('https://api.plaid.com/...');
+   const response = await fetch('https://api.plaid.com/...')
    ```
 
 ---
@@ -692,6 +700,7 @@ jobs:
 ### Common Issues
 
 #### Tests Timeout
+
 ```bash
 # Increase timeout in Jest
 jest.setTimeout(30000);
@@ -701,6 +710,7 @@ test.setTimeout(60000);
 ```
 
 #### Database Connection Issues
+
 ```bash
 # Check Testcontainers logs
 docker logs <container-id>
@@ -711,6 +721,7 @@ docker exec -it <container-id> psql -U test_user -d test_db
 ```
 
 #### Flaky Tests
+
 ```bash
 # Run specific test multiple times
 pnpm run test auth.spec --run-in-band
@@ -720,6 +731,7 @@ jest --runInBand
 ```
 
 #### Coverage Not Generated
+
 ```bash
 # Clear Jest cache
 jest --clearCache

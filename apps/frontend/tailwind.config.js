@@ -49,8 +49,8 @@ export default {
         },
       },
       transitionTimingFunction: {
-        'out': 'var(--ease-out)',
-        'spring': 'var(--ease-spring)',
+        out: 'var(--ease-out)',
+        spring: 'var(--ease-spring)',
       },
       borderRadius: {
         lg: 'var(--radius)',

@@ -13,55 +13,65 @@ Conducted comprehensive audit of project documentation identifying duplications,
 ### 1. Duplication Issues
 
 **Getting Started Section**
+
 - Duplicated across all three files with different details
 - Package manager confusion (npm vs pnpm)
 - Inconsistent version requirements
 
 **Development Commands**
+
 - Repeated in README.md and PROJECT_STRUCTURE.md
 - Mixed command formats (npm, pnpm, nx)
 - Outdated script references
 
 **Architecture Information**
+
 - Technology stack details duplicated between README and PROJECT_STRUCTURE
 - Different version numbers in different locations
 - Conflicting infrastructure descriptions
 
 **Coding Standards**
+
 - Mentioned in both README and CONTRIBUTING
 - Partial duplication of content that should reference docs/code-standards.md
 
 ### 2. Inconsistencies Identified
 
 **Package Manager**
+
 - README.md: Uses `pnpm` commands
 - PROJECT_STRUCTURE.md: Uses `npm` commands ❌
 - CONTRIBUTING.md: Uses `pnpm` commands
 - **Resolution**: All files updated to use `pnpm` (from package.json packageManager field)
 
 **Node.js Version**
+
 - README.md: >= 20.10.0
 - PROJECT_STRUCTURE.md: 24.13.0 LTS (specific)
 - package.json engines: >= 20.10.0
 - **Resolution**: Standardized to >= 20.10.0 (minimum), recommend 24.13.0 LTS
 
 **pnpm Version**
+
 - README.md: >= 8.0.0 (outdated)
 - CONTRIBUTING.md: >= 10.28.0 (correct)
 - package.json: 10.28.0 (enforced)
 - **Resolution**: Updated to >= 10.28.0 everywhere
 
 **Python Version**
+
 - README.md: >= 3.12 (with uv)
 - PROJECT_STRUCTURE.md: 3.11+ ❌
 - **Resolution**: Standardized to >= 3.12
 
 **Database Configuration**
+
 - README.md: PostgreSQL 15 + TimescaleDB (local Docker)
 - PROJECT_STRUCTURE.md: PostgreSQL 15+ (Supabase hosted)
 - **Resolution**: Clarified dual support - local development via Docker, production via Supabase
 
 **Infrastructure**
+
 - README.md: Kubernetes (AWS EKS), Terraform
 - PROJECT_STRUCTURE.md: AWS EC2 + Docker Compose
 - **Resolution**: Clarified development (Docker Compose) vs production (flexible deployment options)
@@ -70,32 +80,35 @@ Conducted comprehensive audit of project documentation identifying duplications,
 
 Research conducted on January 19, 2026 for latest stable versions:
 
-| Package | Old Version | Current Version | Status |
-|---------|-------------|-----------------|--------|
-| Node.js | >= 20.10.0 | 24.13.0 LTS | ✅ Updated recommendation |
-| pnpm | >= 8.0.0 | 10.28.0 | ✅ Updated |
-| Python | >= 3.12 | 3.13.11 | ✅ Documented |
-| Next.js | 16 | 16.1 | ✅ Updated |
-| React | 19 | 19.2 | ✅ Updated |
-| NestJS | 10+ | 11.1.12 | ✅ Updated |
-| TypeScript | 5.3.3 | 5.9.x | ⚠️ Recommend upgrade |
-| TailwindCSS | 3.x | 4.1.18 | ⚠️ Major version update available |
-| PostgreSQL | 15 | 17.7 | ℹ️ Documented as option |
+| Package     | Old Version | Current Version | Status                            |
+| ----------- | ----------- | --------------- | --------------------------------- |
+| Node.js     | >= 20.10.0  | 24.13.0 LTS     | ✅ Updated recommendation         |
+| pnpm        | >= 8.0.0    | 10.28.0         | ✅ Updated                        |
+| Python      | >= 3.12     | 3.13.11         | ✅ Documented                     |
+| Next.js     | 16          | 16.1            | ✅ Updated                        |
+| React       | 19          | 19.2            | ✅ Updated                        |
+| NestJS      | 10+         | 11.1.12         | ✅ Updated                        |
+| TypeScript  | 5.3.3       | 5.9.x           | ⚠️ Recommend upgrade              |
+| TailwindCSS | 3.x         | 4.1.18          | ⚠️ Major version update available |
+| PostgreSQL  | 15          | 17.7            | ℹ️ Documented as option           |
 
 ### 4. Structural Issues
 
 **README.md** (Original: 521 lines)
+
 - Too comprehensive, mixing quick-start with detailed reference
 - Troubleshooting section duplicates common issues
 - Monorepo package versions table adds unnecessary complexity
 - Multiple command format explanations (pnpm vs Nx)
 
 **PROJECT_STRUCTURE.md** (Original: 255 lines)
+
 - Good structure but inconsistent with README
 - Missing some architectural details
 - Outdated package manager commands
 
 **CONTRIBUTING.md** (Original: 299 lines)
+
 - Well-structured overall
 - Some outdated version requirements
 - Duplicates some content from README
@@ -103,9 +116,11 @@ Research conducted on January 19, 2026 for latest stable versions:
 ## Recommended Document Structure
 
 ### README.md - Project Landing Page
+
 **Purpose**: First impression, quick orientation, getting started
 **Target Length**: 250-350 lines
 **Should Include**:
+
 - Project overview & value proposition
 - Quick start (minimal setup steps)
 - Essential commands reference
@@ -113,15 +128,18 @@ Research conducted on January 19, 2026 for latest stable versions:
 - Project status badges
 
 **Should NOT Include**:
+
 - Detailed architecture (→ PROJECT_STRUCTURE.md)
 - Complete command list (→ link to detailed docs)
 - Contribution guidelines (→ CONTRIBUTING.md)
 - Detailed troubleshooting (→ docs/troubleshooting.md)
 
 ### PROJECT_STRUCTURE.md - Technical Architecture
+
 **Purpose**: Complete technical reference for developers
 **Target Length**: 300-450 lines
 **Should Include**:
+
 - Complete folder structure with descriptions
 - Technology stack with specific versions
 - Architecture patterns and decisions
@@ -131,14 +149,17 @@ Research conducted on January 19, 2026 for latest stable versions:
 - Port allocations
 
 **Should NOT Include**:
+
 - Setup instructions (→ README.md)
 - Contribution workflow (→ CONTRIBUTING.md)
 - Development guidelines summary only, details (→ docs/code-standards.md)
 
 ### CONTRIBUTING.md - Developer Guide
+
 **Purpose**: How to contribute to the project
 **Target Length**: 250-350 lines
 **Should Include**:
+
 - Fork and contribution workflow
 - Branch strategy
 - Commit message conventions
@@ -147,6 +168,7 @@ Research conducted on January 19, 2026 for latest stable versions:
 - Code standards (summary + link to details)
 
 **Should NOT Include**:
+
 - Project architecture details (→ PROJECT_STRUCTURE.md)
 - Complete coding standards (→ docs/code-standards.md)
 - API documentation (→ docs/api-documentation.md)

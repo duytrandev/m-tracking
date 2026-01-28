@@ -17,7 +17,7 @@ export const AnimatedPasswordInput = forwardRef<
   const prefersReducedMotion = useReducedMotion()
 
   // Trigger shake animation on error - intentional setState in effect for animation
-   
+
   useEffect(() => {
     if (error && !prefersReducedMotion) {
       setShake(true)

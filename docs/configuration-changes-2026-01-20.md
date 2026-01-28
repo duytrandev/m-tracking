@@ -18,6 +18,7 @@ Integrated Sentry error tracking and performance monitoring for M-Tracking appli
 ### 1. Dependencies Added
 
 **Backend (`services/backend/package.json`):**
+
 ```json
 {
   "dependencies": {
@@ -28,6 +29,7 @@ Integrated Sentry error tracking and performance monitoring for M-Tracking appli
 ```
 
 **Frontend (`apps/frontend/package.json`):**
+
 ```json
 {
   "dependencies": {
@@ -39,11 +41,13 @@ Integrated Sentry error tracking and performance monitoring for M-Tracking appli
 ### 2. New Files Created
 
 **Backend:**
+
 - `services/backend/src/shared/sentry/sentry.config.ts` - Initialization & PII scrubbing
 - `services/backend/src/shared/sentry/sentry.service.ts` - Reusable Sentry service
 - `services/backend/src/shared/sentry/sentry.module.ts` - NestJS DI module
 
 **Frontend:**
+
 - `apps/frontend/sentry.client.config.ts` - Client-side initialization
 - `apps/frontend/sentry.server.config.ts` - Server-side initialization
 - `apps/frontend/sentry.edge.config.ts` - Edge runtime initialization
@@ -52,18 +56,22 @@ Integrated Sentry error tracking and performance monitoring for M-Tracking appli
 ### 3. Modified Files
 
 **Backend:**
+
 - `services/backend/src/main.ts` - Added Sentry middleware and initialization
 - `services/backend/src/app.module.ts` - Imported SentryModule
 - `services/backend/src/common/filters/http-exception.filter.ts` - Enhanced with 5xx error capture
 
 **Frontend:**
+
 - `apps/frontend/next.config.ts` - Added Sentry webpack plugin configuration
 - `apps/frontend/src/lib/api-client.ts` - Enhanced Axios interceptor with error capture
 
 **Infrastructure:**
+
 - `docker-compose.yml` - Added SENTRY_DSN environment variable for backend
 
 **Configuration:**
+
 - `.env.example` - Added Sentry environment variables
 
 ### 4. Environment Variables Added
@@ -84,6 +92,7 @@ SENTRY_ORG=m-tracking
 ### 5. Documentation Created/Updated
 
 **New Documentation:**
+
 - `docs/monitoring-sentry.md` - Comprehensive Sentry guide (738 lines)
   - Quick start & setup
   - Architecture & integration points
@@ -94,6 +103,7 @@ SENTRY_ORG=m-tracking
   - Best practices
 
 **Updated Documentation:**
+
 - `docs/README.md` - Added Sentry to documentation index and infrastructure stack
 - `docs/development-guide.md` - Added Sentry setup section
 - `docs/system-architecture.md` - Added monitoring & observability section
@@ -104,6 +114,7 @@ SENTRY_ORG=m-tracking
 ## Features Enabled
 
 ### Error Tracking
+
 - ✅ Automatic 5xx error capture (Backend)
 - ✅ React component error capture (Frontend)
 - ✅ API error tracking (except auth errors)
@@ -111,6 +122,7 @@ SENTRY_ORG=m-tracking
 - ✅ Database query errors
 
 ### Performance Monitoring
+
 - ✅ HTTP request latency tracking (P50, P95, P99)
 - ✅ Database query performance
 - ✅ API response times
@@ -118,6 +130,7 @@ SENTRY_ORG=m-tracking
 - ✅ Server-side rendering time
 
 ### Privacy & Security
+
 - ✅ Email scrubbing (shows first 2 chars: `jo***@example.com`)
 - ✅ Authorization header removal
 - ✅ Financial data redaction (amounts, account numbers)
@@ -126,6 +139,7 @@ SENTRY_ORG=m-tracking
 - ✅ Session replay with text/media masking
 
 ### User Context
+
 - ✅ User ID attachment
 - ✅ Email (partially scrubbed)
 - ✅ User role/permissions
@@ -137,12 +151,14 @@ SENTRY_ORG=m-tracking
 ## Configuration Details
 
 ### Development Environment
+
 - **Traces Sample Rate:** 100% (capture all requests)
 - **Session Replay:** 10% of normal sessions, 100% on errors
 - **Debug Mode:** Enabled
 - **Cost:** Free tier (5,000 errors/month)
 
 ### Production Environment (Recommended)
+
 - **Traces Sample Rate:** 10% (cost optimization)
 - **Profile Sample Rate:** 1% (CPU profiling)
 - **Session Replay:** 0% normal, 10% on errors
@@ -156,6 +172,7 @@ SENTRY_ORG=m-tracking
 ### For Developers
 
 **1. Create Sentry Projects**
+
 ```bash
 # Visit: https://sentry.io
 # Create organization: m-tracking
@@ -165,6 +182,7 @@ SENTRY_ORG=m-tracking
 ```
 
 **2. Configure Environment**
+
 ```bash
 # Add to .env file
 NEXT_PUBLIC_SENTRY_DSN=https://[your-key]@o0.ingest.sentry.io/[id]
@@ -173,12 +191,14 @@ NEXT_PUBLIC_APP_ENV=development
 ```
 
 **3. Restart Services**
+
 ```bash
 pnpm dev
 # Should see: ✅ Sentry initialized for development environment
 ```
 
 **4. Verify Integration**
+
 - Visit Sentry dashboard
 - Trigger test error
 - Confirm error appears in dashboard
@@ -188,12 +208,14 @@ pnpm dev
 ## Impact Analysis
 
 ### Performance Impact
+
 - **Backend:** <5ms overhead per request (negligible)
 - **Frontend:** <10ms overhead per page load
 - **Network:** Minimal (async error reporting)
 - **Bundle Size:** +50KB (frontend, gzipped)
 
 ### Privacy Compliance
+
 - ✅ GDPR compliant (PII scrubbing)
 - ✅ No credit card data captured
 - ✅ No passwords logged
@@ -201,6 +223,7 @@ pnpm dev
 - ✅ Source maps secured
 
 ### Developer Experience
+
 - ✅ Real-time error notifications
 - ✅ Detailed stack traces with source maps
 - ✅ Session replay for debugging
@@ -212,15 +235,19 @@ pnpm dev
 ## Migration Notes
 
 ### Breaking Changes
+
 - **None** - Sentry is additive, no breaking changes
 
 ### Backward Compatibility
+
 - ✅ Fully backward compatible
 - ✅ Works without Sentry configuration (gracefully degrades)
 - ✅ No changes to existing error handling
 
 ### Rollback Plan
+
 If issues occur:
+
 ```bash
 # 1. Remove Sentry DSN from .env
 # SENTRY_DSN=
@@ -239,6 +266,7 @@ cd apps/frontend && pnpm remove @sentry/nextjs
 ## Testing Checklist
 
 ### Backend Testing
+
 - [x] Dependencies installed successfully
 - [x] Sentry initialized on startup
 - [x] 5xx errors captured in Sentry
@@ -247,6 +275,7 @@ cd apps/frontend && pnpm remove @sentry/nextjs
 - [x] Performance traces recorded
 
 ### Frontend Testing
+
 - [x] Dependencies installed successfully
 - [x] Client config loaded
 - [x] Server config loaded
@@ -266,6 +295,7 @@ cd apps/frontend && pnpm remove @sentry/nextjs
 ## Future Enhancements
 
 ### Planned
+
 - [ ] Analytics service integration (FastAPI)
 - [ ] Distributed tracing across services
 - [ ] Source map upload automation in CI/CD
@@ -273,6 +303,7 @@ cd apps/frontend && pnpm remove @sentry/nextjs
 - [ ] Staging & production environment setup
 
 ### Considered
+
 - [ ] Integration with Slack for critical alerts
 - [ ] Custom performance dashboards
 - [ ] Cost optimization (sampling strategies)
@@ -283,15 +314,18 @@ cd apps/frontend && pnpm remove @sentry/nextjs
 ## References
 
 **Documentation:**
+
 - [Sentry Monitoring Guide](./monitoring-sentry.md)
 - [Development Guide](./development-guide.md)
 - [System Architecture](./system-architecture.md)
 - [Troubleshooting](./troubleshooting.md)
 
 **Implementation Plan:**
+
 - `/plans/precious-swimming-hennessy.md`
 
 **External Resources:**
+
 - [Sentry Next.js Docs](https://docs.sentry.io/platforms/javascript/guides/nextjs/)
 - [Sentry NestJS Docs](https://docs.sentry.io/platforms/node/guides/nestjs/)
 
@@ -300,6 +334,7 @@ cd apps/frontend && pnpm remove @sentry/nextjs
 ## Support
 
 **Questions or Issues:**
+
 1. Check [Sentry Monitoring Guide](./monitoring-sentry.md)
 2. Review [Troubleshooting](./troubleshooting.md)
 3. Visit Sentry dashboard: https://sentry.io/organizations/m-tracking

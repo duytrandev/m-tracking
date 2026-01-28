@@ -407,8 +407,12 @@ describe('AuthService', () => {
       vi.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser)
       vi.spyOn(passwordService, 'generateToken').mockReturnValue('reset-token')
       vi.spyOn(passwordService, 'hashToken').mockReturnValue('hashed-token')
-      vi.spyOn(resetTokenRepository, 'create').mockReturnValue({} as UpdateResult)
-      vi.spyOn(resetTokenRepository, 'save').mockResolvedValue({} as UpdateResult)
+      vi.spyOn(resetTokenRepository, 'create').mockReturnValue(
+        {} as UpdateResult
+      )
+      vi.spyOn(resetTokenRepository, 'save').mockResolvedValue(
+        {} as UpdateResult
+      )
       vi.spyOn(emailService, 'sendPasswordResetEmail').mockResolvedValue(
         undefined
       )
@@ -446,7 +450,9 @@ describe('AuthService', () => {
       )
       vi.spyOn(passwordService, 'hash').mockResolvedValue('new-hashed-password')
       vi.spyOn(userRepository, 'update').mockResolvedValue({} as UpdateResult)
-      vi.spyOn(resetTokenRepository, 'update').mockResolvedValue({} as UpdateResult)
+      vi.spyOn(resetTokenRepository, 'update').mockResolvedValue(
+        {} as UpdateResult
+      )
 
       const result = await service.resetPassword(token, newPassword)
 

@@ -11,6 +11,7 @@
 Complete guide for developers working on M-Tracking. Covers setup, workflows, agents, and troubleshooting.
 
 **Quick Links:**
+
 - [Code Standards](./code-standards.md) - Coding conventions
 - [System Architecture](./system-architecture.md) - Technical architecture
 - [API Documentation](./api-documentation.md) - API reference
@@ -144,22 +145,26 @@ m-tracking/
 ### Frontend Development
 
 **Start development server:**
+
 ```bash
 pnpm dev:frontend
 ```
 
 **Type checking:**
+
 ```bash
 cd apps/frontend
 pnpm exec tsc --noEmit
 ```
 
 **Build:**
+
 ```bash
 pnpm build:frontend
 ```
 
 **Key Patterns:**
+
 - **Types:** Import from `@/types/api/*` or `@/types/entities/*` (never from feature types!)
 - **State:** Use TanStack Query for server state, Zustand for UI state
 - **Components:** Feature-based organization in `src/features/`
@@ -175,7 +180,7 @@ pnpm build:frontend
 **Using Motion in components:**
 
 ```tsx
-import { motion } from "motion/react";
+import { motion } from 'motion/react'
 
 // Form entrance animation
 export function LoginForm() {
@@ -187,14 +192,11 @@ export function LoginForm() {
     >
       {/* Form content */}
     </motion.form>
-  );
+  )
 }
 
 // Button with hover/tap animation
-<motion.button
-  whileHover={{ scale: 1.02 }}
-  whileTap={{ scale: 0.98 }}
->
+;<motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
   Submit
 </motion.button>
 ```
@@ -202,14 +204,10 @@ export function LoginForm() {
 **MotionProvider setup (already configured in root layout):**
 
 ```tsx
-import { LazyMotion, domAnimation } from "motion/react";
+import { LazyMotion, domAnimation } from 'motion/react'
 
 export function MotionProvider({ children }) {
-  return (
-    <LazyMotion features={domAnimation}>
-      {children}
-    </LazyMotion>
-  );
+  return <LazyMotion features={domAnimation}>{children}</LazyMotion>
 }
 ```
 
@@ -217,17 +215,13 @@ export function MotionProvider({ children }) {
 
 ```tsx
 // Use useReducedMotion hook
-import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { useReducedMotion } from '@/hooks/use-reduced-motion'
 
 export function Component() {
-  const prefersReducedMotion = useReducedMotion();
-  const duration = prefersReducedMotion ? 0 : 400;
+  const prefersReducedMotion = useReducedMotion()
+  const duration = prefersReducedMotion ? 0 : 400
 
-  return (
-    <motion.div transition={{ duration }}>
-      Content
-    </motion.div>
-  );
+  return <motion.div transition={{ duration }}>Content</motion.div>
 }
 ```
 
@@ -236,22 +230,26 @@ export function Component() {
 ### Backend Development
 
 **Start development server:**
+
 ```bash
 pnpm dev:backend
 ```
 
 **Type checking:**
+
 ```bash
 cd services/backend
 pnpm exec tsc --noEmit
 ```
 
 **Build:**
+
 ```bash
 pnpm build:backend
 ```
 
 **Key Patterns:**
+
 - **Modules:** Feature-based modules with clear boundaries
 - **Config:** Use `@nestjs/config` with `registerAs` pattern
 - **Events:** Use EventEmitter for domain events
@@ -265,29 +263,32 @@ This project uses BMAD-METHOD for AI-assisted development through OpenCode and C
 
 ### Available Agents
 
-| Agent | When to Use | Activation |
-|-------|-------------|------------|
-| **Full Stack Developer (dev)** | Code implementation, debugging | "As dev, ..." |
-| **Architect** | System design, architecture | "As architect, ..." |
-| **UX Expert** | UI/UX design, prototypes | "As ux-expert, ..." |
-| **Product Manager (pm)** | PRDs, roadmap, strategy | "As pm, ..." |
-| **Product Owner (po)** | Backlog, stories, sprint | "As po, ..." |
-| **Scrum Master (sm)** | Agile process, retrospectives | "As sm, ..." |
-| **QA** | Test architecture, quality | "As qa, ..." |
-| **Business Analyst** | Market research, discovery | "As analyst, ..." |
+| Agent                          | When to Use                    | Activation          |
+| ------------------------------ | ------------------------------ | ------------------- |
+| **Full Stack Developer (dev)** | Code implementation, debugging | "As dev, ..."       |
+| **Architect**                  | System design, architecture    | "As architect, ..." |
+| **UX Expert**                  | UI/UX design, prototypes       | "As ux-expert, ..." |
+| **Product Manager (pm)**       | PRDs, roadmap, strategy        | "As pm, ..."        |
+| **Product Owner (po)**         | Backlog, stories, sprint       | "As po, ..."        |
+| **Scrum Master (sm)**          | Agile process, retrospectives  | "As sm, ..."        |
+| **QA**                         | Test architecture, quality     | "As qa, ..."        |
+| **Business Analyst**           | Market research, discovery     | "As analyst, ..."   |
 
 ### Using Agents
 
 **With OpenCode:**
+
 ```bash
 opencode  # Will read AGENTS.md automatically
 ```
 
 **With Claude Code:**
+
 - Reference roles naturally in conversation
 - Claude will use subagents for specialized tasks
 
 **Agent Commands:**
+
 ```bash
 # List available agents
 npx bmad-method list:agents
@@ -407,6 +408,7 @@ test(auth): add login flow tests
 ```
 
 **Types:**
+
 - `feat:` New feature
 - `fix:` Bug fix
 - `docs:` Documentation
@@ -451,6 +453,7 @@ test(auth): add login flow tests
 ### Common Issues
 
 **1. Port already in use:**
+
 ```bash
 # Find and kill process
 lsof -ti:3000 | xargs kill -9
@@ -458,6 +461,7 @@ lsof -ti:4000 | xargs kill -9
 ```
 
 **2. TypeScript errors after update:**
+
 ```bash
 # Clean and reinstall
 rm -rf node_modules .next dist
@@ -465,6 +469,7 @@ pnpm install
 ```
 
 **3. Database connection issues:**
+
 ```bash
 # Restart Docker
 pnpm docker:down
@@ -472,6 +477,7 @@ pnpm docker:up
 ```
 
 **4. Import errors:**
+
 - Ensure types are imported from `@/types/` (not feature-specific types)
 - Check `tsconfig.json` path mappings
 - Restart TypeScript server in VS Code
@@ -514,6 +520,7 @@ See [Security Guide](../SECURITY.md) for details.
 ## Resources
 
 ### Internal Documentation
+
 - [System Architecture](./system-architecture.md)
 - [Code Standards](./code-standards.md)
 - [API Documentation](./api-documentation.md)
@@ -521,6 +528,7 @@ See [Security Guide](../SECURITY.md) for details.
 - [Deployment Guide](./deployment.md)
 
 ### External Resources
+
 - [Next.js Documentation](https://nextjs.org/docs)
 - [NestJS Documentation](https://docs.nestjs.com)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
@@ -542,6 +550,7 @@ See [Security Guide](../SECURITY.md) for details.
 ## Contributing
 
 See [CONTRIBUTING.md](../CONTRIBUTING.md) for:
+
 - Code review process
 - Style guide
 - Testing requirements

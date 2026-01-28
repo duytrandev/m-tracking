@@ -11,6 +11,7 @@
 Complete configuration guide for the M-Tracking backend API built with NestJS 11, TypeScript 5.9, and TypeORM 0.3.28.
 
 **Technology Stack:**
+
 - **Framework:** NestJS 11.1.12
 - **Language:** TypeScript 5.9.x (strict mode)
 - **ORM:** TypeORM 0.3.28
@@ -86,6 +87,7 @@ tsconfig.base.json (root)             # Shared strict configuration
 ### Inherited from tsconfig.base.json
 
 **Strict Type Checking (100% coverage):**
+
 - ✅ `strict: true` - All strict checks enabled
 - ✅ `strictNullChecks: true` - Null/undefined safety
 - ✅ `noImplicitAny: true` - No implicit any types
@@ -96,6 +98,7 @@ tsconfig.base.json (root)             # Shared strict configuration
 - ✅ `noImplicitReturns: true` - All code paths must return
 
 **Build Performance:**
+
 - ✅ `incremental: true` - 50-80% faster rebuilds
 - ✅ `skipLibCheck: true` - Skip type checking of declaration files
 - ✅ `composite: true` - Enable project references
@@ -288,14 +291,17 @@ export class AppModule {}
 ### Nx Tags Explained
 
 **`type:app`** - Application (not a library)
+
 - Can only depend on libraries (`type:lib`)
 - Cannot be depended upon by other projects
 
 **`scope:backend`** - Backend scope
+
 - Can import from `scope:backend` and `scope:shared` libraries
 - Cannot import from `scope:frontend` (enforced by ESLint)
 
 **`platform:node`** - Node.js runtime
+
 - Uses CommonJS module system
 - Server-side execution
 
@@ -331,11 +337,13 @@ export class AppModule {}
 ### Cache Benefits
 
 **Local Development:**
+
 - Incremental builds: <30 seconds (vs 2-3 minutes full build)
 - Type checking: <10 seconds (incremental)
 - Hot reload: <1 second (with watch mode)
 
 **CI/CD (with Nx Cloud):**
+
 - Cache hit: 85%+ (instant replay)
 - Full build: 2-3 minutes (vs 10-15 minutes without cache)
 - Affected tests only: 70-85% faster CI
@@ -413,6 +421,7 @@ services/backend/
 ### Modular Monolith Pattern
 
 **Key Principles:**
+
 1. **Clear Boundaries** - Each module is self-contained
 2. **Explicit Exports** - Only expose what's needed
 3. **Dependency Injection** - Use NestJS DI for loose coupling
@@ -430,14 +439,9 @@ import { TransactionRepository } from './repositories/transaction.repository'
 import { Transaction } from './entities/transaction.entity'
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Transaction]),
-  ],
+  imports: [TypeOrmModule.forFeature([Transaction])],
   controllers: [TransactionsController],
-  providers: [
-    TransactionsService,
-    TransactionRepository,
-  ],
+  providers: [TransactionsService, TransactionRepository],
   exports: [TransactionsService], // Only export service
 })
 export class TransactionsModule {}
@@ -637,12 +641,14 @@ pnpm lint --fix
 ### What Backend Can Import
 
 ✅ **Allowed:**
+
 - `@m-tracking/common` (scope:shared)
 - `@m-tracking/types` (scope:shared)
 - `@m-tracking/constants` (scope:shared)
 - `@m-tracking/utils` (scope:shared)
 
 ❌ **Not Allowed:**
+
 - Frontend code (scope:frontend)
 - Frontend-specific utilities
 - Client-side modules
@@ -693,6 +699,7 @@ pnpm lint --fix
 **Symptom:** Strict mode catching new type errors
 
 **Solution:**
+
 ```bash
 # Clear build cache
 rm -rf services/backend/dist
@@ -705,9 +712,10 @@ nx run backend:build
 
 ### Issue: Module Not Found
 
-**Symptom:** Cannot resolve @auth/* imports
+**Symptom:** Cannot resolve @auth/\* imports
 
 **Solution:**
+
 1. Verify `tsconfig.json` has correct path mappings
 2. Restart TypeScript server in IDE
 3. Clear build cache
@@ -717,6 +725,7 @@ nx run backend:build
 **Symptom:** Decorators not working
 
 **Solution:**
+
 1. Verify `emitDecoratorMetadata: true` in tsconfig
 2. Verify `experimentalDecorators: true` in tsconfig
 3. Import `reflect-metadata` in main.ts
@@ -726,6 +735,7 @@ nx run backend:build
 **Symptom:** Builds using old code
 
 **Solution:**
+
 ```bash
 # Clear Nx cache
 nx reset

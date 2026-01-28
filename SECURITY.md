@@ -55,21 +55,25 @@ Use parameterized queries or ORM methods that automatically escape inputs.
 ## Severity Levels
 
 ### Critical (P0)
+
 - **Examples**: Authentication bypass, SQL injection, remote code execution
 - **Response Time**: Fix within 24-48 hours
 - **Disclosure**: After fix is deployed and verified
 
 ### High (P1)
+
 - **Examples**: XSS vulnerabilities, sensitive data exposure, privilege escalation
 - **Response Time**: Fix within 7 days
 - **Disclosure**: After fix is deployed
 
 ### Medium (P2)
+
 - **Examples**: CSRF vulnerabilities, information disclosure
 - **Response Time**: Fix within 14 days
 - **Disclosure**: After fix is deployed
 
 ### Low (P3)
+
 - **Examples**: Minor security improvements, rate limiting issues
 - **Response Time**: Fix within 30 days
 - **Disclosure**: Can be discussed publicly
@@ -81,6 +85,7 @@ Use parameterized queries or ORM methods that automatically escape inputs.
 When contributing code, please follow these security guidelines:
 
 #### 1. Input Validation
+
 ```typescript
 // ✅ Good - Validate and sanitize input
 @IsEmail()
@@ -92,6 +97,7 @@ email: string;
 ```
 
 #### 2. Authentication & Authorization
+
 ```typescript
 // ✅ Good - Verify user has access
 @UseGuards(JwtAuthGuard, ResourceOwnerGuard)
@@ -106,17 +112,19 @@ async getTransaction(@Param('id') id: string) {
 ```
 
 #### 3. SQL Injection Prevention
+
 ```typescript
 // ✅ Good - Use ORM or parameterized queries
 const user = await this.repository.findOne({
-  where: { email: email }
-});
+  where: { email: email },
+})
 
 // ❌ Bad - String concatenation
-const query = `SELECT * FROM users WHERE email = '${email}'`;
+const query = `SELECT * FROM users WHERE email = '${email}'`
 ```
 
 #### 4. XSS Prevention
+
 ```typescript
 // ✅ Good - Sanitize output
 import { escape } from 'html-escaper';
@@ -127,15 +135,17 @@ dangerouslySetInnerHTML={{ __html: userInput }}
 ```
 
 #### 5. Secrets Management
+
 ```typescript
 // ✅ Good - Use environment variables
-const apiKey = process.env.API_KEY;
+const apiKey = process.env.API_KEY
 
 // ❌ Bad - Hard-coded secrets
-const apiKey = "sk_live_abc123xyz";
+const apiKey = 'sk_live_abc123xyz'
 ```
 
 #### 6. Rate Limiting
+
 ```typescript
 // ✅ Good - Apply rate limiting
 @UseGuards(ThrottlerGuard)
@@ -146,43 +156,49 @@ async login(@Body() dto: LoginDto) {
 ```
 
 #### 7. CORS Configuration
+
 ```typescript
 // ✅ Good - Whitelist specific origins
 app.enableCors({
   origin: process.env.FRONTEND_URL,
   credentials: true,
-});
+})
 
 // ❌ Bad - Allow all origins
-app.enableCors({ origin: '*' });
+app.enableCors({ origin: '*' })
 ```
 
 ## Security Features in M-Tracking
 
 ### Authentication
+
 - **JWT tokens** with 15-minute expiry (access tokens)
 - **Refresh tokens** with 7-day expiry
 - **Token blacklisting** via Redis for logout/revocation
 - **Bcrypt password hashing** with cost factor 10
 
 ### Authorization
+
 - **Role-based access control (RBAC)**
 - **Resource-level permissions**
 - **Route guards** on all protected endpoints
 
 ### Data Protection
+
 - **Encryption at rest** (database-level)
 - **TLS/SSL** for all communications
 - **Secure headers** via Helmet.js
 - **CORS** with strict origin whitelist
 
 ### API Security
+
 - **Rate limiting** (100 req/min authenticated, 20 req/min public)
 - **Input validation** with class-validator
 - **SQL injection prevention** via TypeORM
 - **XSS prevention** with output sanitization
 
 ### Infrastructure Security
+
 - **Supabase RLS** (Row Level Security) policies
 - **Redis AUTH** for cache access
 - **Docker security** (non-root users, minimal images)
@@ -205,10 +221,10 @@ When a vulnerability is fixed:
 
 ## Supported Versions
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.x     | ✅ Yes             |
-| < 1.0   | ❌ No              |
+| Version | Supported |
+| ------- | --------- |
+| 1.x     | ✅ Yes    |
+| < 1.0   | ❌ No     |
 
 ## Security Checklist for Developers
 
@@ -230,6 +246,7 @@ Before submitting a PR, verify:
 ### Dependencies
 
 We monitor dependencies for known vulnerabilities using:
+
 - **Dependabot** (GitHub automated alerts)
 - **npm audit** (weekly manual checks)
 - **Snyk** (optional, for advanced scanning)
@@ -251,6 +268,7 @@ M-Tracking follows industry-standard security practices:
 ## Contact
 
 For security-related questions that are not vulnerabilities:
+
 - **General Security**: [SECURITY_EMAIL_TO_BE_ADDED]
 - **Privacy Questions**: [PRIVACY_EMAIL_TO_BE_ADDED]
 

@@ -18,7 +18,7 @@ Leaf configs that extend the root inherit all path patterns, even ones that don'
 
 ```js
 // services/backend/eslint.config.js
-import rootConfig from '../../eslint.config.js'  // Inherits frontend paths!
+import rootConfig from '../../eslint.config.js' // Inherits frontend paths!
 ```
 
 ## Solution: Modular Shared Configs
@@ -163,46 +163,46 @@ export default defineConfig(
 
 ### From `base.js`
 
-| Export | Description |
-|--------|-------------|
-| `ignores` | Global ignore patterns (dist, node_modules, etc.) |
-| `baseRules` | JS recommended + TS strict + Prettier |
-| `typescriptRules` | Common TS rules (no-console, no-explicit-any, etc.) |
-| `disableTypeCheckedForTests` | Disables type-aware linting for spec files |
-| `tseslint` | Re-exported typescript-eslint for advanced use |
+| Export                       | Description                                         |
+| ---------------------------- | --------------------------------------------------- |
+| `ignores`                    | Global ignore patterns (dist, node_modules, etc.)   |
+| `baseRules`                  | JS recommended + TS strict + Prettier               |
+| `typescriptRules`            | Common TS rules (no-console, no-explicit-any, etc.) |
+| `disableTypeCheckedForTests` | Disables type-aware linting for spec files          |
+| `tseslint`                   | Re-exported typescript-eslint for advanced use      |
 
 ### From `nx.js`
 
-| Export | Description |
-|--------|-------------|
-| `nxPlugin` | The Nx ESLint plugin object |
+| Export                | Description                        |
+| --------------------- | ---------------------------------- |
+| `nxPlugin`            | The Nx ESLint plugin object        |
 | `moduleBoundaryRules` | Module boundary enforcement config |
 
 ### From `react.js`
 
-| Export | Description |
-|--------|-------------|
-| `reactPlugins` | React Hooks + JSX A11y plugin objects |
-| `reactRecommendedRules` | Recommended rules from both plugins |
-| `reactRules` | React-specific overrides (promise handling, etc.) |
-| `consoleAllowList` | Files that need console access |
+| Export                  | Description                                       |
+| ----------------------- | ------------------------------------------------- |
+| `reactPlugins`          | React Hooks + JSX A11y plugin objects             |
+| `reactRecommendedRules` | Recommended rules from both plugins               |
+| `reactRules`            | React-specific overrides (promise handling, etc.) |
+| `consoleAllowList`      | Files that need console access                    |
 
 ### From `nestjs.js`
 
-| Export | Description |
-|--------|-------------|
-| `nestjsRules` | NestJS-specific rules (decorators, interfaces) |
-| `migrationRules` | Relaxed rules for DB migrations |
-| `sharedUtilityRules` | Warning-level rules for dynamic code |
+| Export               | Description                                    |
+| -------------------- | ---------------------------------------------- |
+| `nestjsRules`        | NestJS-specific rules (decorators, interfaces) |
+| `migrationRules`     | Relaxed rules for DB migrations                |
+| `sharedUtilityRules` | Warning-level rules for dynamic code           |
 
 ### From `testing.js`
 
-| Export | Description |
-|--------|-------------|
+| Export             | Description                  |
+| ------------------ | ---------------------------- |
 | `testFilePatterns` | Glob patterns for test files |
 | `mockFilePatterns` | Glob patterns for mock files |
-| `testRules` | Relaxed rules for test files |
-| `mockRules` | Relaxed rules for mock files |
+| `testRules`        | Relaxed rules for test files |
+| `mockRules`        | Relaxed rules for mock files |
 
 ## Migration Path
 

@@ -10,10 +10,7 @@
           "$schema": "../../node_modules/nx/schemas/project-schema.json",
           "projectType": "application",
           "sourceRoot": "services/analytics/app",
-          "tags": [
-            "type:app",
-            "scope:backend"
-          ],
+          "tags": ["type:app", "scope:backend"],
           "targets": {
             "serve": {
               "executor": "nx:run-commands",
@@ -33,13 +30,8 @@
               },
               "configurations": {},
               "parallelism": true,
-              "dependsOn": [
-                "^build"
-              ],
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "dependsOn": ["^build"],
+              "inputs": ["production", "^production"],
               "outputs": [
                 "{projectRoot}/dist",
                 "{projectRoot}/.next",
@@ -55,10 +47,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/eslint.config.js"
-              ],
+              "inputs": ["default", "{workspaceRoot}/eslint.config.js"],
               "cache": true
             },
             "test": {
@@ -69,9 +58,7 @@
               },
               "configurations": {},
               "parallelism": true,
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "inputs": [
                 "default",
                 "^production",
@@ -89,11 +76,7 @@
         "data": {
           "root": "services/backend",
           "name": "@m-tracking/backend",
-          "tags": [
-            "npm:private",
-            "type:app",
-            "scope:backend"
-          ],
+          "tags": ["npm:private", "type:app", "scope:backend"],
           "metadata": {
             "targetGroups": {
               "NPM Scripts": [
@@ -200,16 +183,12 @@
             },
             "build": {
               "executor": "@nx/js:tsc",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "dist/services/backend",
                 "main": "services/backend/src/main.ts",
                 "tsConfig": "services/backend/tsconfig.json",
-                "assets": [
-                  "services/backend/src/assets"
-                ]
+                "assets": ["services/backend/src/assets"]
               },
               "configurations": {
                 "production": {
@@ -217,10 +196,7 @@
                 }
               },
               "parallelism": true,
-              "inputs": [
-                "nestBuild",
-                "^production"
-              ],
+              "inputs": ["nestBuild", "^production"],
               "cache": true
             },
             "serve": {
@@ -255,17 +231,12 @@
             "lint": {
               "executor": "@nx/eslint:lint",
               "options": {
-                "lintFilePatterns": [
-                  "services/backend/src/**/*.ts"
-                ]
+                "lintFilePatterns": ["services/backend/src/**/*.ts"]
               },
               "cache": true,
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/eslint.config.js"
-              ]
+              "inputs": ["default", "{workspaceRoot}/eslint.config.js"]
             },
             "test": {
               "executor": "nx:run-commands",
@@ -276,9 +247,7 @@
               "cache": true,
               "configurations": {},
               "parallelism": true,
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "inputs": [
                 "default",
                 "^production",
@@ -304,10 +273,7 @@
               "cache": true,
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ]
+              "inputs": ["default", "^production"]
             }
           },
           "$schema": "../../node_modules/nx/schemas/project-schema.json",
@@ -323,17 +289,10 @@
         "data": {
           "root": "libs/constants",
           "name": "constants",
-          "tags": [
-            "npm:private",
-            "type:lib",
-            "scope:shared"
-          ],
+          "tags": ["npm:private", "type:lib", "scope:shared"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "test:watch",
-                "test:cov"
-              ]
+              "NPM Scripts": ["test:watch", "test:cov"]
             },
             "description": "Shared constants",
             "js": {
@@ -381,18 +340,12 @@
                 "command": "pnpm build",
                 "cwd": "libs/constants"
               },
-              "inputs": [
-                "libraryBuild"
-              ],
-              "outputs": [
-                "{projectRoot}/dist"
-              ],
+              "inputs": ["libraryBuild"],
+              "outputs": ["{projectRoot}/dist"],
               "cache": true,
               "configurations": {},
               "parallelism": true,
-              "dependsOn": [
-                "^build"
-              ]
+              "dependsOn": ["^build"]
             },
             "lint": {
               "executor": "nx:run-commands",
@@ -400,10 +353,7 @@
                 "command": "pnpm eslint src --ext .ts",
                 "cwd": "libs/constants"
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/eslint.config.js"
-              ],
+              "inputs": ["default", "{workspaceRoot}/eslint.config.js"],
               "cache": true,
               "configurations": {},
               "parallelism": true
@@ -414,16 +364,11 @@
                 "command": "pnpm test",
                 "cwd": "libs/constants"
               },
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true,
               "configurations": {},
               "parallelism": true,
-              "dependsOn": [
-                "build"
-              ]
+              "dependsOn": ["build"]
             },
             "type-check": {
               "executor": "nx:run-commands",
@@ -431,10 +376,7 @@
                 "command": "pnpm type-check",
                 "cwd": "libs/constants"
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/tsconfig.base.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/tsconfig.base.json"],
               "cache": true,
               "configurations": {},
               "parallelism": true
@@ -452,11 +394,7 @@
         "data": {
           "root": "apps/frontend",
           "name": "@m-tracking/frontend",
-          "tags": [
-            "npm:private",
-            "type:app",
-            "scope:frontend"
-          ],
+          "tags": ["npm:private", "type:app", "scope:frontend"],
           "metadata": {
             "targetGroups": {
               "NPM Scripts": [
@@ -581,10 +519,7 @@
               },
               "defaultConfiguration": "production",
               "parallelism": true,
-              "inputs": [
-                "nextBuild",
-                "^production"
-              ],
+              "inputs": ["nextBuild", "^production"],
               "cache": true
             },
             "serve": {
@@ -627,17 +562,12 @@
             "lint": {
               "executor": "@nx/eslint:lint",
               "options": {
-                "lintFilePatterns": [
-                  "apps/frontend/**/*.{ts,tsx,js,jsx}"
-                ]
+                "lintFilePatterns": ["apps/frontend/**/*.{ts,tsx,js,jsx}"]
               },
               "cache": true,
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "{workspaceRoot}/eslint.config.js"
-              ]
+              "inputs": ["default", "{workspaceRoot}/eslint.config.js"]
             },
             "test": {
               "executor": "nx:run-commands",
@@ -648,9 +578,7 @@
               "cache": true,
               "configurations": {},
               "parallelism": true,
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "inputs": [
                 "default",
                 "^production",
@@ -685,10 +613,7 @@
               "cache": true,
               "configurations": {},
               "parallelism": true,
-              "inputs": [
-                "default",
-                "^production"
-              ]
+              "inputs": ["default", "^production"]
             }
           },
           "$schema": "../../node_modules/nx/schemas/project-schema.json",
@@ -704,17 +629,10 @@
         "data": {
           "root": "libs/common",
           "name": "common",
-          "tags": [
-            "npm:private",
-            "type:lib",
-            "scope:shared"
-          ],
+          "tags": ["npm:private", "type:lib", "scope:shared"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "test:watch",
-                "test:cov"
-              ]
+              "NPM Scripts": ["test:watch", "test:cov"]
             },
             "description": "Shared utilities and types for M-Tracking services",
             "js": {
@@ -762,18 +680,12 @@
                 "command": "pnpm build",
                 "cwd": "libs/common"
               },
-              "inputs": [
-                "libraryBuild"
-              ],
-              "outputs": [
-                "{projectRoot}/dist"
-              ],
+              "inputs": ["libraryBuild"],
+              "outputs": ["{projectRoot}/dist"],
               "cache": true,
               "configurations": {},
               "parallelism": true,
-              "dependsOn": [
-                "^build"
-              ]
+              "dependsOn": ["^build"]
             },
             "lint": {
               "executor": "nx:run-commands",
@@ -781,10 +693,7 @@
                 "command": "pnpm eslint src --ext .ts",
                 "cwd": "libs/common"
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/eslint.config.js"
-              ],
+              "inputs": ["default", "{workspaceRoot}/eslint.config.js"],
               "cache": true,
               "configurations": {},
               "parallelism": true
@@ -795,16 +704,11 @@
                 "command": "pnpm test",
                 "cwd": "libs/common"
               },
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true,
               "configurations": {},
               "parallelism": true,
-              "dependsOn": [
-                "build"
-              ]
+              "dependsOn": ["build"]
             },
             "type-check": {
               "executor": "nx:run-commands",
@@ -812,10 +716,7 @@
                 "command": "pnpm type-check",
                 "cwd": "libs/common"
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/tsconfig.base.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/tsconfig.base.json"],
               "cache": true,
               "configurations": {},
               "parallelism": true
@@ -833,17 +734,10 @@
         "data": {
           "root": "libs/types",
           "name": "types",
-          "tags": [
-            "npm:private",
-            "type:lib",
-            "scope:shared"
-          ],
+          "tags": ["npm:private", "type:lib", "scope:shared"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "test:watch",
-                "test:cov"
-              ]
+              "NPM Scripts": ["test:watch", "test:cov"]
             },
             "description": "Shared TypeScript type definitions",
             "js": {
@@ -891,18 +785,12 @@
                 "command": "pnpm build",
                 "cwd": "libs/types"
               },
-              "inputs": [
-                "libraryBuild"
-              ],
-              "outputs": [
-                "{projectRoot}/dist"
-              ],
+              "inputs": ["libraryBuild"],
+              "outputs": ["{projectRoot}/dist"],
               "cache": true,
               "configurations": {},
               "parallelism": true,
-              "dependsOn": [
-                "^build"
-              ]
+              "dependsOn": ["^build"]
             },
             "lint": {
               "executor": "nx:run-commands",
@@ -910,10 +798,7 @@
                 "command": "pnpm eslint src --ext .ts",
                 "cwd": "libs/types"
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/eslint.config.js"
-              ],
+              "inputs": ["default", "{workspaceRoot}/eslint.config.js"],
               "cache": true,
               "configurations": {},
               "parallelism": true
@@ -924,16 +809,11 @@
                 "command": "pnpm test",
                 "cwd": "libs/types"
               },
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true,
               "configurations": {},
               "parallelism": true,
-              "dependsOn": [
-                "build"
-              ]
+              "dependsOn": ["build"]
             },
             "type-check": {
               "executor": "nx:run-commands",
@@ -941,10 +821,7 @@
                 "command": "pnpm type-check",
                 "cwd": "libs/types"
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/tsconfig.base.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/tsconfig.base.json"],
               "cache": true,
               "configurations": {},
               "parallelism": true
@@ -962,17 +839,10 @@
         "data": {
           "root": "libs/utils",
           "name": "utils",
-          "tags": [
-            "npm:private",
-            "type:lib",
-            "scope:shared"
-          ],
+          "tags": ["npm:private", "type:lib", "scope:shared"],
           "metadata": {
             "targetGroups": {
-              "NPM Scripts": [
-                "test:watch",
-                "test:cov"
-              ]
+              "NPM Scripts": ["test:watch", "test:cov"]
             },
             "description": "Shared utility functions",
             "js": {
@@ -1020,18 +890,12 @@
                 "command": "pnpm build",
                 "cwd": "libs/utils"
               },
-              "inputs": [
-                "libraryBuild"
-              ],
-              "outputs": [
-                "{projectRoot}/dist"
-              ],
+              "inputs": ["libraryBuild"],
+              "outputs": ["{projectRoot}/dist"],
               "cache": true,
               "configurations": {},
               "parallelism": true,
-              "dependsOn": [
-                "^build"
-              ]
+              "dependsOn": ["^build"]
             },
             "lint": {
               "executor": "nx:run-commands",
@@ -1039,10 +903,7 @@
                 "command": "pnpm eslint src --ext .ts",
                 "cwd": "libs/utils"
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/eslint.config.js"
-              ],
+              "inputs": ["default", "{workspaceRoot}/eslint.config.js"],
               "cache": true,
               "configurations": {},
               "parallelism": true
@@ -1053,16 +914,11 @@
                 "command": "pnpm test",
                 "cwd": "libs/utils"
               },
-              "inputs": [
-                "default",
-                "^production"
-              ],
+              "inputs": ["default", "^production"],
               "cache": true,
               "configurations": {},
               "parallelism": true,
-              "dependsOn": [
-                "build"
-              ]
+              "dependsOn": ["build"]
             },
             "type-check": {
               "executor": "nx:run-commands",
@@ -1070,10 +926,7 @@
                 "command": "pnpm type-check",
                 "cwd": "libs/utils"
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/tsconfig.base.json"
-              ],
+              "inputs": ["default", "{workspaceRoot}/tsconfig.base.json"],
               "cache": true,
               "configurations": {},
               "parallelism": true

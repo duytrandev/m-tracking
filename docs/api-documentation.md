@@ -11,11 +11,13 @@
 REST API documentation for M-Tracking backend services.
 
 **Base URLs:**
+
 - **Development**: `http://localhost:4000/api`
 - **Production**: `https://api.yourdomain.com/api`
 - **Interactive Docs**: `/api/docs` (Swagger UI)
 
 **API Format:**
+
 - REST with JSON payloads
 - OpenAPI 3.0 specification
 - Bearer token authentication
@@ -48,11 +50,13 @@ REST API documentation for M-Tracking backend services.
 All protected endpoints require a JWT access token in the `Authorization` header.
 
 **Request Header:**
+
 ```http
 Authorization: Bearer <access_token>
 ```
 
 **Example:**
+
 ```bash
 curl -X GET "http://localhost:4000/api/users/me" \
   -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -100,11 +104,13 @@ curl -X POST "http://localhost:4000/api/auth/login" \
 ## Rate Limiting
 
 **Limits:**
+
 - **Authenticated users**: 100 requests per minute
 - **Public endpoints**: 20 requests per minute
 - **IP-based**: Tracked by client IP address
 
 **Headers:**
+
 ```http
 X-RateLimit-Limit: 100
 X-RateLimit-Remaining: 95
@@ -112,6 +118,7 @@ X-RateLimit-Reset: 1234567890
 ```
 
 **429 Response (Rate Limit Exceeded):**
+
 ```json
 {
   "statusCode": 429,
@@ -142,19 +149,19 @@ X-RateLimit-Reset: 1234567890
 
 ### HTTP Status Codes
 
-| Code | Meaning | Description |
-|------|---------|-------------|
-| 200 | OK | Request succeeded |
-| 201 | Created | Resource created |
-| 204 | No Content | Request succeeded, no content returned |
-| 400 | Bad Request | Invalid request payload |
-| 401 | Unauthorized | Missing or invalid authentication |
-| 403 | Forbidden | Insufficient permissions |
-| 404 | Not Found | Resource not found |
-| 409 | Conflict | Resource conflict (e.g., duplicate email) |
-| 422 | Unprocessable Entity | Validation errors |
-| 429 | Too Many Requests | Rate limit exceeded |
-| 500 | Internal Server Error | Server error |
+| Code | Meaning               | Description                               |
+| ---- | --------------------- | ----------------------------------------- |
+| 200  | OK                    | Request succeeded                         |
+| 201  | Created               | Resource created                          |
+| 204  | No Content            | Request succeeded, no content returned    |
+| 400  | Bad Request           | Invalid request payload                   |
+| 401  | Unauthorized          | Missing or invalid authentication         |
+| 403  | Forbidden             | Insufficient permissions                  |
+| 404  | Not Found             | Resource not found                        |
+| 409  | Conflict              | Resource conflict (e.g., duplicate email) |
+| 422  | Unprocessable Entity  | Validation errors                         |
+| 429  | Too Many Requests     | Rate limit exceeded                       |
+| 500  | Internal Server Error | Server error                              |
 
 ---
 
@@ -171,6 +178,7 @@ GET /api/transactions?page=1&limit=50
 ```
 
 **Parameters:**
+
 - `page` (optional): Page number (default: 1, min: 1)
 - `limit` (optional): Items per page (default: 20, min: 1, max: 100)
 
@@ -252,6 +260,7 @@ GET /api/transactions?limit=0
 Register a new user account.
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com",
@@ -261,6 +270,7 @@ Register a new user account.
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -276,6 +286,7 @@ Register a new user account.
 ```
 
 **Errors:**
+
 - `400`: Invalid email or weak password
 - `409`: Email already registered
 
@@ -286,6 +297,7 @@ Register a new user account.
 Authenticate user and obtain tokens.
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com",
@@ -294,6 +306,7 @@ Authenticate user and obtain tokens.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -308,6 +321,7 @@ Authenticate user and obtain tokens.
 ```
 
 **Errors:**
+
 - `401`: Invalid credentials
 
 ---
@@ -317,6 +331,7 @@ Authenticate user and obtain tokens.
 Refresh access token using refresh token.
 
 **Request Body:**
+
 ```json
 {
   "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -324,6 +339,7 @@ Refresh access token using refresh token.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -332,6 +348,7 @@ Refresh access token using refresh token.
 ```
 
 **Errors:**
+
 - `401`: Invalid or expired refresh token
 
 ---
@@ -341,6 +358,7 @@ Refresh access token using refresh token.
 Logout user and invalidate tokens.
 
 **Headers:**
+
 ```http
 Authorization: Bearer <access_token>
 ```
@@ -356,11 +374,13 @@ Authorization: Bearer <access_token>
 Get current authenticated user profile.
 
 **Headers:**
+
 ```http
 Authorization: Bearer <access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": "uuid",
@@ -381,11 +401,13 @@ Authorization: Bearer <access_token>
 Update current user profile.
 
 **Headers:**
+
 ```http
 Authorization: Bearer <access_token>
 ```
 
 **Request Body:**
+
 ```json
 {
   "name": "John Smith",
@@ -395,6 +417,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": "uuid",
@@ -415,11 +438,13 @@ Authorization: Bearer <access_token>
 List all transactions for authenticated user with pagination (Phase 01 Optimized).
 
 **Headers:**
+
 ```http
 Authorization: Bearer <access_token>
 ```
 
 **Query Parameters:**
+
 - `page` (optional): Page number (default: 1, min: 1)
 - `limit` (optional): Items per page (default: 20, min: 1, max: 100)
 - `startDate` (optional): Filter by start date (ISO 8601)
@@ -429,6 +454,7 @@ Authorization: Bearer <access_token>
 - `search` (optional): Search in description
 
 **Examples:**
+
 ```http
 # Default pagination
 GET /transactions
@@ -444,6 +470,7 @@ GET /transactions?page=1&limit=20&startDate=2026-01-01&endDate=2026-01-31&catego
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -474,6 +501,7 @@ GET /transactions?page=1&limit=20&startDate=2026-01-01&endDate=2026-01-31&catego
 ```
 
 **Response Fields:**
+
 - `data`: Array of transaction objects
 - `total`: Total transactions matching filter (across all pages)
 - `page`: Current page number (1-indexed)
@@ -494,11 +522,13 @@ GET /transactions?page=1&limit=20&startDate=2026-01-01&endDate=2026-01-31&catego
 Create a new transaction.
 
 **Headers:**
+
 ```http
 Authorization: Bearer <access_token>
 ```
 
 **Request Body:**
+
 ```json
 {
   "amount": 49.99,
@@ -513,6 +543,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": "uuid",
@@ -530,6 +561,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Errors:**
+
 - `400`: Invalid data
 - `404`: Category or account not found
 
@@ -540,11 +572,13 @@ Authorization: Bearer <access_token>
 Get a specific transaction by ID.
 
 **Headers:**
+
 ```http
 Authorization: Bearer <access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": "uuid",
@@ -570,6 +604,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Errors:**
+
 - `404`: Transaction not found
 - `403`: Unauthorized access
 
@@ -580,11 +615,13 @@ Authorization: Bearer <access_token>
 Update a transaction.
 
 **Headers:**
+
 ```http
 Authorization: Bearer <access_token>
 ```
 
 **Request Body:**
+
 ```json
 {
   "amount": 54.99,
@@ -594,6 +631,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": "uuid",
@@ -610,6 +648,7 @@ Authorization: Bearer <access_token>
 Delete a transaction.
 
 **Headers:**
+
 ```http
 Authorization: Bearer <access_token>
 ```
@@ -617,6 +656,7 @@ Authorization: Bearer <access_token>
 **Response (204 No Content)**
 
 **Errors:**
+
 - `404`: Transaction not found
 - `403`: Unauthorized access
 
@@ -629,11 +669,13 @@ Authorization: Bearer <access_token>
 List all categories.
 
 **Headers:**
+
 ```http
 Authorization: Bearer <access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -664,11 +706,13 @@ Authorization: Bearer <access_token>
 Create a custom category.
 
 **Headers:**
+
 ```http
 Authorization: Bearer <access_token>
 ```
 
 **Request Body:**
+
 ```json
 {
   "name": "Freelance Work",
@@ -679,6 +723,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": "uuid",
@@ -701,11 +746,13 @@ Authorization: Bearer <access_token>
 List all budgets for authenticated user.
 
 **Headers:**
+
 ```http
 Authorization: Bearer <access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -716,8 +763,8 @@ Authorization: Bearer <access_token>
       "currency": "USD",
       "period": "monthly",
       "categoryId": "uuid",
-      "spent": 320.50,
-      "remaining": 179.50,
+      "spent": 320.5,
+      "remaining": 179.5,
       "percentage": 64.1,
       "status": "on-track",
       "startDate": "2026-01-01",
@@ -734,11 +781,13 @@ Authorization: Bearer <access_token>
 Create a new budget.
 
 **Headers:**
+
 ```http
 Authorization: Bearer <access_token>
 ```
 
 **Request Body:**
+
 ```json
 {
   "name": "Monthly Groceries",
@@ -751,6 +800,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": "uuid",
@@ -773,11 +823,13 @@ Authorization: Bearer <access_token>
 List connected bank accounts.
 
 **Headers:**
+
 ```http
 Authorization: Bearer <access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -785,7 +837,7 @@ Authorization: Bearer <access_token>
       "id": "uuid",
       "name": "Chase Checking",
       "type": "checking",
-      "balance": 2500.00,
+      "balance": 2500.0,
       "currency": "USD",
       "institutionName": "Chase Bank",
       "lastSyncedAt": "2026-01-18T10:00:00Z",
@@ -802,11 +854,13 @@ Authorization: Bearer <access_token>
 Initiate bank account linking (Plaid).
 
 **Headers:**
+
 ```http
 Authorization: Bearer <access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "linkToken": "link-sandbox-xxx",
@@ -823,11 +877,13 @@ Authorization: Bearer <access_token>
 List user notifications.
 
 **Headers:**
+
 ```http
 Authorization: Bearer <access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -852,6 +908,7 @@ Authorization: Bearer <access_token>
 M-Tracking can send webhooks for various events.
 
 **Supported Events:**
+
 - `transaction.created`
 - `transaction.updated`
 - `transaction.deleted`
@@ -859,6 +916,7 @@ M-Tracking can send webhooks for various events.
 - `account.synced`
 
 **Webhook Payload:**
+
 ```json
 {
   "event": "transaction.created",
@@ -875,19 +933,19 @@ M-Tracking can send webhooks for various events.
 
 ```typescript
 // Verify webhook signature
-import crypto from 'crypto';
+import crypto from 'crypto'
 
-const signature = request.headers['x-webhook-signature'];
-const payload = JSON.stringify(request.body);
-const secret = process.env.WEBHOOK_SECRET;
+const signature = request.headers['x-webhook-signature']
+const payload = JSON.stringify(request.body)
+const secret = process.env.WEBHOOK_SECRET
 
 const expectedSignature = crypto
   .createHmac('sha256', secret)
   .update(payload)
-  .digest('hex');
+  .digest('hex')
 
 if (signature !== expectedSignature) {
-  throw new Error('Invalid signature');
+  throw new Error('Invalid signature')
 }
 ```
 
@@ -898,33 +956,35 @@ if (signature !== expectedSignature) {
 ### Connection
 
 ```javascript
-import { io } from 'socket.io-client';
+import { io } from 'socket.io-client'
 
 const socket = io('http://localhost:4000', {
   auth: {
     token: accessToken,
   },
-});
+})
 
 socket.on('connect', () => {
-  console.log('Connected to WebSocket');
-});
+  console.log('Connected to WebSocket')
+})
 ```
 
 ### Events
 
 #### transaction.created
+
 ```javascript
-socket.on('transaction.created', (transaction) => {
-  console.log('New transaction:', transaction);
-});
+socket.on('transaction.created', transaction => {
+  console.log('New transaction:', transaction)
+})
 ```
 
 #### budget.alert
+
 ```javascript
-socket.on('budget.alert', (alert) => {
-  console.log('Budget alert:', alert);
-});
+socket.on('budget.alert', alert => {
+  console.log('Budget alert:', alert)
+})
 ```
 
 ---
@@ -932,12 +992,14 @@ socket.on('budget.alert', (alert) => {
 ## Interactive API Documentation
 
 Visit `/api/docs` for interactive Swagger UI documentation where you can:
+
 - Explore all available endpoints
 - Test API calls directly from browser
 - View request/response schemas
 - Download OpenAPI specification
 
 **Access Swagger UI:**
+
 - Development: http://localhost:4000/api/docs
 - Production: https://api.yourdomain.com/api/docs
 

@@ -3,6 +3,7 @@
 ## Prerequisites
 
 1. **Environment Variables**: Copy `.env.example` to `.env` and configure database credentials:
+
    ```bash
    cp .env.example .env
    ```
@@ -19,26 +20,31 @@
 ## Migration Commands
 
 ### Run All Pending Migrations
+
 ```bash
 npm run migration:run
 ```
 
 ### Revert Last Migration
+
 ```bash
 npm run migration:revert
 ```
 
 ### Show Migration Status
+
 ```bash
 npm run migration:show
 ```
 
 ### Generate New Migration from Entities
+
 ```bash
 npm run migration:generate -- src/migrations/MigrationName
 ```
 
 ### Create Empty Migration
+
 ```bash
 npm run migration:create -- src/migrations/MigrationName
 ```
@@ -59,6 +65,7 @@ npm run migration:create -- src/migrations/MigrationName
 ## Migration Workflow
 
 ### First Time Setup
+
 ```bash
 # 1. Configure .env file
 cp .env.example .env
@@ -72,6 +79,7 @@ npm run migration:run
 ```
 
 ### Development Workflow
+
 ```bash
 # 1. Make changes to entities
 # 2. Generate migration
@@ -91,6 +99,7 @@ npm run migration:run
 ## Troubleshooting
 
 ### Migration Fails
+
 ```bash
 # Check migration status
 npm run migration:show
@@ -101,6 +110,7 @@ npm run migration:revert
 ```
 
 ### Connection Issues
+
 ```bash
 # Verify database credentials
 # Check Supabase project is running
@@ -108,6 +118,7 @@ npm run migration:revert
 ```
 
 ### Reset Database (DANGER!)
+
 ```bash
 # This will drop all tables - USE WITH CAUTION
 npm run migration:revert  # Run multiple times to revert all
@@ -145,6 +156,7 @@ After running migrations, verify in Supabase:
 ## Next Steps
 
 After successful migration:
+
 1. Proceed to Phase 2: Email/Password Authentication
 2. Implement auth services
 3. Create auth controllers

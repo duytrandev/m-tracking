@@ -212,75 +212,75 @@ m-tracking/
 
 ### Backend (NestJS Monolith)
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **Node.js** | 24.13.0 LTS | JavaScript runtime (minimum: >= 20.10.0) |
-| **NestJS** | 11.1.12 | Backend framework |
-| **TypeScript** | 5.9.x | Type-safe JavaScript |
-| **TypeORM** | 0.3.28 | Database ORM |
-| **class-validator** | 0.14.x | DTO validation |
-| **class-transformer** | 0.5.x | Object transformation |
-| **bcrypt** | 5.1.x | Password hashing |
-| **passport** | 0.7.x | Authentication middleware |
-| **passport-jwt** | 4.0.x | JWT strategy |
-| **@nestjs/jwt** | 10.2.x | JWT utilities |
-| **winston** | 3.11.x | Logging |
-| **helmet** | 7.1.x | Security headers |
+| Technology            | Version     | Purpose                                  |
+| --------------------- | ----------- | ---------------------------------------- |
+| **Node.js**           | 24.13.0 LTS | JavaScript runtime (minimum: >= 20.10.0) |
+| **NestJS**            | 11.1.12     | Backend framework                        |
+| **TypeScript**        | 5.9.x       | Type-safe JavaScript                     |
+| **TypeORM**           | 0.3.28      | Database ORM                             |
+| **class-validator**   | 0.14.x      | DTO validation                           |
+| **class-transformer** | 0.5.x       | Object transformation                    |
+| **bcrypt**            | 5.1.x       | Password hashing                         |
+| **passport**          | 0.7.x       | Authentication middleware                |
+| **passport-jwt**      | 4.0.x       | JWT strategy                             |
+| **@nestjs/jwt**       | 10.2.x      | JWT utilities                            |
+| **winston**           | 3.11.x      | Logging                                  |
+| **helmet**            | 7.1.x       | Security headers                         |
 
 ### Analytics Service (FastAPI)
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **Python** | 3.13.11 | Runtime (minimum: >= 3.12) |
-| **FastAPI** | 0.110+ | Web framework |
-| **uvicorn** | 0.27+ | ASGI server |
-| **pydantic** | 2.6+ | Data validation |
-| **asyncpg** | 0.29+ | PostgreSQL async driver |
-| **SQLAlchemy** | 2.0+ | ORM |
-| **anthropic** | 0.18+ | Claude API client |
-| **openai** | 1.12+ | OpenAI API client |
+| Technology     | Version | Purpose                    |
+| -------------- | ------- | -------------------------- |
+| **Python**     | 3.13.11 | Runtime (minimum: >= 3.12) |
+| **FastAPI**    | 0.110+  | Web framework              |
+| **uvicorn**    | 0.27+   | ASGI server                |
+| **pydantic**   | 2.6+    | Data validation            |
+| **asyncpg**    | 0.29+   | PostgreSQL async driver    |
+| **SQLAlchemy** | 2.0+    | ORM                        |
+| **anthropic**  | 0.18+   | Claude API client          |
+| **openai**     | 1.12+   | OpenAI API client          |
 
 ### Frontend (Next.js)
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **Next.js** | 16.1 | React framework |
-| **React** | 19.2 | UI library |
-| **TypeScript** | 5.9.x | Type safety |
-| **TailwindCSS** | 4.1.18 | Utility-first CSS |
-| **shadcn/ui** | Latest | UI components |
-| **Radix UI** | Latest | Headless UI primitives |
-| **Zustand** | 5.0.x | Client state management |
-| **TanStack Query** | 5.x | Server state management |
-| **React Hook Form** | 7.50.x | Form handling |
-| **Zod** | 3.22.x | Schema validation |
-| **next-intl** | 3.9.x | Internationalization |
-| **lucide-react** | Latest | Icons |
+| Technology          | Version | Purpose                 |
+| ------------------- | ------- | ----------------------- |
+| **Next.js**         | 16.1    | React framework         |
+| **React**           | 19.2    | UI library              |
+| **TypeScript**      | 5.9.x   | Type safety             |
+| **TailwindCSS**     | 4.1.18  | Utility-first CSS       |
+| **shadcn/ui**       | Latest  | UI components           |
+| **Radix UI**        | Latest  | Headless UI primitives  |
+| **Zustand**         | 5.0.x   | Client state management |
+| **TanStack Query**  | 5.x     | Server state management |
+| **React Hook Form** | 7.50.x  | Form handling           |
+| **Zod**             | 3.22.x  | Schema validation       |
+| **next-intl**       | 3.9.x   | Internationalization    |
+| **lucide-react**    | Latest  | Icons                   |
 
 ### Database & Caching
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **PostgreSQL** | 17.7 | Primary database |
-| **TimescaleDB** | 2.14+ | Time-series extension |
-| **pgvector** | 0.6+ | Vector similarity search |
-| **Redis** | 7.x | Caching & session storage |
-| **RabbitMQ** | 3.12 | Message broker |
+| Technology      | Version | Purpose                   |
+| --------------- | ------- | ------------------------- |
+| **PostgreSQL**  | 17.7    | Primary database          |
+| **TimescaleDB** | 2.14+   | Time-series extension     |
+| **pgvector**    | 0.6+    | Vector similarity search  |
+| **Redis**       | 7.x     | Caching & session storage |
+| **RabbitMQ**    | 3.12    | Message broker            |
 
 ### Infrastructure & DevOps
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **Docker** | Latest | Containerization |
-| **Docker Compose** | Latest | Local orchestration |
-| **Nx** | 22.3.3 | Monorepo build system |
-| **pnpm** | 10.28.0 | Package manager |
-| **Husky** | 8.0.3 | Git hooks |
-| **ESLint** | 8.x | Linting |
-| **Prettier** | 3.1.0 | Code formatting |
-| **Jest** | 29.x | Testing (Backend) |
-| **Vitest** | 1.x | Testing (Frontend) |
-| **Playwright** | 1.40.x | E2E testing |
+| Technology         | Version | Purpose               |
+| ------------------ | ------- | --------------------- |
+| **Docker**         | Latest  | Containerization      |
+| **Docker Compose** | Latest  | Local orchestration   |
+| **Nx**             | 22.3.3  | Monorepo build system |
+| **pnpm**           | 10.28.0 | Package manager       |
+| **Husky**          | 8.0.3   | Git hooks             |
+| **ESLint**         | 8.x     | Linting               |
+| **Prettier**       | 3.1.0   | Code formatting       |
+| **Jest**           | 29.x    | Testing (Backend)     |
+| **Vitest**         | 1.x     | Testing (Frontend)    |
+| **Playwright**     | 1.40.x  | E2E testing           |
 
 ---
 
@@ -289,6 +289,7 @@ m-tracking/
 ### Backend Architecture
 
 **Modular Monolith**
+
 - All business domains in single codebase
 - Modules: Auth, Transaction, Banking, Budget, Notification
 - Shared infrastructure layer
@@ -296,6 +297,7 @@ m-tracking/
 - Repository pattern for data access
 
 **Design Patterns**
+
 - **Repository Pattern**: Data access abstraction
 - **DTO Pattern**: Request/response validation
 - **Strategy Pattern**: Multiple bank provider implementations
@@ -305,16 +307,19 @@ m-tracking/
 ### Frontend Architecture
 
 **Server Components First**
+
 - Default to React Server Components
 - Client Components only when needed (interactivity)
 - Minimize client-side JavaScript
 
 **State Management**
+
 - **Zustand**: Client state (UI, forms)
 - **TanStack Query**: Server state (API data, caching)
 - No Redux - simpler state management
 
 **Code Organization**
+
 - Feature-based folder structure
 - Co-located components and hooks
 - Shared UI components in `components/ui`
@@ -323,12 +328,14 @@ m-tracking/
 ### Database Architecture
 
 **PostgreSQL + Extensions**
+
 - **TimescaleDB**: Transaction time-series data
 - **pgvector**: AI embeddings for transaction categorization
 - **Partitioning**: Monthly transaction partitions
 - **Indexing**: Optimized for common queries
 
 **Schema Design**
+
 - Multi-tenant (user_id in all tables)
 - Audit columns (created_at, updated_at)
 - Soft deletes where appropriate
@@ -338,15 +345,15 @@ m-tracking/
 
 ## Port Allocations
 
-| Service | Port | Protocol | Description |
-|---------|------|----------|-------------|
-| **Frontend** | 3000 | HTTP | Next.js development server |
-| **Backend** | 4000 | HTTP | NestJS API |
-| **Analytics** | 5000 | HTTP | FastAPI service |
-| **PostgreSQL** | 5432 | TCP | Database server |
-| **Redis** | 6379 | TCP | Cache server |
-| **RabbitMQ** | 5672 | AMQP | Message broker |
-| **RabbitMQ UI** | 15672 | HTTP | Management interface |
+| Service         | Port  | Protocol | Description                |
+| --------------- | ----- | -------- | -------------------------- |
+| **Frontend**    | 3000  | HTTP     | Next.js development server |
+| **Backend**     | 4000  | HTTP     | NestJS API                 |
+| **Analytics**   | 5000  | HTTP     | FastAPI service            |
+| **PostgreSQL**  | 5432  | TCP      | Database server            |
+| **Redis**       | 6379  | TCP      | Cache server               |
+| **RabbitMQ**    | 5672  | AMQP     | Message broker             |
+| **RabbitMQ UI** | 15672 | HTTP     | Management interface       |
 
 ---
 
@@ -364,15 +371,15 @@ packages:
 
 ### Shared Libraries
 
-| Package | Scope | Purpose |
-|---------|-------|---------|
-| `@m-tracking/common` | Backend + Frontend | Shared utilities, decorators, interfaces |
-| `@m-tracking/constants` | Backend + Frontend | Transaction categories, currency codes, error codes |
-| `@m-tracking/types` | Backend + Frontend | TypeScript type definitions |
-| `@m-tracking/utils` | Backend + Frontend | Helper functions (date, currency, validation) |
-| `@m-tracking/eslint-config` | All | ESLint configuration |
-| `@m-tracking/prettier-config` | All | Prettier configuration |
-| `@m-tracking/typescript-config` | Backend + Frontend | TypeScript base configs |
+| Package                         | Scope              | Purpose                                             |
+| ------------------------------- | ------------------ | --------------------------------------------------- |
+| `@m-tracking/common`            | Backend + Frontend | Shared utilities, decorators, interfaces            |
+| `@m-tracking/constants`         | Backend + Frontend | Transaction categories, currency codes, error codes |
+| `@m-tracking/types`             | Backend + Frontend | TypeScript type definitions                         |
+| `@m-tracking/utils`             | Backend + Frontend | Helper functions (date, currency, validation)       |
+| `@m-tracking/eslint-config`     | All                | ESLint configuration                                |
+| `@m-tracking/prettier-config`   | All                | Prettier configuration                              |
+| `@m-tracking/typescript-config` | Backend + Frontend | TypeScript base configs                             |
 
 ### Nx Task Dependencies
 
@@ -396,6 +403,7 @@ packages:
 ### Backend Modules
 
 **Gateway Module**
+
 - Rate limiting
 - CORS configuration
 - Global exception filters
@@ -403,6 +411,7 @@ packages:
 - API versioning
 
 **Auth Module**
+
 - User registration & login
 - JWT token generation & refresh
 - Password reset flow
@@ -410,6 +419,7 @@ packages:
 - Role-based access control (RBAC)
 
 **Transaction Module**
+
 - Transaction CRUD operations
 - Automatic categorization (AI-powered)
 - Transaction search & filtering
@@ -417,6 +427,7 @@ packages:
 - Transaction analytics
 
 **Bank Module**
+
 - Bank account linking (Plaid, Tink, momo.vn)
 - Automatic transaction sync
 - Balance updates
@@ -424,6 +435,7 @@ packages:
 - Webhook handling
 
 **Budget Module**
+
 - Budget creation & management
 - Category-based budgets
 - Budget tracking & alerts
@@ -431,6 +443,7 @@ packages:
 - Spending analysis
 
 **Notification Module**
+
 - Telegram bot integration
 - Email notifications
 - Push notifications
@@ -640,4 +653,4 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ---
 
-*Last Updated: January 19, 2026*
+_Last Updated: January 19, 2026_

@@ -12,6 +12,7 @@
 Complete authentication system for M-Tracking backend with JWT, OAuth 2.1, email verification, password reset, session management, and rate limiting.
 
 **Key Features:**
+
 - ✅ Email/password authentication (register, login, logout, refresh)
 - ✅ Email verification with token-based flow
 - ✅ Password reset flow with secure tokens
@@ -29,18 +30,21 @@ Complete authentication system for M-Tracking backend with JWT, OAuth 2.1, email
 ### Token Strategy
 
 **Access Token (Short-lived):**
+
 - Algorithm: RS256 (asymmetric)
 - Expiry: 15 minutes
 - Storage: In-memory (frontend), request header (backend)
 - Purpose: Stateless API authentication
 
 **Refresh Token (Long-lived):**
+
 - Algorithm: HS256 (symmetric)
 - Expiry: 7 days
 - Storage: httpOnly cookie (secure, not accessible to JS)
 - Purpose: Token renewal without re-authentication
 
 **Session Token:**
+
 - Storage: Redis with TTL
 - Tracks: Device, IP address, user agent
 - Purpose: Device management, concurrent session limits
@@ -96,6 +100,7 @@ src/auth/
 Register a new user account.
 
 **Request:**
+
 ```json
 {
   "email": "user@example.com",
@@ -105,6 +110,7 @@ Register a new user account.
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -122,6 +128,7 @@ Register a new user account.
 
 **Rate Limit:** 5 requests/minute
 **Validation:**
+
 - Email must be valid and unique
 - Password minimum 8 characters, must include: uppercase, lowercase, number, symbol
 
@@ -132,6 +139,7 @@ Register a new user account.
 Authenticate user with email and password.
 
 **Request:**
+
 ```json
 {
   "email": "user@example.com",
@@ -140,6 +148,7 @@ Authenticate user with email and password.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -156,6 +165,7 @@ Authenticate user with email and password.
 
 **Rate Limit:** 5 requests/minute
 **Errors:**
+
 - 401: Invalid credentials
 - 403: Account not verified (if email verification required)
 
@@ -166,6 +176,7 @@ Authenticate user with email and password.
 Refresh access token using refresh token.
 
 **Request:**
+
 ```json
 {
   "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -173,6 +184,7 @@ Refresh access token using refresh token.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -181,6 +193,7 @@ Refresh access token using refresh token.
 ```
 
 **Errors:**
+
 - 401: Invalid or expired refresh token
 - 401: Token has been blacklisted
 
@@ -191,6 +204,7 @@ Refresh access token using refresh token.
 Logout user and invalidate tokens.
 
 **Headers:**
+
 ```http
 Authorization: Bearer <access_token>
 ```
@@ -198,6 +212,7 @@ Authorization: Bearer <access_token>
 **Response (204 No Content)**
 
 **Side Effects:**
+
 - Access token added to blacklist (15 minutes)
 - Refresh token invalidated immediately
 - Session terminated
@@ -209,6 +224,7 @@ Authorization: Bearer <access_token>
 Verify email address with verification token.
 
 **Request:**
+
 ```json
 {
   "token": "verification-token-from-email"
@@ -216,6 +232,7 @@ Verify email address with verification token.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "message": "Email verified successfully",
@@ -234,6 +251,7 @@ Verify email address with verification token.
 Request password reset via email.
 
 **Request:**
+
 ```json
 {
   "email": "user@example.com"
@@ -241,6 +259,7 @@ Request password reset via email.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "message": "If email exists, password reset link sent"
@@ -257,6 +276,7 @@ Request password reset via email.
 Reset password using reset token from email.
 
 **Request:**
+
 ```json
 {
   "token": "reset-token-from-email",
@@ -265,6 +285,7 @@ Reset password using reset token from email.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "message": "Password reset successfully",
@@ -283,16 +304,19 @@ Reset password using reset token from email.
 OAuth callback handler (Google, GitHub, Facebook).
 
 **Providers:**
+
 - `/auth/google/callback`
 - `/auth/github/callback`
 - `/auth/facebook/callback`
 
 **Query Parameters:**
+
 ```
 ?code=authorization_code&state=state_parameter
 ```
 
 **Response (Redirect to frontend):**
+
 ```
 https://frontend.com/auth/callback?accessToken=...&refreshToken=...
 ```
@@ -359,10 +383,11 @@ const accessToken = this.jwtService.sign(
     algorithm: 'RS256',
     expiresIn: '15m',
   }
-);
+)
 ```
 
 **Payload:**
+
 ```json
 {
   "sub": "user-uuid",
@@ -387,7 +412,7 @@ const refreshToken = this.jwtService.sign(
     secret: process.env.JWT_REFRESH_SECRET,
     expiresIn: '7d',
   }
-);
+)
 ```
 
 ---
@@ -401,33 +426,33 @@ const refreshToken = this.jwtService.sign(
 if (profile.emailVerified) {
   const user = await this.userRepository.findOne({
     where: { email: profile.email },
-  });
+  })
   if (user) {
     // Link OAuth account to existing user
-    return user;
+    return user
   }
 }
 
 // Create new user for unverified email
-const newUser = new User();
-newUser.email = profile.email;
-newUser.name = profile.displayName;
-newUser.emailVerified = profile.emailVerified;
+const newUser = new User()
+newUser.email = profile.email
+newUser.name = profile.displayName
+newUser.emailVerified = profile.emailVerified
 ```
 
 ### OAuth Token Encryption
 
 ```typescript
-import { EncryptionUtil } from '../utils/encryption.util';
+import { EncryptionUtil } from '../utils/encryption.util'
 
 // Encrypt OAuth tokens before storage
-const encrypted = EncryptionUtil.encrypt(oauthAccessToken);
-oauthAccount.accessToken = encrypted;
-await this.oauthAccountRepository.save(oauthAccount);
+const encrypted = EncryptionUtil.encrypt(oauthAccessToken)
+oauthAccount.accessToken = encrypted
+await this.oauthAccountRepository.save(oauthAccount)
 
 // Decrypt when needed for API calls
-const plaintext = EncryptionUtil.decrypt(encrypted);
-await this.oauthProvider.makeAuthenticatedCall(plaintext);
+const plaintext = EncryptionUtil.decrypt(encrypted)
+await this.oauthProvider.makeAuthenticatedCall(plaintext)
 ```
 
 **Algorithm:** AES-256-GCM (Authenticated encryption with additional data)
@@ -438,12 +463,12 @@ await this.oauthProvider.makeAuthenticatedCall(plaintext);
 
 ### Default Limits
 
-| Endpoint | Limit | Window |
-|----------|-------|--------|
-| POST /auth/register | 5 req | 1 minute |
-| POST /auth/login | 5 req | 1 minute |
-| POST /auth/forgot-password | 3 req | 1 minute |
-| Other endpoints | 10 req | 1 minute |
+| Endpoint                   | Limit  | Window   |
+| -------------------------- | ------ | -------- |
+| POST /auth/register        | 5 req  | 1 minute |
+| POST /auth/login           | 5 req  | 1 minute |
+| POST /auth/forgot-password | 3 req  | 1 minute |
+| Other endpoints            | 10 req | 1 minute |
 
 ### Implementation
 
@@ -476,31 +501,31 @@ async login(@Body() dto: LoginDto) {
 @Entity('sessions')
 export class Session {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id: string
 
   @Column()
-  userId: string;
+  userId: string
 
   @Column()
-  deviceId: string;
+  deviceId: string
 
   @Column()
-  userAgent: string;
+  userAgent: string
 
   @Column()
-  ipAddress: string;
+  ipAddress: string
 
   @Column()
-  refreshTokenHash: string;
+  refreshTokenHash: string
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt: Date
 
   @UpdateDateColumn()
-  lastActiveAt: Date;
+  lastActiveAt: Date
 
   @Column({ nullable: true })
-  expiresAt: Date;
+  expiresAt: Date
 }
 ```
 
@@ -508,17 +533,14 @@ export class Session {
 
 ```typescript
 // Create session on login
-const session = await this.sessionService.create(
-  user.id,
-  {
-    deviceId: generateDeviceId(),
-    userAgent: request.get('user-agent'),
-    ipAddress: request.ip,
-  }
-);
+const session = await this.sessionService.create(user.id, {
+  deviceId: generateDeviceId(),
+  userAgent: request.get('user-agent'),
+  ipAddress: request.ip,
+})
 
 // Validate session on request
-const session = await this.sessionService.validateToken(refreshToken);
+const session = await this.sessionService.validateToken(refreshToken)
 ```
 
 ---
@@ -530,6 +552,7 @@ const session = await this.sessionService.validateToken(refreshToken);
 **Current Status:** 64/64 tests passing (100% pass rate)
 
 **Test Files:**
+
 - `auth.service.spec.ts` - Core auth logic
 - `password.service.spec.ts` - Password hashing and reset
 - `token.service.spec.ts` - JWT token generation/validation
@@ -588,12 +611,14 @@ pnpm test auth.service.spec.ts
 ### JWT Keys Not Found
 
 **Error:**
+
 ```
 ENOENT: no such file or directory, open 'jwt-private-key.pem'
 ```
 
 **Solution:**
 Generate JWT keys:
+
 ```bash
 openssl genrsa -out jwt-private-key.pem 2048
 openssl rsa -in jwt-private-key.pem -pubout -out jwt-public-key.pem
@@ -602,12 +627,14 @@ openssl rsa -in jwt-private-key.pem -pubout -out jwt-public-key.pem
 ### OAuth Encryption Key Invalid
 
 **Error:**
+
 ```
 OAUTH_ENCRYPTION_KEY must be 32 bytes (64 hex characters)
 ```
 
 **Solution:**
 Generate new key:
+
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
@@ -615,12 +642,14 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ### Token Expired
 
 **Error:**
+
 ```
 401 Unauthorized: Token has expired
 ```
 
 **Solution:**
 Use refresh endpoint to get new access token:
+
 ```bash
 curl -X POST http://localhost:4000/auth/refresh \
   -H "Content-Type: application/json" \
@@ -630,6 +659,7 @@ curl -X POST http://localhost:4000/auth/refresh \
 ### Rate Limit Exceeded
 
 **Error:**
+
 ```
 429 Too Many Requests: Rate limit exceeded
 ```

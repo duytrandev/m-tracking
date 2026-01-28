@@ -11,6 +11,7 @@
 Complete configuration guide for the M-Tracking frontend application built with Next.js 16, React 19, TypeScript 5.9, and TailwindCSS 4.
 
 **Technology Stack:**
+
 - **Framework:** Next.js 16.1 (App Router)
 - **Runtime:** React 19.2
 - **Language:** TypeScript 5.9.x
@@ -64,12 +65,7 @@ tsconfig.base.json (root)           # Shared strict configuration
       "@m-tracking/utils": ["../../libs/utils/src/index.ts"]
     }
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
-  ],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }
 ```
@@ -77,6 +73,7 @@ tsconfig.base.json (root)           # Shared strict configuration
 ### Inherited from tsconfig.base.json
 
 **Strict Type Checking (100% coverage):**
+
 - ✅ `strict: true` - All strict checks enabled
 - ✅ `strictNullChecks: true` - Null/undefined safety
 - ✅ `noImplicitAny: true` - No implicit any types
@@ -87,6 +84,7 @@ tsconfig.base.json (root)           # Shared strict configuration
 - ✅ `noUncheckedIndexedAccess: true` - Array index safety
 
 **Build Performance:**
+
 - ✅ `incremental: true` - 50-80% faster rebuilds
 - ✅ `skipLibCheck: true` - Skip type checking of declaration files
 
@@ -114,7 +112,7 @@ const nextConfig: NextConfig = {
 
   // Experimental Features
   experimental: {
-    typedRoutes: true,  // Type-safe routing
+    typedRoutes: true, // Type-safe routing
   },
 
   // Output
@@ -133,16 +131,19 @@ export default nextConfig
 ### Key Configuration Decisions
 
 **1. TypeScript Strict Mode ✅**
+
 - **Why:** Catch bugs at compile time
 - **Impact:** 100% type coverage, fewer runtime errors
 - **Trade-off:** Slightly more verbose code
 
 **2. App Router (vs Pages Router) ✅**
+
 - **Why:** Modern React patterns, better performance
 - **Impact:** Server Components by default, improved caching
 - **Trade-off:** Learning curve for older patterns
 
 **3. Standalone Output ✅**
+
 - **Why:** Optimized for Docker deployment
 - **Impact:** Smaller image size, faster cold starts
 - **Trade-off:** None
@@ -275,10 +276,12 @@ export default nextConfig
 ### Nx Tags Explained
 
 **`type:app`** - Application (not a library)
+
 - Can only depend on libraries (`type:lib`)
 - Cannot be depended upon by other projects
 
 **`scope:frontend`** - Frontend scope
+
 - Can import from `scope:frontend` and `scope:shared` libraries
 - Cannot import from `scope:backend` (enforced by ESLint)
 
@@ -317,11 +320,13 @@ export default nextConfig
 ### Cache Benefits
 
 **Local Development:**
+
 - Incremental builds: 30-60 seconds (vs 2-5 minutes full build)
 - Type checking: <10 seconds (incremental)
 - Hot Module Replacement: <1 second
 
 **CI/CD (with Nx Cloud):**
+
 - Cache hit: 85%+ (instant replay)
 - Full build: 3-5 minutes (vs 15-20 minutes without cache)
 - Affected tests only: 70-85% faster CI
@@ -514,12 +519,14 @@ pnpm lint --fix
 ### What Frontend Can Import
 
 ✅ **Allowed:**
+
 - `@m-tracking/common` (scope:shared)
 - `@m-tracking/types` (scope:shared)
 - `@m-tracking/constants` (scope:shared)
 - `@m-tracking/utils` (scope:shared)
 
 ❌ **Not Allowed:**
+
 - Backend code (scope:backend)
 - Backend-specific utilities
 - Server-side modules
@@ -571,6 +578,7 @@ pnpm lint --fix
 **Symptom:** Strict mode catching new type errors
 
 **Solution:**
+
 ```bash
 # Clear Next.js cache
 rm -rf apps/frontend/.next
@@ -585,9 +593,10 @@ nx run frontend:build
 
 ### Issue: Module Not Found
 
-**Symptom:** Cannot resolve @/* imports
+**Symptom:** Cannot resolve @/\* imports
 
 **Solution:**
+
 1. Verify `tsconfig.json` has correct path mappings
 2. Restart TypeScript server in IDE
 3. Clear `.next` cache
@@ -597,6 +606,7 @@ nx run frontend:build
 **Symptom:** Builds using old code
 
 **Solution:**
+
 ```bash
 # Clear Nx cache
 nx reset

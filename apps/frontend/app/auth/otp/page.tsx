@@ -50,7 +50,7 @@ export default function OtpLoginPage(): React.ReactElement {
   // Move to verify step on success
   // Note: This effect synchronously sets state, but it's intentional
   // to transition between steps based on external state changes
-   
+
   useEffect(() => {
     if (requestSuccess && phone && step === 'request') {
       setStep('verify')
@@ -94,7 +94,7 @@ export default function OtpLoginPage(): React.ReactElement {
         description="We'll text you a code to sign in"
       >
         <form
-          onSubmit={(e) => {
+          onSubmit={e => {
             void handleSubmit(onSubmit)(e)
           }}
           className="space-y-6"

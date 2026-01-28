@@ -37,7 +37,7 @@ Updated `services/backend/nest-cli.json` to use SWC:
 Created `services/backend/.swcrc` with the following key settings:
 
 - **Parser**: TypeScript syntax with decorators support (required for NestJS)
-- **Transform**: 
+- **Transform**:
   - `legacyDecorator: true` - Required for NestJS decorators
   - `decoratorMetadata: true` - Emits decorator metadata (required for dependency injection)
 - **Target**: ES2022 (modern Node.js)
@@ -107,10 +107,10 @@ The compiled output is located in `dist/services/backend/`:
 
 Typical build times (approximate):
 
-| Compiler | Cold Build | Incremental Build |
-|----------|-----------|-------------------|
-| TypeScript (tsc) | ~15-20s | ~5-8s |
-| SWC | ~2-3s | <1s |
+| Compiler         | Cold Build | Incremental Build |
+| ---------------- | ---------- | ----------------- |
+| TypeScript (tsc) | ~15-20s    | ~5-8s             |
+| SWC              | ~2-3s      | <1s               |
 
 ## Important Notes
 
@@ -132,6 +132,7 @@ SWC is primarily a transpiler, not a type checker. The `typeCheck: true` option 
 ### Compatibility
 
 SWC is fully compatible with:
+
 - All NestJS decorators and features
 - TypeORM decorators
 - Dependency injection

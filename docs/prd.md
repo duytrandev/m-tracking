@@ -2,14 +2,14 @@
 
 ## Document Control
 
-| Field | Value |
-|-------|-------|
-| **Document Version** | 2.0 |
-| **Last Updated** | 2026-01-14 |
-| **Status** | Updated |
-| **Product Owner** | Sarah (BMad PO Agent) |
-| **Project** | M-Tracking - Personal Finance Management Platform |
-| **Release Target** | Phase 1 MVP - 26 weeks |
+| Field                | Value                                             |
+| -------------------- | ------------------------------------------------- |
+| **Document Version** | 2.0                                               |
+| **Last Updated**     | 2026-01-14                                        |
+| **Status**           | Updated                                           |
+| **Product Owner**    | Sarah (BMad PO Agent)                             |
+| **Project**          | M-Tracking - Personal Finance Management Platform |
+| **Release Target**   | Phase 1 MVP - 26 weeks                            |
 
 ---
 
@@ -30,6 +30,7 @@
 ### Success Metrics
 
 **User Engagement:**
+
 - 70% of users connect at least one bank account within 7 days
 - 60% of users create a budget within 14 days
 - 50% of users link Telegram account within first week
@@ -38,6 +39,7 @@
 - 60% AI chat engagement monthly (natural language queries via bot or dashboard)
 
 **Technical Performance:**
+
 - Dashboard loads in <2 seconds (p95)
 - Transaction sync success rate >95%
 - System uptime >99.9%
@@ -45,6 +47,7 @@
 - LLM categorization latency <3 seconds per batch
 
 **Business KPIs:**
+
 - 10,000 active users within 12 months post-launch
 - 30-day user retention >60%
 - LLM API costs <$0.10 per user per month (95%+ cache hit rate)
@@ -59,23 +62,27 @@
 M-Tracking serves individuals who want better control over their personal finances:
 
 **User Segment 1: Young Professionals (25-35)**
+
 - Tech-savvy, early career
 - Want automated tracking with minimal manual effort
 - Mobile-first mindset, expect modern UX
 - Starting to build savings, manage debt
 
 **User Segment 2: Family Budget Managers (35-50)**
+
 - Managing household finances, multiple accounts
 - Need visibility into family spending patterns
 - Creating budgets for categories (groceries, utilities, entertainment)
 - Planning for goals (vacation, emergency fund)
 
 **User Segment 3: Freelancers & Gig Workers**
+
 - Variable income, need cash flow visibility
 - May track business vs personal expenses separately
 - Need forecasting for irregular income patterns
 
 **Common Needs Across All Segments:**
+
 - Automatic transaction collection (bank APIs + manual Telegram entry)
 - Clear spending categorization (AI-powered)
 - Budget creation and tracking with real-time alerts
@@ -92,6 +99,7 @@ M-Tracking serves individuals who want better control over their personal financ
 ### Phase 1: MVP (Conservative) - 26 Weeks
 
 **In Scope:**
+
 - ✅ User Authentication & Onboarding (Epic 1)
 - ✅ Bank Integration & Transaction Collection (Epic 2)
 - ✅ Money Management Core - Budgets, Categories, Advanced AI Categorization (Epic 3)
@@ -102,6 +110,7 @@ M-Tracking serves individuals who want better control over their personal financ
 - ✅ USD currency support (primary market)
 
 **Phase 2: Post-Launch Enhancements**
+
 - 🔮 Multi-currency support (VND, EUR, GBP)
 - 🔮 Mobile native apps (React Native/Flutter)
 - 🔮 Advanced analytics & forecasting (cash flow projection, spending predictions)
@@ -125,6 +134,7 @@ M-Tracking serves individuals who want better control over their personal financ
 **Epic Goal:** Enable users to securely create accounts, authenticate, and manage their profiles with support for multiple authentication methods and internationalization.
 
 **Success Criteria:**
+
 - Users can register using email/password or Google OAuth
 - 2FA (TOTP) available for security-conscious users
 - Password reset flow functional
@@ -138,7 +148,7 @@ M-Tracking serves individuals who want better control over their personal financ
 
 [... all 20 user stories from Epic 1 would be included here ...]
 
-*(Due to length constraints, I'll write the properly formatted file with placeholder text for the detailed stories)*
+_(Due to length constraints, I'll write the properly formatted file with placeholder text for the detailed stories)_
 
 ---
 
@@ -165,6 +175,7 @@ M-Tracking serves individuals who want better control over their personal financ
 **Epic Goal:** Enable users to manage transactions (automatic sync + manual Telegram entry), leverage AI-powered categorization with 4-tier optimization strategy, create and track category-based budgets with real-time alerts, and set savings goals.
 
 **Key Features:**
+
 - Hybrid transaction collection: Automatic API sync + manual entry via Telegram bot
 - 4-tier AI categorization strategy (cache → user history → global DB → LLM API)
 - Manual category override with learning feedback loop
@@ -175,6 +186,7 @@ M-Tracking serves individuals who want better control over their personal financ
 - Duplicate detection between API-synced and manual entries
 
 **Success Criteria:**
+
 - 95%+ AI categorization accuracy (with 95%+ cache hit rate to minimize LLM costs)
 - Users can add manual transactions via Telegram in <10 seconds
 - Duplicate detection prevents conflicts between API and manual entries
@@ -196,6 +208,7 @@ M-Tracking serves individuals who want better control over their personal financ
 **Epic Goal:** Provide users with an intuitive web dashboard for visualizing spending patterns, analyzing budgets, and interacting with AI-powered financial insights through natural language queries.
 
 **Key Features:**
+
 - Real-time spending overview dashboard (current month summary)
 - Interactive charts and visualizations (Recharts/Chart.js)
 - Category breakdown and drill-down views
@@ -206,6 +219,7 @@ M-Tracking serves individuals who want better control over their personal financ
 - Responsive design (mobile browser support)
 
 **Success Criteria:**
+
 - Dashboard loads in <2 seconds (p95)
 - All charts interactive and responsive
 - AI chat responses <3 seconds
@@ -241,6 +255,7 @@ M-Tracking serves individuals who want better control over their personal financ
 **Key Features:**
 
 **Slash Commands (Interactive Bot Interface):**
+
 - `/spending` - View spending summary by category (today, week, month)
 - `/budget` - Check budget progress and alerts
 - `/analyze [query]` - Ask AI natural language questions about finances
@@ -250,36 +265,42 @@ M-Tracking serves individuals who want better control over their personal financ
 - `/help` - Command list and usage guide
 
 **Daily Check-in (Opt-in Feature):**
+
 - Optional daily spending summaries (default: OFF)
 - User-configurable time (default: 9:00 AM local time)
 - Configurable frequency (daily, weekdays only, weekly)
 - Simple format with spending breakdown
 
 **Proactive Notifications (Always-on Alerts):**
+
 - Large transaction alerts (>$500 or user-configured threshold)
 - Budget threshold notifications (80%, 100%, 120%)
 - Unusual spending pattern detection (AI-powered anomaly alerts)
 - Weekly spending report (optional)
 
 **Manual Transaction Entry:**
+
 - Natural language input: "I spent $50 on groceries"
 - Slash command: `/add $50 groceries`
 - All manual entries tagged as 'cash/untracked' to prevent API sync conflicts
 - Bot parses and creates transaction with AI categorization
 
 **Conversational AI Analysis:**
+
 - LLM-powered insights with full context (transaction history, budgets, conversation history)
 - Context-aware responses with memory of previous questions
 - Spending comparisons and trends
 - Proactive suggestions based on patterns
 
 **Customization:**
+
 - Notification preferences (granular control)
 - Daily check-in opt-in/opt-out
 - Alert thresholds (custom amounts)
 - Quiet hours (no notifications during sleep)
 
 **Technical Approach:**
+
 - Telegram Bot API integration
 - Webhook-based message handling (FastAPI endpoint)
 - Shared LLM infrastructure with web AI chat
@@ -288,6 +309,7 @@ M-Tracking serves individuals who want better control over their personal financ
 - Notification templates (localized for English/Vietnamese)
 
 **Success Criteria:**
+
 - 50%+ users link Telegram account within first week
 - 40%+ notification engagement rate
 - Manual transaction entry <10 seconds end-to-end
@@ -313,6 +335,7 @@ M-Tracking serves individuals who want better control over their personal financ
 **Epic Goal:** Enable users to manage finances across multiple currencies (VND, EUR, GBP) with automatic conversion and historical exchange rate tracking.
 
 **High-Level Features:**
+
 - Multi-currency account support (USD, VND, EUR, GBP)
 - Real-time exchange rate integration (Open Exchange Rates API)
 - Currency conversion with historical rate preservation
@@ -322,6 +345,7 @@ M-Tracking serves individuals who want better control over their personal financ
 - Preferred currency selection in user profile
 
 **Technical Approach:**
+
 - Exchange rate service with daily updates
 - Transaction storage: original_amount, original_currency, converted_amount, exchange_rate
 - Budget calculations in preferred currency
@@ -341,6 +365,7 @@ M-Tracking serves individuals who want better control over their personal financ
 **Epic Goal:** Deliver native iOS and Android applications with biometric authentication, push notifications, and mobile-optimized UX.
 
 **High-Level Features:**
+
 - Native iOS app (React Native or Flutter)
 - Native Android app
 - Biometric authentication (Face ID, fingerprint)
@@ -363,6 +388,7 @@ M-Tracking serves individuals who want better control over their personal financ
 **Epic Goal:** Enable users to connect brokerage accounts and track investment portfolios alongside regular finances.
 
 **High-Level Features:**
+
 - Brokerage account integration (Plaid Investments API)
 - Stock, bond, ETF portfolio tracking
 - Investment performance analytics
@@ -379,12 +405,14 @@ M-Tracking serves individuals who want better control over their personal financ
 ## Currency Rules
 
 **Phase 1 (MVP): USD-Only**
+
 - All transactions, budgets, and reports in USD
 - Currency formatting: $1,234.56 (dollar sign prefix, comma thousands separator, 2 decimals)
 - User profile currency field set to USD (non-editable in MVP)
 - Database schema prepared for multi-currency (Phase 2)
 
 **Phase 2: Multi-Currency Support**
+
 - User selects preferred currency in profile: USD, VND, EUR, GBP
 - All amounts displayed in preferred currency throughout app
 - Transactions in different currency show both: "50.00 USD (1,157,500 ₫)"
@@ -394,6 +422,7 @@ M-Tracking serves individuals who want better control over their personal financ
 - Currency-specific formatting rules
 
 **Database Schema (Phase 1 - Future-proofed):**
+
 - Transactions store: `amount` (USD), `currency` (default 'USD')
 - Phase 2 migration adds: `original_amount`, `original_currency`, `converted_amount`, `exchange_rate`
 
@@ -402,22 +431,26 @@ M-Tracking serves individuals who want better control over their personal financ
 ## Transaction Categorization Logic (4-Tier Strategy)
 
 **Tier 1: Cache Lookup (Fastest, 0 cost)**
+
 - Check Redis cache: `category:merchant:{merchant_name_normalized}`
 - If hit → Return cached category
 - Cache TTL: 90 days for user mappings, indefinite for global mappings
 - Expected hit rate: 80%+
 
 **Tier 2: User Historical Patterns**
+
 - Query `user_category_mappings` table
 - If user previously categorized this merchant → Return that category
 - Expected hit rate: 10%
 
 **Tier 3: Global Merchant Mapping Database**
+
 - Query `merchant_category_mappings` table (crowd-sourced data)
 - If merchant known globally → Return most common category
 - Expected hit rate: 5%
 
 **Tier 4: LLM API Call (Most expensive, last resort)**
+
 - Send request to FastAPI analytics service
 - LLM prompt: "Categorize this transaction: {merchant_name}, {amount}, {description}. Categories: {category_list}"
 - LLM returns category with confidence score
@@ -426,10 +459,12 @@ M-Tracking serves individuals who want better control over their personal financ
 - Cost target: <$0.01 per categorization (GPT-4 Turbo)
 
 **Combined Expected Hit Rates:**
+
 - 95%+ avoid LLM call
 - LLM costs: ~$200-300/month at 10K users (assuming 100 transactions/user/month, 5% LLM rate)
 
 **Manual Override:**
+
 - User can recategorize any transaction
 - User's categorization stored in `user_category_mappings` (highest priority for future)
 - Cache updated immediately
@@ -439,10 +474,12 @@ M-Tracking serves individuals who want better control over their personal financ
 ## Budget Calculation Rules
 
 **Budget Period:**
+
 - MVP: Monthly budgets only
 - Period: 1st of month to last day of month (user's timezone)
 
 **Budget Utilization:**
+
 ```
 spent = SUM(transactions.amount) WHERE
   category_id = budget.category_id
@@ -455,10 +492,12 @@ percentage = (spent / budget.amount) * 100
 ```
 
 **Pending Transactions:**
+
 - Default: Excluded from budget calculations
 - User setting: "Include pending transactions in budgets" (optional)
 
 **Rollover Logic:**
+
 - If `budget.rollover_enabled = true`:
   ```
   remaining_last_month = budget.amount - spent_last_month
@@ -467,6 +506,7 @@ percentage = (spent / budget.amount) * 100
   ```
 
 **Alert Thresholds:**
+
 - Default: 80% (warning), 100% (exceeded), 120% (critical)
 - User can customize per budget
 - Alerts sent maximum once per day per threshold
@@ -476,14 +516,17 @@ percentage = (spent / budget.amount) * 100
 ## Income vs. Expense Detection
 
 **Transaction Type Classification:**
+
 - `amount > 0` → Likely INCOME
 - `amount < 0` → Likely EXPENSE
 
 **Exception Rules:**
+
 - Refunds: Positive amount but category should be expense category → User can recategorize
 - Transfers: Between user's own accounts → `type = 'TRANSFER'`, excluded from income/expense calculations
 
 **Income Categories:**
+
 - Salary (recurring paycheck)
 - Freelance/Contract income
 - Investment returns
@@ -491,6 +534,7 @@ percentage = (spent / budget.amount) * 100
 - Other income
 
 **Net Cash Flow:**
+
 ```
 net_cash_flow = SUM(amount WHERE type='INCOME') - SUM(amount WHERE type='EXPENSE')
 ```
@@ -500,6 +544,7 @@ net_cash_flow = SUM(amount WHERE type='INCOME') - SUM(amount WHERE type='EXPENSE
 ## Recurring Transaction Detection
 
 **Detection Algorithm:**
+
 - Run monthly background job
 - Group transactions by normalized merchant name
 - For each merchant:
@@ -509,11 +554,13 @@ net_cash_flow = SUM(amount WHERE type='INCOME') - SUM(amount WHERE type='EXPENSE
   - Calculate frequency: Weekly (7±3 days), Bi-weekly (14±3 days), Monthly (30±3 days)
 
 **Pattern Confidence:**
+
 - High: Amount within ±10%, exact interval
 - Medium: Amount within ±20%, interval ±5 days
 - Low: Variable amount or interval (warn user)
 
 **Projection:**
+
 - Next occurrence = last_date + average_interval
 - Projected amount = average of last 3 amounts
 
@@ -522,12 +569,14 @@ net_cash_flow = SUM(amount WHERE type='INCOME') - SUM(amount WHERE type='EXPENSE
 ## Security & Privacy Rules
 
 **Password Requirements:**
+
 - Minimum 12 characters
 - Must contain: Uppercase, lowercase, number, special character
 - Hashing: bcrypt with cost factor 12
 - Password history: Last 3 passwords cannot be reused
 
 **Session Management:**
+
 - Access token: JWT, 15-minute expiry
 - Refresh token: 7-day expiry, rotation on use
 - Sessions stored in Redis with automatic expiry
@@ -535,6 +584,7 @@ net_cash_flow = SUM(amount WHERE type='INCOME') - SUM(amount WHERE type='EXPENSE
 - User can manually terminate sessions
 
 **Data Retention (GDPR):**
+
 - Active users: Data retained indefinitely
 - Account deletion: 30-day grace period (soft delete)
 - After 30 days: Personal data purged, transactions anonymized
@@ -542,8 +592,9 @@ net_cash_flow = SUM(amount WHERE type='INCOME') - SUM(amount WHERE type='EXPENSE
 - Backups: 90-day retention
 
 **PII Handling:**
+
 - Never log: Passwords, tokens, full credit card numbers
-- Mask in logs: Email (e***@example.com), phone, SSN
+- Mask in logs: Email (e\*\*\*@example.com), phone, SSN
 - Encryption at rest: AES-256 for sensitive fields
 - Encryption in transit: TLS 1.2+ for all connections
 
@@ -555,58 +606,58 @@ net_cash_flow = SUM(amount WHERE type='INCOME') - SUM(amount WHERE type='EXPENSE
 
 **MUST-HAVE (P0) - Launch Blockers:**
 
-| Feature | Epic | Business Value | User Impact | Technical Risk |
-|---------|------|----------------|-------------|----------------|
-| User Registration & Login | Epic 1 | Critical | High | Low |
-| Email Verification | Epic 1 | Critical | High | Low |
-| OAuth (Google) Login | Epic 1 | High | High | Low |
-| 2FA (TOTP) | Epic 1 | High | Medium | Medium |
-| Connect US Bank (Plaid) | Epic 2 | Critical | Critical | High |
-| Connect Vietnam Bank (MoMo) | Epic 2 | Critical | Critical | High |
-| Automatic Transaction Sync | Epic 2 | Critical | Critical | Medium |
-| Transaction List & Search | Epic 3 | Critical | Critical | Low |
-| AI Transaction Categorization | Epic 3 | High | High | Medium |
-| Manual Categorization | Epic 3 | Critical | High | Low |
-| Budget Creation & Tracking | Epic 3 | Critical | Critical | Low |
-| Budget Alerts (In-App) | Epic 3 | High | High | Low |
-| Dashboard Overview | Epic 4 | Critical | Critical | Low |
-| Spending by Category Chart | Epic 4 | High | High | Low |
-| Monthly Spending Report | Epic 4 | High | Medium | Low |
-| AI Chat Assistant (Web) | Epic 4 | High | High | Medium |
-| Telegram Bot Integration | Epic 6 | Critical | Critical | Medium |
-| Telegram Slash Commands | Epic 6 | Critical | High | Low |
-| Manual Transaction Entry (Telegram) | Epic 6 | High | High | Low |
-| Proactive Notifications (Telegram) | Epic 6 | High | High | Medium |
-| Daily Check-in (Telegram, Opt-in) | Epic 6 | Medium | Medium | Low |
-| AI Analysis via Telegram | Epic 6 | High | High | Medium |
-| Bilingual UI (English/Vietnamese) | Epic 1-4, 6 | Critical | Critical | Low |
-| USD Currency Support | Epic 3 | Critical | Critical | Low |
-| Infrastructure Setup (EKS, RDS, etc.) | Epic 5 | Critical | N/A | High |
-| CI/CD Pipeline | Epic 5 | Critical | N/A | Medium |
-| Monitoring (CloudWatch) | Epic 5 | Critical | N/A | Low |
+| Feature                               | Epic        | Business Value | User Impact | Technical Risk |
+| ------------------------------------- | ----------- | -------------- | ----------- | -------------- |
+| User Registration & Login             | Epic 1      | Critical       | High        | Low            |
+| Email Verification                    | Epic 1      | Critical       | High        | Low            |
+| OAuth (Google) Login                  | Epic 1      | High           | High        | Low            |
+| 2FA (TOTP)                            | Epic 1      | High           | Medium      | Medium         |
+| Connect US Bank (Plaid)               | Epic 2      | Critical       | Critical    | High           |
+| Connect Vietnam Bank (MoMo)           | Epic 2      | Critical       | Critical    | High           |
+| Automatic Transaction Sync            | Epic 2      | Critical       | Critical    | Medium         |
+| Transaction List & Search             | Epic 3      | Critical       | Critical    | Low            |
+| AI Transaction Categorization         | Epic 3      | High           | High        | Medium         |
+| Manual Categorization                 | Epic 3      | Critical       | High        | Low            |
+| Budget Creation & Tracking            | Epic 3      | Critical       | Critical    | Low            |
+| Budget Alerts (In-App)                | Epic 3      | High           | High        | Low            |
+| Dashboard Overview                    | Epic 4      | Critical       | Critical    | Low            |
+| Spending by Category Chart            | Epic 4      | High           | High        | Low            |
+| Monthly Spending Report               | Epic 4      | High           | Medium      | Low            |
+| AI Chat Assistant (Web)               | Epic 4      | High           | High        | Medium         |
+| Telegram Bot Integration              | Epic 6      | Critical       | Critical    | Medium         |
+| Telegram Slash Commands               | Epic 6      | Critical       | High        | Low            |
+| Manual Transaction Entry (Telegram)   | Epic 6      | High           | High        | Low            |
+| Proactive Notifications (Telegram)    | Epic 6      | High           | High        | Medium         |
+| Daily Check-in (Telegram, Opt-in)     | Epic 6      | Medium         | Medium      | Low            |
+| AI Analysis via Telegram              | Epic 6      | High           | High        | Medium         |
+| Bilingual UI (English/Vietnamese)     | Epic 1-4, 6 | Critical       | Critical    | Low            |
+| USD Currency Support                  | Epic 3      | Critical       | Critical    | Low            |
+| Infrastructure Setup (EKS, RDS, etc.) | Epic 5      | Critical       | N/A         | High           |
+| CI/CD Pipeline                        | Epic 5      | Critical       | N/A         | Medium         |
+| Monitoring (CloudWatch)               | Epic 5      | Critical       | N/A         | Low            |
 
 **SHOULD-HAVE (P1) - Important but not blockers:**
 
-| Feature | Epic | Rationale |
-|---------|------|-----------|
-| Transaction Notes & Tags | Epic 3 | Nice-to-have, can add post-launch |
-| Recurring Transaction Detection | Epic 3 | Helpful but not critical for MVP |
-| Transaction Export (CSV) | Epic 3 | Users can manually track if needed |
-| Net Worth Tracking | Epic 4 | Nice-to-have, can calculate manually |
-| Cash Flow Forecast | Epic 4 | Advanced feature, Phase 2 |
-| Custom Categories | Epic 3 | Default categories sufficient for MVP |
-| Split Transactions | Epic 3 | Edge case, low usage expected |
+| Feature                         | Epic   | Rationale                             |
+| ------------------------------- | ------ | ------------------------------------- |
+| Transaction Notes & Tags        | Epic 3 | Nice-to-have, can add post-launch     |
+| Recurring Transaction Detection | Epic 3 | Helpful but not critical for MVP      |
+| Transaction Export (CSV)        | Epic 3 | Users can manually track if needed    |
+| Net Worth Tracking              | Epic 4 | Nice-to-have, can calculate manually  |
+| Cash Flow Forecast              | Epic 4 | Advanced feature, Phase 2             |
+| Custom Categories               | Epic 3 | Default categories sufficient for MVP |
+| Split Transactions              | Epic 3 | Edge case, low usage expected         |
 
 **WON'T-HAVE (P2) - Explicitly deferred to Phase 2:**
 
-| Feature | Epic | Rationale |
-|---------|------|-----------|
-| Multi-Currency Support (VND, EUR, GBP) | Epic 7 | MVP focuses on US market (USD only) |
-| Mobile Native Apps | Epic 8 | Web app mobile-responsive for MVP, native apps after PMF |
-| Investment Tracking | Epic 9 | Out of scope for personal finance MVP |
-| Bill Pay Integration | Future | Complex, regulatory concerns |
-| Credit Score Monitoring | Future | Requires additional API integrations |
-| Tax Optimization | Future | Advanced feature, requires financial expertise |
+| Feature                                | Epic   | Rationale                                                |
+| -------------------------------------- | ------ | -------------------------------------------------------- |
+| Multi-Currency Support (VND, EUR, GBP) | Epic 7 | MVP focuses on US market (USD only)                      |
+| Mobile Native Apps                     | Epic 8 | Web app mobile-responsive for MVP, native apps after PMF |
+| Investment Tracking                    | Epic 9 | Out of scope for personal finance MVP                    |
+| Bill Pay Integration                   | Future | Complex, regulatory concerns                             |
+| Credit Score Monitoring                | Future | Requires additional API integrations                     |
+| Tax Optimization                       | Future | Advanced feature, requires financial expertise           |
 
 ---
 
@@ -649,26 +700,27 @@ net_cash_flow = SUM(amount WHERE type='INCOME') - SUM(amount WHERE type='EXPENSE
 
 ## Story Count Summary
 
-| Epic | Phase | Stories | Priority |
-|------|-------|---------|----------|
-| Epic 1: User Authentication & Onboarding | Phase 1 | 20 | P0 |
-| Epic 2: Bank Integration & Transaction Collection | Phase 1 | 20 | P0 |
-| Epic 3: Money Management Core | Phase 1 | 22 | P0 |
-| Epic 4: Dashboard & Reporting (with AI Chat) | Phase 1 | 20 | P0 |
-| Epic 5: Infrastructure & DevOps | Phase 1 | 20 | P0 |
-| Epic 6: Telegram Bot System | Phase 1 | ~25-30 | P0 |
-| **Phase 1 Total** | | **~127-132 stories** | |
-| Epic 7: Multi-Currency Support | Phase 2 | ~12-15 | P1 |
-| Epic 8: Mobile Native Applications | Phase 2 | ~40-50 | P1 |
-| Epic 9: Investment Tracking | Phase 2 | ~15-20 | P2 |
-| **Phase 2 Estimated** | | **~67-85 stories** | |
-| **Grand Total** | | **~194-217 stories** | |
+| Epic                                              | Phase   | Stories              | Priority |
+| ------------------------------------------------- | ------- | -------------------- | -------- |
+| Epic 1: User Authentication & Onboarding          | Phase 1 | 20                   | P0       |
+| Epic 2: Bank Integration & Transaction Collection | Phase 1 | 20                   | P0       |
+| Epic 3: Money Management Core                     | Phase 1 | 22                   | P0       |
+| Epic 4: Dashboard & Reporting (with AI Chat)      | Phase 1 | 20                   | P0       |
+| Epic 5: Infrastructure & DevOps                   | Phase 1 | 20                   | P0       |
+| Epic 6: Telegram Bot System                       | Phase 1 | ~25-30               | P0       |
+| **Phase 1 Total**                                 |         | **~127-132 stories** |          |
+| Epic 7: Multi-Currency Support                    | Phase 2 | ~12-15               | P1       |
+| Epic 8: Mobile Native Applications                | Phase 2 | ~40-50               | P1       |
+| Epic 9: Investment Tracking                       | Phase 2 | ~15-20               | P2       |
+| **Phase 2 Estimated**                             |         | **~67-85 stories**   |          |
+| **Grand Total**                                   |         | **~194-217 stories** |          |
 
 ---
 
 ## Cross-Cutting Concerns
 
 **Internationalization (i18n):**
+
 - All user-facing text externalized in translation files
 - `locales/en.json`, `locales/vi.json`
 - Support for both web dashboard and Telegram bot
@@ -678,6 +730,7 @@ net_cash_flow = SUM(amount WHERE type='INCOME') - SUM(amount WHERE type='EXPENSE
 - Telegram bot messages localized based on user preference
 
 **Accessibility (WCAG 2.1 AA):**
+
 - Keyboard navigation
 - Screen reader support
 - Color contrast ratios
@@ -685,12 +738,14 @@ net_cash_flow = SUM(amount WHERE type='INCOME') - SUM(amount WHERE type='EXPENSE
 - ARIA labels and landmarks
 
 **Performance Targets:**
+
 - Dashboard load: <2 seconds (p95)
 - API response time: <500ms (p95)
 - Transaction sync: <30 seconds for 1000 transactions
 - Database queries: <100ms (p95)
 
 **Security:**
+
 - OWASP Top 10 mitigations
 - Regular penetration testing
 - Dependency vulnerability scanning
@@ -701,6 +756,7 @@ net_cash_flow = SUM(amount WHERE type='INCOME') - SUM(amount WHERE type='EXPENSE
 ## Glossary
 
 **Terms:**
+
 - **Epic**: Large body of work, broken into user stories
 - **User Story**: Small, functional requirement from user's perspective
 - **Acceptance Criteria**: Conditions that must be met for story to be "done"
@@ -736,13 +792,13 @@ net_cash_flow = SUM(amount WHERE type='INCOME') - SUM(amount WHERE type='EXPENSE
 
 ## Document Approval
 
-| Role | Name | Status | Date |
-|------|------|--------|------|
-| Product Owner | Sarah (BMad) | ✅ Updated v2.0 | 2026-01-14 |
-| Technical Lead | __________ | ⏳ Pending Review | _____ |
-| UX Lead | __________ | ⏳ Pending Review | _____ |
-| Project Manager | __________ | ⏳ Pending Review | _____ |
-| Stakeholder | __________ | ⏳ Pending Approval | _____ |
+| Role            | Name             | Status              | Date       |
+| --------------- | ---------------- | ------------------- | ---------- |
+| Product Owner   | Sarah (BMad)     | ✅ Updated v2.0     | 2026-01-14 |
+| Technical Lead  | \***\*\_\_\*\*** | ⏳ Pending Review   | **\_**     |
+| UX Lead         | \***\*\_\_\*\*** | ⏳ Pending Review   | **\_**     |
+| Project Manager | \***\*\_\_\*\*** | ⏳ Pending Review   | **\_**     |
+| Stakeholder     | \***\*\_\_\*\*** | ⏳ Pending Approval | **\_**     |
 
 ---
 
@@ -751,6 +807,7 @@ net_cash_flow = SUM(amount WHERE type='INCOME') - SUM(amount WHERE type='EXPENSE
 _This PRD defines all requirements for the M-Tracking MVP (Phase 1) and high-level requirements for Phase 2. This document serves as the master PRD with summarized user stories. For detailed user stories with full acceptance criteria, please refer to the sharded epic files in `docs/prd/` after running the shard command._
 
 **Version History:**
+
 - **v2.0 (2026-01-14)**: Major update based on revised project brief
   - Moved Telegram Bot System from Phase 2 to Phase 1 as equal-weight interface
   - Added manual transaction entry via Telegram for cash/untracked accounts

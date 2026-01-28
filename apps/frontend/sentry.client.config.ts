@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/nextjs';
+import * as Sentry from '@sentry/nextjs'
 
 /**
  * Sentry client-side configuration for Next.js
@@ -17,15 +17,16 @@ if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
     environment: process.env.NEXT_PUBLIC_APP_ENV || 'development',
 
     // Sampling rates (100% in development, adjust for production)
-    tracesSampleRate: process.env.NEXT_PUBLIC_APP_ENV === 'production' ? 0.1 : 1.0,
+    tracesSampleRate:
+      process.env.NEXT_PUBLIC_APP_ENV === 'production' ? 0.1 : 1.0,
     replaysSessionSampleRate: 0.1, // 10% of sessions
     replaysOnErrorSampleRate: 1.0, // 100% when errors occur
 
     // Performance monitoring integrations
     integrations: [
       Sentry.replayIntegration({
-        maskAllText: true,       // Mask all text for privacy
-        blockAllMedia: true,     // Block all media (images, videos)
+        maskAllText: true, // Mask all text for privacy
+        blockAllMedia: true, // Block all media (images, videos)
       }),
       Sentry.browserTracingIntegration(),
     ],
@@ -34,23 +35,26 @@ if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
     beforeSend(event, _hint) {
       // Scrub request headers
       if (event.request?.headers) {
-        delete event.request.headers['Authorization'];
-        delete event.request.headers['Cookie'];
+        delete event.request.headers['Authorization']
+        delete event.request.headers['Cookie']
       }
 
       // Scrub query parameters with sensitive data
-      if (event.request?.query_string && typeof event.request.query_string === 'string') {
+      if (
+        event.request?.query_string &&
+        typeof event.request.query_string === 'string'
+      ) {
         event.request.query_string = event.request.query_string
           .replace(/token=[^&]*/g, 'token=[REDACTED]')
-          .replace(/email=[^&]*/g, 'email=[REDACTED]');
+          .replace(/email=[^&]*/g, 'email=[REDACTED]')
       }
 
       // Partially scrub user email (keep first 2 chars + domain)
       if (event.user?.email) {
-        const email = event.user.email;
-        const [localPart, domain] = email.split('@');
+        const email = event.user.email
+        const [localPart, domain] = email.split('@')
         if (localPart && domain) {
-          event.user.email = `${localPart.substring(0, 2)}***@${domain}`;
+          event.user.email = `${localPart.substring(0, 2)}***@${domain}`
         }
       }
 
@@ -60,22 +64,22 @@ if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
           if (breadcrumb.data) {
             // Redact transaction amounts
             if ('amount' in breadcrumb.data) {
-              breadcrumb.data.amount = '[REDACTED]';
+              breadcrumb.data.amount = '[REDACTED]'
             }
             // Redact account numbers
             if ('accountNumber' in breadcrumb.data) {
-              breadcrumb.data.accountNumber = '[REDACTED]';
+              breadcrumb.data.accountNumber = '[REDACTED]'
             }
             // Redact merchant names (keep category)
             if ('merchant' in breadcrumb.data) {
-              breadcrumb.data.merchant = '[REDACTED]';
+              breadcrumb.data.merchant = '[REDACTED]'
             }
           }
-          return breadcrumb;
-        });
+          return breadcrumb
+        })
       }
 
-      return event;
+      return event
     },
 
     // Ignore non-critical errors
@@ -89,9 +93,9 @@ if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
 
     // Enable debug mode in development
     debug: process.env.NEXT_PUBLIC_APP_ENV === 'development',
-  });
+  })
 
-  console.log('✅ Sentry client initialized');
+  console.log('✅ Sentry client initialized')
 } else {
-  console.log('⚠️  Sentry DSN not configured - client monitoring disabled');
+  console.log('⚠️  Sentry DSN not configured - client monitoring disabled')
 }

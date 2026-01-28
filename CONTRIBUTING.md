@@ -43,22 +43,26 @@ Ensure you have the required tools installed:
 1. **Fork the repository** on GitHub
 
 2. **Clone your fork locally**:
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/m-tracking.git
    cd m-tracking
    ```
 
 3. **Add upstream remote**:
+
    ```bash
    git remote add upstream https://github.com/ORIGINAL_OWNER/m-tracking.git
    ```
 
 4. **Install dependencies**:
+
    ```bash
    pnpm install
    ```
 
 5. **Install Python dependencies** (Analytics service):
+
    ```bash
    cd services/analytics
    uv sync
@@ -66,11 +70,13 @@ Ensure you have the required tools installed:
    ```
 
 6. **Start local infrastructure**:
+
    ```bash
    pnpm run docker:up
    ```
 
 7. **Configure environment variables**:
+
    ```bash
    cp apps/frontend/.env.example apps/frontend/.env
    cp services/backend/.env.example services/backend/.env
@@ -203,21 +209,22 @@ type(scope): description
 
 ### Types
 
-| Type | Description | Example |
-|------|-------------|---------|
-| `feat` | New feature | `feat(auth): implement OAuth login` |
-| `fix` | Bug fix | `fix(transaction): resolve sync timing issue` |
-| `docs` | Documentation | `docs(readme): update installation steps` |
-| `style` | Code style (formatting, no logic change) | `style(budget): format with prettier` |
-| `refactor` | Code refactoring | `refactor(auth): extract JWT logic to service` |
-| `test` | Add or update tests | `test(transaction): add unit tests for sync` |
-| `chore` | Build, dependencies, tooling | `chore(deps): upgrade nestjs to 11.1.12` |
-| `perf` | Performance improvement | `perf(db): optimize transaction query` |
-| `ci` | CI/CD changes | `ci(gh-actions): add test coverage report` |
+| Type       | Description                              | Example                                        |
+| ---------- | ---------------------------------------- | ---------------------------------------------- |
+| `feat`     | New feature                              | `feat(auth): implement OAuth login`            |
+| `fix`      | Bug fix                                  | `fix(transaction): resolve sync timing issue`  |
+| `docs`     | Documentation                            | `docs(readme): update installation steps`      |
+| `style`    | Code style (formatting, no logic change) | `style(budget): format with prettier`          |
+| `refactor` | Code refactoring                         | `refactor(auth): extract JWT logic to service` |
+| `test`     | Add or update tests                      | `test(transaction): add unit tests for sync`   |
+| `chore`    | Build, dependencies, tooling             | `chore(deps): upgrade nestjs to 11.1.12`       |
+| `perf`     | Performance improvement                  | `perf(db): optimize transaction query`         |
+| `ci`       | CI/CD changes                            | `ci(gh-actions): add test coverage report`     |
 
 ### Scope
 
 Scope indicates the affected module or area:
+
 - `auth`, `transaction`, `bank`, `budget`, `notification`
 - `frontend`, `backend`, `analytics`
 - `docs`, `deps`, `ci`, `docker`
@@ -248,12 +255,14 @@ chore(deps): update typescript to 5.9.x
 ### Before Creating a PR
 
 1. **Update your branch** with latest main:
+
    ```bash
    git fetch upstream
    git rebase upstream/main
    ```
 
 2. **Run all checks locally**:
+
    ```bash
    # Lint code
    pnpm run lint
@@ -278,6 +287,7 @@ chore(deps): update typescript to 5.9.x
 ### Creating a Pull Request
 
 1. **Push to your fork**:
+
    ```bash
    git push origin feature/your-feature-name
    ```
@@ -288,29 +298,36 @@ chore(deps): update typescript to 5.9.x
    - Select your fork and branch
 
 3. **Fill out PR template**:
+
    ```markdown
    ## Description
+
    Brief description of changes
 
    ## Related Issues
+
    Closes #123
 
    ## Type of Change
+
    - [ ] Bug fix (non-breaking change)
    - [ ] New feature (non-breaking change)
    - [ ] Breaking change
    - [ ] Documentation update
 
    ## Testing
+
    - [ ] Unit tests added/updated
    - [ ] Integration tests added/updated
    - [ ] E2E tests added/updated
    - [ ] Manual testing completed
 
    ## Screenshots (if applicable)
+
    [Add screenshots for UI changes]
 
    ## Checklist
+
    - [ ] Code follows project standards
    - [ ] Self-review completed
    - [ ] Comments added for complex logic
@@ -345,6 +362,7 @@ fix(transaction): resolve duplicate detection bug
 ### After PR is Merged
 
 1. **Delete your feature branch**:
+
    ```bash
    git checkout main
    git branch -d feature/your-feature-name
@@ -352,6 +370,7 @@ fix(transaction): resolve duplicate detection bug
    ```
 
 2. **Update your main branch**:
+
    ```bash
    git pull upstream main
    ```
@@ -374,16 +393,19 @@ fix(transaction): resolve duplicate detection bug
 ### Test Types
 
 **Backend (NestJS)**
+
 - **Unit Tests**: Jest - Test individual services and utilities
 - **Integration Tests**: Testcontainers - Test with real database
 - **E2E Tests**: Supertest - Test API endpoints
 
 **Frontend (Next.js)**
+
 - **Unit Tests**: Vitest - Test components and hooks
 - **Integration Tests**: Testing Library - Test component interactions
 - **E2E Tests**: Playwright - Test user workflows
 
 **Analytics (FastAPI)**
+
 - **Unit Tests**: pytest - Test services and utilities
 - **Integration Tests**: pytest + testcontainers
 
@@ -438,14 +460,14 @@ pnpm run test:e2e
 
 ### Files to Update
 
-| File | When to Update |
-|------|---------------|
-| `README.md` | Setup or key feature changes |
-| `PROJECT_STRUCTURE.md` | Architecture or folder structure changes |
-| `docs/api-documentation.md` | API endpoint changes |
-| `docs/code-standards.md` | Coding standards updates |
-| `docs/development-roadmap.md` | Milestone completions |
-| `docs/project-changelog.md` | All user-facing changes |
+| File                          | When to Update                           |
+| ----------------------------- | ---------------------------------------- |
+| `README.md`                   | Setup or key feature changes             |
+| `PROJECT_STRUCTURE.md`        | Architecture or folder structure changes |
+| `docs/api-documentation.md`   | API endpoint changes                     |
+| `docs/code-standards.md`      | Coding standards updates                 |
+| `docs/development-roadmap.md` | Milestone completions                    |
+| `docs/project-changelog.md`   | All user-facing changes                  |
 
 ---
 
@@ -454,11 +476,13 @@ pnpm run test:e2e
 We use Husky to enforce code quality:
 
 **Pre-commit**:
+
 - ESLint with auto-fix
 - Prettier formatting
 - TypeScript type checking (staged files)
 
 **Pre-push**:
+
 - Run tests
 - Check build
 
@@ -486,4 +510,4 @@ By contributing to M-Tracking, you agree that your contributions will be license
 
 Your contributions help make financial management better for everyone.
 
-*Last Updated: January 19, 2026*
+_Last Updated: January 19, 2026_

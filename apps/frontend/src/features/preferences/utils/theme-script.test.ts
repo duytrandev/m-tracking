@@ -51,7 +51,6 @@ describe('themeScript', () => {
   it('should be executable as JavaScript', () => {
     // This should not throw when evaluated in a test environment
     expect(() => {
-       
       eval(themeScript)
     }).not.toThrow()
   })

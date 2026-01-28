@@ -25,7 +25,7 @@ export function CodeInput({
   )
 
   // Sync external value to local state - intentional controlled component pattern
-   
+
   useEffect(() => {
     const values = value.padEnd(length, ' ').slice(0, length).split('')
     setLocalValues(values.map(v => (v === ' ' ? '' : v)))

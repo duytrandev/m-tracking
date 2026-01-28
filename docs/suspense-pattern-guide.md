@@ -3,6 +3,7 @@
 This guide explains how to use manual `<Suspense>` boundaries instead of automatic `loading.tsx` files in Next.js App Router.
 
 ## Table of Contents
+
 - [Why Manual Suspense?](#why-manual-suspense)
 - [Pattern Overview](#pattern-overview)
 - [Implementation](#implementation)
@@ -12,6 +13,7 @@ This guide explains how to use manual `<Suspense>` boundaries instead of automat
 ## Why Manual Suspense?
 
 ### Benefits over `loading.tsx`
+
 ✅ **Granular control** - Different sections load independently  
 ✅ **Avoid full-page loading** - Only parts that need data show skeletons  
 ✅ **Better UX** - Static content (headers, navigation) appears immediately  
@@ -20,9 +22,9 @@ This guide explains how to use manual `<Suspense>` boundaries instead of automat
 
 ### When to Use Each Approach
 
-| Approach | Use When |
-|----------|----------|
-| **loading.tsx** | - Simple pages with single data source<br>- Want automatic behavior<br>- Entire page needs loading state |
+| Approach            | Use When                                                                                                                 |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **loading.tsx**     | - Simple pages with single data source<br>- Want automatic behavior<br>- Entire page needs loading state                 |
 | **Manual Suspense** | - Complex pages with multiple data sources<br>- Want partial page loading<br>- Need different loading states per section |
 
 ## Pattern Overview
@@ -78,9 +80,7 @@ export function StatisticsCardsSkeleton() {
 }
 
 export function ChartSectionSkeleton() {
-  return (
-    <div className="h-[300px] animate-pulse rounded-lg bg-background/50" />
-  )
+  return <div className="h-[300px] animate-pulse rounded-lg bg-background/50" />
 }
 ```
 
@@ -95,7 +95,7 @@ import { useSpendingData } from '@/features/spending/hooks/use-spending-data'
 
 export function DashboardStats({ period }: { period: TimePeriod }) {
   const { summary, isLoading } = useSpendingData(period)
-  
+
   // Component handles its own loading state
   if (isLoading) {
     return <StatisticsCardsSkeleton />
@@ -228,6 +228,7 @@ export default function SettingsPage() {
 ### ✅ Do
 
 1. **Wrap only data-fetching components**
+
    ```tsx
    <Suspense fallback={<Skeleton />}>
      <DataComponent /> {/* Fetches data */}
@@ -235,6 +236,7 @@ export default function SettingsPage() {
    ```
 
 2. **Keep static content outside Suspense**
+
    ```tsx
    <div>
      <h1>Title</h1> {/* Static, no Suspense */}
@@ -245,6 +247,7 @@ export default function SettingsPage() {
    ```
 
 3. **Use multiple boundaries for independence**
+
    ```tsx
    <Suspense fallback={<StatsSkeleton />}>
      <Stats />
@@ -262,9 +265,12 @@ export default function SettingsPage() {
 ### ❌ Don't
 
 1. **Don't wrap entire pages unnecessarily**
+
    ```tsx
-   {/* ❌ Bad - everything waits for all data */}
-   <Suspense fallback={<FullPageSkeleton />}>
+   {
+     /* ❌ Bad - everything waits for all data */
+   }
+   ;<Suspense fallback={<FullPageSkeleton />}>
      <Header />
      <Stats />
      <Charts />
@@ -272,9 +278,12 @@ export default function SettingsPage() {
    ```
 
 2. **Don't nest too deeply**
+
    ```tsx
-   {/* ❌ Bad - too many levels */}
-   <Suspense>
+   {
+     /* ❌ Bad - too many levels */
+   }
+   ;<Suspense>
      <Suspense>
        <Suspense>
          <Component />
@@ -285,8 +294,10 @@ export default function SettingsPage() {
 
 3. **Don't use Suspense for client-only interactions**
    ```tsx
-   {/* ❌ Bad - modal doesn't need Suspense */}
-   <Suspense fallback={<ModalSkeleton />}>
+   {
+     /* ❌ Bad - modal doesn't need Suspense */
+   }
+   ;<Suspense fallback={<ModalSkeleton />}>
      <Modal open={isOpen} />
    </Suspense>
    ```
@@ -308,6 +319,7 @@ return <div>{data.total}</div>
 ```
 
 Then in the page:
+
 ```tsx
 <Suspense fallback={<Skeleton />}>
   <SpendingComponent /> {/* Uses suspense query */}
@@ -327,22 +339,26 @@ Then in the page:
 ### Keeping Both Approaches
 
 You can mix both patterns:
+
 - Use `loading.tsx` for route-level navigation loading
 - Use manual Suspense for section-level granular loading
 
 ## Performance Considerations
 
 ### Bundle Size
+
 - Manual Suspense adds ~2KB for React imports
 - Saves code by reusing skeletons across pages
 
 ### Loading Experience
+
 ```
 loading.tsx:     [========= Full Page Loading =========]
 Manual Suspense: [Header Ready][====Stats====][===Charts===]
 ```
 
 ### When Data is Fast (<100ms)
+
 - Suspense fallback might cause "flash"
 - Consider using React Query's `placeholderData` instead
 - Or set a minimum delay for smooth transitions
@@ -350,9 +366,11 @@ Manual Suspense: [Header Ready][====Stats====][===Charts===]
 ## Troubleshooting
 
 ### Fallback Flashing
+
 **Problem:** Skeleton flashes briefly even when data is cached.
 
 **Solution:** Use `placeholderData` or `staleTime` in React Query:
+
 ```tsx
 useQuery({
   queryKey: ['data'],
@@ -362,20 +380,26 @@ useQuery({
 ```
 
 ### Infinite Loading
+
 **Problem:** Suspense boundary shows fallback forever.
 
 **Solution:** Check that component eventually resolves:
+
 - Verify API calls complete
 - Check for errors in component
 - Ensure `isLoading` becomes false
 
 ### Layout Shift
+
 **Problem:** Content jumps when skeleton is replaced.
 
 **Solution:** Match skeleton dimensions exactly:
+
 ```tsx
 // Skeleton should match final content height
-<div className="h-[300px]"> {/* Exact height */}
+<div className="h-[300px]">
+  {' '}
+  {/* Exact height */}
   <Skeleton />
 </div>
 ```

@@ -211,7 +211,7 @@ import { create } from 'zustand'
 import { persist, createJSONStorage, StateStorage } from 'zustand/middleware'
 
 const safeStorage: StateStorage = {
-  getItem: (name) => {
+  getItem: name => {
     if (typeof window === 'undefined') return null
     return localStorage.getItem(name)
   },
@@ -219,7 +219,7 @@ const safeStorage: StateStorage = {
     if (typeof window === 'undefined') return
     localStorage.setItem(name, value)
   },
-  removeItem: (name) => {
+  removeItem: name => {
     if (typeof window === 'undefined') return
     localStorage.removeItem(name)
   },
@@ -227,7 +227,7 @@ const safeStorage: StateStorage = {
 
 export const useStore = create(
   persist(
-    (set) => ({
+    set => ({
       // Your state here
     }),
     {

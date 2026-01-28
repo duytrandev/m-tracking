@@ -146,6 +146,10 @@
       "commit": true,
       "tag": true
     },
-    "projects": ["@m-tracking/frontend", "@m-tracking/backend", "@m-tracking/shared"]
+    "projects": [
+      "@m-tracking/frontend",
+      "@m-tracking/backend",
+      "@m-tracking/shared"
+    ]
   }
 }

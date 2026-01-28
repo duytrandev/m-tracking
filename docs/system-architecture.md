@@ -397,6 +397,7 @@ Need secure authentication mechanism for API access with asymmetric/symmetric ke
 #### Implementation (Completed 2026-01-21)
 
 **Access Token Generation (RS256):**
+
 ```typescript
 const accessToken = this.jwtService.sign(
   {
@@ -408,10 +409,11 @@ const accessToken = this.jwtService.sign(
     algorithm: 'RS256',
     expiresIn: '15m', // Short-lived
   }
-);
+)
 ```
 
 **Refresh Token Generation (HS256):**
+
 ```typescript
 const refreshToken = this.jwtService.sign(
   {
@@ -423,10 +425,11 @@ const refreshToken = this.jwtService.sign(
     secret: process.env.JWT_REFRESH_SECRET,
     expiresIn: '7d', // Long-lived
   }
-);
+)
 ```
 
 **Environment Setup:**
+
 ```env
 JWT_PRIVATE_KEY_PATH=jwt-private-key.pem   # RS256 signing key
 JWT_PUBLIC_KEY_PATH=jwt-public-key.pem     # RS256 verification key
@@ -1272,7 +1275,10 @@ const totals = await this.transactionRepository
   .addSelect('SUM(t.amount)', 'total')
   .addSelect('COUNT(t.id)', 'count')
   .where('t.userId = :userId', { userId })
-  .andWhere('t.date BETWEEN :start AND :end', { start: startDate, end: endDate })
+  .andWhere('t.date BETWEEN :start AND :end', {
+    start: startDate,
+    end: endDate,
+  })
   .groupBy('t.type')
   .getRawMany()
 
@@ -1297,17 +1303,17 @@ export class PaginationDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  page?: number = 1;
+  page?: number = 1
 
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  @Max(100)  // Hard limit prevents DoS
-  limit?: number = 20;
+  @Max(100) // Hard limit prevents DoS
+  limit?: number = 20
 
   get skip(): number {
-    return ((this.page ?? 1) - 1) * (this.limit ?? 20);
+    return ((this.page ?? 1) - 1) * (this.limit ?? 20)
   }
 }
 
@@ -1374,11 +1380,13 @@ CREATE INDEX idx_transactions_date
 #### Performance Metrics (Phase 01 Baseline)
 
 **Before Optimization:**
+
 - List transactions: 2-5s (in-memory sorting, no pagination)
 - Spending summary: 5-10s (aggregate 10K+ records in NodeJS)
 - Memory per user: 50-100MB for large datasets
 
 **After Optimization (Verified):**
+
 - List transactions: <200ms (paginated, indexed)
 - Spending summary: <500ms (database aggregation + cache)
 - Memory per user: <1MB (stateless pagination)
@@ -1463,7 +1471,10 @@ const categoryBreakdown = await this.transactionRepository
   .addSelect('SUM(t.amount)', 'total')
   .leftJoin('t.category', 'c')
   .where('t.userId = :userId', { userId })
-  .andWhere('t.date BETWEEN :start AND :end', { start: startDate, end: endDate })
+  .andWhere('t.date BETWEEN :start AND :end', {
+    start: startDate,
+    end: endDate,
+  })
   .groupBy('c.id')
   .getRawMany()
 
@@ -1822,6 +1833,7 @@ Optimized the Transactions API for production readiness by implementing database
 ### Files Modified/Created
 
 **Backend Files:**
+
 - `/services/backend/src/transactions/transactions.service.ts` - Database aggregation, pagination, caching
 - `/services/backend/src/transactions/transactions.controller.ts` - Pagination query params
 - `/services/backend/src/transactions/transactions.module.ts` - Redis cache module
@@ -1867,12 +1879,12 @@ CREATE INDEX idx_transactions_date
 
 ### Performance Gains (Verified)
 
-| Operation | Before | After | Improvement |
-|-----------|--------|-------|-------------|
-| List transactions (100 items) | 2-5s | <200ms | 10-25x faster |
-| Spending summary | 5-10s | <500ms (cached) | 10-20x faster |
-| Memory per user | 50-100MB | <1MB | 50-100x less |
-| Cache hit rate | 0% | 80%+ | N/A |
+| Operation                     | Before   | After           | Improvement   |
+| ----------------------------- | -------- | --------------- | ------------- |
+| List transactions (100 items) | 2-5s     | <200ms          | 10-25x faster |
+| Spending summary              | 5-10s    | <500ms (cached) | 10-20x faster |
+| Memory per user               | 50-100MB | <1MB            | 50-100x less  |
+| Cache hit rate                | 0%       | 80%+            | N/A           |
 
 ### Implementation Pattern (For Other APIs)
 
@@ -1885,10 +1897,10 @@ export class PaginationDto {
   @Type(() => Number)
   @Min(1)
   @Max(100)
-  limit?: number = 20;
+  limit?: number = 20
 
   get skip(): number {
-    return ((this.page ?? 1) - 1) * (this.limit ?? 20);
+    return ((this.page ?? 1) - 1) * (this.limit ?? 20)
   }
 }
 

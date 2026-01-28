@@ -75,7 +75,10 @@ describe('OAuthController', () => {
 
       mockOAuthService.handleOAuthCallback.mockResolvedValue(mockResult)
 
-      await controller.googleCallback(mockRequest, mockResponse as unknown as Response)
+      await controller.googleCallback(
+        mockRequest,
+        mockResponse as unknown as Response
+      )
 
       expect(oauthService.handleOAuthCallback).toHaveBeenCalledWith(
         mockRequest.user,
@@ -94,7 +97,10 @@ describe('OAuthController', () => {
         new Error('OAuth failed')
       )
 
-      await controller.googleCallback(mockRequest, mockResponse as unknown as Response)
+      await controller.googleCallback(
+        mockRequest,
+        mockResponse as unknown as Response
+      )
 
       expect(mockResponse.redirect).toHaveBeenCalledWith(
         expect.stringContaining('http://localhost:3000/auth/error')
@@ -120,7 +126,10 @@ describe('OAuthController', () => {
 
       mockOAuthService.handleOAuthCallback.mockResolvedValue(mockResult)
 
-      await controller.githubCallback(mockRequest, mockResponse as unknown as Response)
+      await controller.githubCallback(
+        mockRequest,
+        mockResponse as unknown as Response
+      )
 
       expect(mockResponse.redirect).toHaveBeenCalledWith(
         expect.stringContaining('http://localhost:3000/auth/callback')
@@ -143,7 +152,10 @@ describe('OAuthController', () => {
 
       mockOAuthService.handleOAuthCallback.mockResolvedValue(mockResult)
 
-      await controller.facebookCallback(mockRequest, mockResponse as unknown as Response)
+      await controller.facebookCallback(
+        mockRequest,
+        mockResponse as unknown as Response
+      )
 
       expect(mockResponse.redirect).toHaveBeenCalledWith(
         expect.stringContaining('http://localhost:3000/auth/callback')

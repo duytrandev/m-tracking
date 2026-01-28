@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/nextjs';
+import * as Sentry from '@sentry/nextjs'
 
 /**
  * Sentry server-side configuration for Next.js
@@ -17,27 +17,26 @@ if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
     environment: process.env.NEXT_PUBLIC_APP_ENV || 'development',
 
     // Sampling rates (100% in development, adjust for production)
-    tracesSampleRate: process.env.NEXT_PUBLIC_APP_ENV === 'production' ? 0.1 : 1.0,
+    tracesSampleRate:
+      process.env.NEXT_PUBLIC_APP_ENV === 'production' ? 0.1 : 1.0,
 
     // Performance monitoring
-    integrations: [
-      Sentry.httpIntegration(),
-    ],
+    integrations: [Sentry.httpIntegration()],
 
     // Privacy: Scrub sensitive data (same as client)
     beforeSend(event, _hint) {
       // Scrub request headers
       if (event.request?.headers) {
-        delete event.request.headers['authorization'];
-        delete event.request.headers['cookie'];
+        delete event.request.headers['authorization']
+        delete event.request.headers['cookie']
       }
 
       // Partially scrub user email
       if (event.user?.email) {
-        const email = event.user.email;
-        const [localPart, domain] = email.split('@');
+        const email = event.user.email
+        const [localPart, domain] = email.split('@')
         if (localPart && domain) {
-          event.user.email = `${localPart.substring(0, 2)}***@${domain}`;
+          event.user.email = `${localPart.substring(0, 2)}***@${domain}`
         }
       }
 
@@ -46,24 +45,24 @@ if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
         event.breadcrumbs = event.breadcrumbs.map(breadcrumb => {
           if (breadcrumb.data) {
             if ('amount' in breadcrumb.data) {
-              breadcrumb.data.amount = '[REDACTED]';
+              breadcrumb.data.amount = '[REDACTED]'
             }
             if ('accountNumber' in breadcrumb.data) {
-              breadcrumb.data.accountNumber = '[REDACTED]';
+              breadcrumb.data.accountNumber = '[REDACTED]'
             }
           }
-          return breadcrumb;
-        });
+          return breadcrumb
+        })
       }
 
-      return event;
+      return event
     },
 
     // Enable debug mode in development
     debug: process.env.NEXT_PUBLIC_APP_ENV === 'development',
-  });
+  })
 
-  console.log('✅ Sentry server initialized');
+  console.log('✅ Sentry server initialized')
 } else {
-  console.log('⚠️  Sentry DSN not configured - server monitoring disabled');
+  console.log('⚠️  Sentry DSN not configured - server monitoring disabled')
 }

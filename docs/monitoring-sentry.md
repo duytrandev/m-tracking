@@ -8,6 +8,7 @@
 Sentry provides real-time error tracking and performance monitoring for the M-Tracking application. This document covers setup, configuration, usage, and best practices.
 
 **Integrated Services:**
+
 - ✅ **Backend** (NestJS) - Error tracking, performance monitoring, profiling
 - ✅ **Frontend** (Next.js) - Client/server errors, session replay, web vitals
 - ⏳ **Analytics** (FastAPI) - Planned for future implementation
@@ -96,6 +97,7 @@ Sentry Organization: m-tracking
 ```
 
 **Why Separate Projects:**
+
 - Clear error attribution per service
 - Independent alert configurations
 - Service-specific error budgets
@@ -130,12 +132,14 @@ Sentry Organization: m-tracking
 ### Integration Points
 
 **Backend:**
+
 - `main.ts` - Sentry initialization & middleware
 - `http-exception.filter.ts` - 5xx error capture
 - `sentry.service.ts` - Manual error tracking
 - `sentry.config.ts` - Configuration & PII scrubbing
 
 **Frontend:**
+
 - `sentry.client.config.ts` - Browser error tracking
 - `sentry.server.config.ts` - Server Component errors
 - `sentry.edge.config.ts` - Edge runtime errors
@@ -148,11 +152,11 @@ Sentry Organization: m-tracking
 
 ### Environment-Based Settings
 
-| Environment | Traces Sample Rate | Features Enabled |
-|-------------|-------------------|------------------|
-| Development | 100% | All errors, full traces, debug logs |
-| Staging | 50% | All errors, sampled traces |
-| Production | 10% | All errors, 10% traces, profiling |
+| Environment | Traces Sample Rate | Features Enabled                    |
+| ----------- | ------------------ | ----------------------------------- |
+| Development | 100%               | All errors, full traces, debug logs |
+| Staging     | 50%                | All errors, sampled traces          |
+| Production  | 10%                | All errors, 10% traces, profiling   |
 
 ### Backend Configuration
 
@@ -162,8 +166,8 @@ Sentry Organization: m-tracking
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
   environment: 'development',
-  tracesSampleRate: 1.0,        // 100% in dev
-  profilesSampleRate: 1.0,       // CPU profiling
+  tracesSampleRate: 1.0, // 100% in dev
+  profilesSampleRate: 1.0, // CPU profiling
   integrations: [
     new Sentry.Integrations.Http({ tracing: true }),
     new Sentry.Integrations.Express(),
@@ -171,7 +175,7 @@ Sentry.init({
   ],
   beforeSend: scrubSensitiveData,
   debug: true,
-});
+})
 ```
 
 ### Frontend Configuration
@@ -183,14 +187,14 @@ Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   environment: 'development',
   tracesSampleRate: 1.0,
-  replaysSessionSampleRate: 0.1,    // 10% of sessions
-  replaysOnErrorSampleRate: 1.0,    // 100% on errors
+  replaysSessionSampleRate: 0.1, // 10% of sessions
+  replaysOnErrorSampleRate: 1.0, // 100% on errors
   integrations: [
     Sentry.replayIntegration(),
     Sentry.browserTracingIntegration(),
   ],
   beforeSend: scrubSensitiveData,
-});
+})
 ```
 
 ---
@@ -200,12 +204,14 @@ Sentry.init({
 ### 1. Automatic Error Capture
 
 **Backend:**
+
 - ✅ All 5xx errors automatically captured
 - ✅ Unhandled exceptions
 - ✅ Promise rejections
 - ✅ TypeORM query errors
 
 **Frontend:**
+
 - ✅ React component errors
 - ✅ Server Component errors
 - ✅ API route errors
@@ -215,6 +221,7 @@ Sentry.init({
 ### 2. Performance Monitoring
 
 **Tracked Metrics:**
+
 - HTTP request latency (p50, p95, p99)
 - Database query performance
 - API response times
@@ -222,23 +229,25 @@ Sentry.init({
 - Server-side rendering time
 
 **Backend Example:**
+
 ```typescript
 const transaction = Sentry.startTransaction({
   name: 'sync-transactions',
   op: 'background.job',
-});
+})
 
 try {
-  await syncTransactions();
-  transaction.setStatus('ok');
+  await syncTransactions()
+  transaction.setStatus('ok')
 } finally {
-  transaction.finish();
+  transaction.finish()
 }
 ```
 
 ### 3. Session Replay
 
 **Frontend Only:**
+
 - Records user sessions when errors occur
 - Masks all text and media for privacy
 - 10% of normal sessions recorded
@@ -247,25 +256,27 @@ try {
 ### 4. User Context Tracking
 
 **Automatic Attachment:**
+
 - User ID (anonymized)
 - Email (partially scrubbed)
 - User role/permissions
 - Request metadata
 
 **Example:**
+
 ```typescript
 // Backend
 this.sentryService.setUser({
   id: user.id,
-  email: user.email,  // Auto-scrubbed
+  email: user.email, // Auto-scrubbed
   username: user.name,
-});
+})
 
 // Frontend
 Sentry.setUser({
   id: user.id,
-  email: user.email,  // Auto-scrubbed
-});
+  email: user.email, // Auto-scrubbed
+})
 ```
 
 ### 5. Breadcrumbs
@@ -279,14 +290,14 @@ this.sentryService.addBreadcrumb({
   message: 'Transaction categorized',
   level: 'info',
   data: { category: 'food', confidence: 0.95 },
-});
+})
 
 // Frontend
 Sentry.addBreadcrumb({
   category: 'ui',
   message: 'User clicked Add Transaction',
   level: 'info',
-});
+})
 ```
 
 ---
@@ -296,6 +307,7 @@ Sentry.addBreadcrumb({
 ### PII Scrubbing
 
 **Automatically Redacted:**
+
 - ❌ Authorization headers & cookies
 - ❌ User emails (partially: `jo***@example.com`)
 - ❌ Financial data (amounts, account numbers)
@@ -304,30 +316,28 @@ Sentry.addBreadcrumb({
 - ❌ Passwords & secrets
 
 **Implementation:**
+
 ```typescript
 function scrubSensitiveData(event: Sentry.Event) {
   // Scrub headers
   if (event.request?.headers) {
-    delete event.request.headers['authorization'];
-    delete event.request.headers['cookie'];
+    delete event.request.headers['authorization']
+    delete event.request.headers['cookie']
   }
 
   // Scrub email
   if (event.user?.email) {
-    event.user.email = event.user.email.replace(
-      /(.{2}).*(@.*)/,
-      '$1***$2'
-    );
+    event.user.email = event.user.email.replace(/(.{2}).*(@.*)/, '$1***$2')
   }
 
   // Scrub financial data
   if (event.breadcrumbs) {
     event.breadcrumbs.forEach(b => {
-      if ('amount' in b.data) b.data.amount = '[REDACTED]';
-    });
+      if ('amount' in b.data) b.data.amount = '[REDACTED]'
+    })
   }
 
-  return event;
+  return event
 }
 ```
 
@@ -346,18 +356,16 @@ function scrubSensitiveData(event: Sentry.Event) {
 ### Backend Manual Error Capture
 
 ```typescript
-import { SentryService } from '@/shared/sentry/sentry.service';
+import { SentryService } from '@/shared/sentry/sentry.service'
 
 @Injectable()
 export class TransactionService {
-  constructor(
-    private readonly sentryService: SentryService,
-  ) {}
+  constructor(private readonly sentryService: SentryService) {}
 
   async processTransaction(transaction: Transaction) {
     try {
       // Business logic
-      return await this.categorize(transaction);
+      return await this.categorize(transaction)
     } catch (error) {
       // Capture with context
       this.sentryService.captureException(error, {
@@ -365,8 +373,8 @@ export class TransactionService {
           id: transaction.id,
           type: transaction.type,
         },
-      });
-      throw error;
+      })
+      throw error
     }
   }
 }
@@ -375,14 +383,10 @@ export class TransactionService {
 ### Frontend Error Boundary
 
 ```tsx
-import { SentryErrorBoundary } from '@/components/shared/sentry-error-boundary';
+import { SentryErrorBoundary } from '@/components/shared/sentry-error-boundary'
 
 export default function Layout({ children }) {
-  return (
-    <SentryErrorBoundary>
-      {children}
-    </SentryErrorBoundary>
-  );
+  return <SentryErrorBoundary>{children}</SentryErrorBoundary>
 }
 ```
 
@@ -393,16 +397,16 @@ export default function Layout({ children }) {
 const transaction = this.sentryService.startTransaction(
   'sync-plaid-transactions',
   'background.job'
-);
+)
 
 try {
-  await this.syncFromPlaid();
-  transaction.setStatus('ok');
+  await this.syncFromPlaid()
+  transaction.setStatus('ok')
 } catch (error) {
-  transaction.setStatus('internal_error');
-  throw error;
+  transaction.setStatus('internal_error')
+  throw error
 } finally {
-  transaction.finish();
+  transaction.finish()
 }
 ```
 
@@ -414,14 +418,14 @@ this.sentryService.setTags({
   module: 'transaction',
   operation: 'sync',
   provider: 'plaid',
-});
+})
 
 // Set custom context
 this.sentryService.setContext('business_operation', {
   operation_type: 'transaction_sync',
   bank_provider: 'plaid',
   sync_mode: 'automatic',
-});
+})
 ```
 
 ---
@@ -433,10 +437,12 @@ this.sentryService.setContext('business_operation', {
 #### 1. Sentry Not Capturing Errors
 
 **Symptoms:**
+
 - No errors appearing in Sentry dashboard
 - Console shows "Sentry DSN not configured"
 
 **Solution:**
+
 ```bash
 # Check environment variables
 echo $SENTRY_DSN
@@ -452,10 +458,12 @@ pnpm dev
 #### 2. Too Many Events
 
 **Symptoms:**
+
 - Sentry quota exceeded
 - Too many duplicate errors
 
 **Solution:**
+
 ```typescript
 // Adjust sample rates in production
 tracesSampleRate: 0.1,  // 10% instead of 100%
@@ -470,10 +478,12 @@ ignoreErrors: [
 #### 3. Source Maps Not Working
 
 **Symptoms:**
+
 - Stack traces show minified code
 - Can't identify error location
 
 **Solution:**
+
 ```bash
 # Frontend: Ensure webpack plugin enabled
 # Check next.config.ts:
@@ -488,9 +498,11 @@ pnpm sentry:sourcemaps
 #### 4. PII Leaking to Sentry
 
 **Symptoms:**
+
 - Sensitive data visible in Sentry events
 
 **Solution:**
+
 ```typescript
 // Check beforeSend hook is active
 beforeSend(event) {
@@ -595,6 +607,7 @@ Action: Page on-call engineer
 ### Key Metrics to Track
 
 **Backend:**
+
 - Error rate (target: <0.5%)
 - P95 API latency (target: <500ms)
 - Database query time (target: <100ms)
@@ -602,6 +615,7 @@ Action: Page on-call engineer
 - CPU profiling
 
 **Frontend:**
+
 - Error rate (target: <1%)
 - Web Vitals (LCP <2.5s, FID <100ms, CLS <0.1)
 - API error rate
@@ -611,6 +625,7 @@ Action: Page on-call engineer
 ### Dashboards
 
 **Recommended Dashboards:**
+
 1. **Overview** - Error counts, performance metrics, user impact
 2. **Backend Health** - API latency, database performance, queue depth
 3. **Frontend Performance** - Web Vitals, page load times, API errors
@@ -629,12 +644,14 @@ Action: Page on-call engineer
 ### Optimization Strategies
 
 1. **Sampling:**
+
    ```typescript
    // Reduce traces in production
    tracesSampleRate: 0.1,  // 10% instead of 100%
    ```
 
 2. **Filtering:**
+
    ```typescript
    // Ignore non-actionable errors
    ignoreErrors: [
@@ -654,11 +671,11 @@ Action: Page on-call engineer
 
 ### Estimated Costs
 
-| Plan | Price/Month | Events | Performance | Projects |
-|------|-------------|--------|-------------|----------|
-| Free | $0 | 5K | 10K units | 1 |
-| Team | $26 | 50K | 100K units | Unlimited |
-| Business | $80 | 100K | 500K units | Unlimited |
+| Plan     | Price/Month | Events | Performance | Projects  |
+| -------- | ----------- | ------ | ----------- | --------- |
+| Free     | $0          | 5K     | 10K units   | 1         |
+| Team     | $26         | 50K    | 100K units  | Unlimited |
+| Business | $80         | 100K   | 500K units  | Unlimited |
 
 ---
 
@@ -675,15 +692,18 @@ Action: Page on-call engineer
 ## Support & Resources
 
 **Internal:**
+
 - Sentry Dashboard: https://sentry.io/organizations/m-tracking
 - Implementation Plan: `/plans/precious-swimming-hennessy.md`
 
 **External:**
+
 - Sentry Docs: https://docs.sentry.io
 - Next.js Integration: https://docs.sentry.io/platforms/javascript/guides/nextjs/
 - NestJS Integration: https://docs.sentry.io/platforms/node/guides/nestjs/
 
 **Team Contacts:**
+
 - Sentry Admin: [Team Lead]
 - On-Call: [PagerDuty rotation]
 

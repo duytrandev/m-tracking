@@ -11,6 +11,7 @@
 This guide covers deployment strategies for M-Tracking across different environments: local development, staging, and production.
 
 **Architecture:**
+
 - **Backend**: NestJS Monolith (Port 4000)
 - **Analytics**: FastAPI Service (Port 5000)
 - **Frontend**: Next.js Application (Port 3000)
@@ -46,12 +47,14 @@ This guide covers deployment strategies for M-Tracking across different environm
 ### Setup Steps
 
 1. **Clone repository**:
+
    ```bash
    git clone <repository-url>
    cd m-tracking
    ```
 
 2. **Install dependencies**:
+
    ```bash
    # Node.js dependencies
    pnpm install
@@ -63,6 +66,7 @@ This guide covers deployment strategies for M-Tracking across different environm
    ```
 
 3. **Setup environment variables**:
+
    ```bash
    # Root environment
    cp .env.example .env
@@ -75,16 +79,19 @@ This guide covers deployment strategies for M-Tracking across different environm
    ```
 
 4. **Start infrastructure** (PostgreSQL, Redis):
+
    ```bash
    pnpm run docker:up
    ```
 
 5. **Run database migrations** (when available):
+
    ```bash
    pnpm run migrate
    ```
 
 6. **Start development servers**:
+
    ```bash
    # All services
    pnpm run dev
@@ -164,6 +171,7 @@ docker compose -f docker-compose.prod.yml up -d
 ### Infrastructure Requirements
 
 **Recommended Setup (10K users):**
+
 - **2x EC2 t3.medium** (4 vCPU, 4GB RAM each) - $120/month
 - **Supabase Pro** (PostgreSQL + TimescaleDB) - $50/month
 - **AWS ALB** (Application Load Balancer) - $20/month
@@ -251,6 +259,7 @@ sudo nano /etc/nginx/sites-available/mtracking
 ```
 
 **Nginx Configuration**:
+
 ```nginx
 # Frontend
 server {
@@ -402,6 +411,7 @@ ANTHROPIC_API_KEY=your-anthropic-key
    - Note: Database URL, API keys
 
 2. **Enable Extensions**:
+
    ```sql
    -- TimescaleDB for time-series data
    CREATE EXTENSION IF NOT EXISTS timescaledb;
@@ -411,6 +421,7 @@ ANTHROPIC_API_KEY=your-anthropic-key
    ```
 
 3. **Run Migrations**:
+
    ```bash
    # From local machine
    pnpm run migrate:production

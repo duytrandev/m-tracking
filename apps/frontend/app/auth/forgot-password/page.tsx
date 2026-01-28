@@ -48,7 +48,7 @@ export default function ForgotPasswordPage() {
   return (
     <AuthCard title={t('title')} description={t('subtitle')}>
       <form
-        onSubmit={(e) => {
+        onSubmit={e => {
           void handleSubmit(onSubmit)(e)
         }}
         className="space-y-6"

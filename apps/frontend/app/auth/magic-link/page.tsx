@@ -103,7 +103,7 @@ export default function MagicLinkPage(): React.ReactElement {
       description="We'll email you a link to sign in instantly"
     >
       <form
-        onSubmit={(e) => {
+        onSubmit={e => {
           void handleSubmit(onSubmit)(e)
         }}
         className="space-y-6"

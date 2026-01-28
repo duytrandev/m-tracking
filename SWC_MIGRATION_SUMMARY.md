@@ -9,6 +9,7 @@ Successfully migrated the NestJS backend from TypeScript Compiler (tsc) to SWC (
 ### 1. Package Dependencies
 
 **Added to `services/backend/package.json`:**
+
 - `@swc/cli@^0.5.0` (devDependency) - SWC command-line interface
 - `@swc/core@^1.15.10` (devDependency) - Already present, confirmed version
 - `@swc/helpers@^0.5.17` (dependency) - Runtime helpers for compiled code
@@ -16,7 +17,9 @@ Successfully migrated the NestJS backend from TypeScript Compiler (tsc) to SWC (
 ### 2. Configuration Files
 
 #### `services/backend/nest-cli.json`
+
 Updated NestJS CLI to use SWC builder:
+
 ```json
 {
   "compilerOptions": {
@@ -27,7 +30,9 @@ Updated NestJS CLI to use SWC builder:
 ```
 
 #### `services/backend/.swcrc` (New File)
+
 Created comprehensive SWC configuration with:
+
 - TypeScript parser with decorators support
 - Legacy decorator transformation (required for NestJS)
 - Decorator metadata emission (required for dependency injection)
@@ -38,7 +43,9 @@ Created comprehensive SWC configuration with:
 - Class name preservation
 
 #### `services/backend/project.json`
+
 Updated Nx build target to use SWC executor:
+
 ```json
 {
   "build": {
@@ -55,24 +62,29 @@ Updated Nx build target to use SWC executor:
 Fixed TypeScript strict type checking errors in:
 
 **`services/backend/src/migrations/1737383000000-SeedMockSpendingData.ts`**
+
 - Changed `queryRunner.query<UserRow[]>()` to type assertion: `(await queryRunner.query()) as UserRow[]`
 - Added null check for `users[0]`
 
 **`services/backend/src/shared/queue/queue.service.ts`**
+
 - Added type assertions for BullMQ strict types: `jobName as any` and `data as any`
 - Added ESLint disable comment for legitimate any usage
 
 **`services/backend/src/shared/sentry/sentry.service.ts`**
+
 - Added type assertion for Sentry contexts: `{ contexts: context } as any`
 - Added ESLint disable comment for legitimate any usage
 
 ## Build Performance
 
 ### Before (TypeScript Compiler)
+
 - Cold build: ~15-20 seconds
 - Incremental build: ~5-8 seconds
 
 ### After (SWC)
+
 - Cold build: ~2-3 seconds (**~7x faster**)
 - Incremental build: <1 second (**~8x faster**)
 - Build output size: 2.0MB
@@ -100,6 +112,7 @@ pnpm nx type-check @m-tracking/backend
 ## Build Output
 
 The compiled output in `dist/services/backend/` includes:
+
 - `.js` files - Compiled JavaScript (CommonJS)
 - `.js.map` files - Source maps for debugging
 - `.d.ts` files - TypeScript declaration files
@@ -108,6 +121,7 @@ The compiled output in `dist/services/backend/` includes:
 ## Compatibility
 
 ✅ Fully compatible with all NestJS features:
+
 - Dependency injection
 - Decorators (@Injectable, @Controller, @Get, etc.)
 - Metadata reflection
@@ -115,6 +129,7 @@ The compiled output in `dist/services/backend/` includes:
 - All middleware, guards, interceptors, and pipes
 
 ✅ Maintains full type safety:
+
 - `typeCheck: true` ensures TypeScript type checker runs during build
 - All type definitions are generated
 - Source maps enable debugging with original TypeScript code
@@ -130,12 +145,16 @@ The compiled output in `dist/services/backend/` includes:
 ## Important Notes
 
 ### Decorators Configuration
+
 SWC requires specific settings for NestJS decorators:
+
 - `legacyDecorator: true` - Uses legacy decorator proposal
 - `decoratorMetadata: true` - Emits metadata for reflection
 
 ### Path Aliases
+
 Path aliases must be duplicated in `.swcrc` because SWC doesn't read `tsconfig.json`. The following aliases are configured:
+
 - `@/*` → `src/*`
 - `@gateway/*` → `src/gateway/*`
 - `@auth/*` → `src/auth/*`
@@ -148,11 +167,13 @@ Path aliases must be duplicated in `.swcrc` because SWC doesn't read `tsconfig.j
 - `@m-tracking/shared` → `../../libs/shared/src/index.ts`
 
 ### Module System
+
 SWC is configured to output CommonJS modules (`module.type: "commonjs"`), which is required for NestJS applications.
 
 ## Testing
 
 All builds tested and verified:
+
 - ✅ Development build
 - ✅ Production build
 - ✅ Clean build (removed dist folder)
@@ -163,6 +184,7 @@ All builds tested and verified:
 ## Documentation
 
 Created detailed documentation in `services/backend/SWC_CONFIGURATION.md` covering:
+
 - Configuration details
 - Usage instructions
 - Troubleshooting guide
@@ -196,6 +218,7 @@ node dist/services/backend/src/main.js
 ## Conclusion
 
 The migration to SWC has been completed successfully with:
+
 - ✅ **~7-8x faster build times**
 - ✅ **Zero breaking changes** to existing code
 - ✅ **Full compatibility** with NestJS and all features

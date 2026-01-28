@@ -19,6 +19,7 @@ The hook performs the following checks in order:
 ### Why These Checks?
 
 #### 1. Lint-staged (Fast, ~2-5s)
+
 - **What**: Runs ESLint and Prettier only on staged files
 - **Why**: Ensures consistent code style and catches common errors
 - **Performance**: Very fast since it only checks modified files
@@ -37,12 +38,14 @@ The hook performs the following checks in order:
 ```
 
 #### 2. Type Check (Fast, ~3-10s)
+
 - **What**: Runs `tsc --noEmit` on affected projects only
 - **Why**: Catches TypeScript errors before commit
 - **Performance**: Uses Nx affected detection to only check changed code
 - **Benefits**: Prevents type errors from breaking CI/CD pipeline
 
 #### 3. Tests (Optional, ~10-60s)
+
 - **What**: Runs tests on affected projects
 - **Why**: Ensures changes don't break existing functionality
 - **Performance**: Only tests affected by your changes
@@ -59,16 +62,17 @@ The hook uses several strategies to stay fast:
 
 ### Expected Performance
 
-| Check | Typical Time | Large Change Time |
-|-------|-------------|-------------------|
-| Lint-staged | 2-5s | 5-10s |
-| Type Check (affected) | 3-8s | 8-15s |
-| Tests (affected, optional) | 5-30s | 30-120s |
-| **Total (without tests)** | **5-15s** | **15-30s** |
+| Check                      | Typical Time | Large Change Time |
+| -------------------------- | ------------ | ----------------- |
+| Lint-staged                | 2-5s         | 5-10s             |
+| Type Check (affected)      | 3-8s         | 8-15s             |
+| Tests (affected, optional) | 5-30s        | 30-120s           |
+| **Total (without tests)**  | **5-15s**    | **15-30s**        |
 
 ### Configuration Options
 
 #### Option 1: Fast (Current Default)
+
 Best for rapid development. Includes linting and type checking.
 
 ```sh
@@ -80,6 +84,7 @@ Best for rapid development. Includes linting and type checking.
 **Use when**: Making frequent small commits, rapid iteration
 
 #### Option 2: Comprehensive (Recommended for Critical Code)
+
 Includes all checks including tests.
 
 To enable, uncomment the test section in `.husky/pre-commit`:
@@ -96,6 +101,7 @@ pnpm nx affected -t test --parallel=3 || {
 **Use when**: Working on critical features, before pushing to main/develop
 
 #### Option 3: Ultra-Fast (For Large Refactors)
+
 Only lint-staged, no type checking or tests.
 
 Edit `.husky/pre-commit` to comment out type checking:
@@ -120,11 +126,13 @@ git commit --no-verify -m "WIP: work in progress"
 ```
 
 ⚠️ **Warning**: Only use `--no-verify` for:
+
 - WIP commits on feature branches
 - Emergency hotfixes (but run checks manually after)
 - Known false positives in linting
 
 **Never** use `--no-verify` for:
+
 - Commits to main/develop/master
 - Pull request final commits
 - Production deployments
@@ -198,6 +206,7 @@ pnpm test           # Test all projects
 ```
 
 This ensures:
+
 - Pre-commit catches most issues locally (fast feedback)
 - CI catches edge cases and integration issues (comprehensive)
 

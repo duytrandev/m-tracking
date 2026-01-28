@@ -11,6 +11,7 @@
 Common issues, error messages, and their solutions for M-Tracking development and deployment.
 
 **Quick Links:**
+
 - [Installation Issues](#installation-issues)
 - [Docker Issues](#docker-issues)
 - [Database Issues](#database-issues)
@@ -26,11 +27,13 @@ Common issues, error messages, and their solutions for M-Tracking development an
 ### pnpm install fails
 
 #### Problem
+
 ```bash
 ERR_PNPM_PEER_DEP_ISSUES  Unmet peer dependencies
 ```
 
 #### Solution
+
 ```bash
 # Clear pnpm cache
 pnpm store prune
@@ -50,11 +53,13 @@ node --version  # Should be >= 20.10.0
 ### Python uv sync fails
 
 #### Problem
+
 ```bash
 error: No solution found when resolving dependencies
 ```
 
 #### Solution
+
 ```bash
 # Check Python version
 python3 --version  # Should be >= 3.12
@@ -77,11 +82,13 @@ uv sync --verbose
 ### Docker containers won't start
 
 #### Problem
+
 ```bash
 Error response from daemon: Ports are not available
 ```
 
 #### Solution
+
 ```bash
 # Check if ports are already in use
 lsof -i :5432  # PostgreSQL
@@ -102,11 +109,13 @@ nano docker-compose.override.yml  # Edit ports
 ### Docker build fails with "no space left on device"
 
 #### Problem
+
 ```bash
 ERROR: failed to solve: write /var/lib/docker/...: no space left on device
 ```
 
 #### Solution
+
 ```bash
 # Remove unused Docker resources
 docker system prune -a --volumes
@@ -123,12 +132,14 @@ docker system df
 ### Container restarts continuously
 
 #### Problem
+
 ```bash
 $ docker compose ps
 backend    restarting
 ```
 
 #### Solution
+
 ```bash
 # Check container logs
 docker compose logs backend --tail=100
@@ -155,11 +166,13 @@ docker compose up -d
 ### Cannot connect to PostgreSQL
 
 #### Problem
+
 ```bash
 Error: connect ECONNREFUSED 127.0.0.1:5432
 ```
 
 #### Solution
+
 ```bash
 # Check if PostgreSQL is running
 docker compose ps postgres
@@ -183,11 +196,13 @@ docker compose restart postgres
 ### Migration fails
 
 #### Problem
+
 ```bash
 Error: relation "users" already exists
 ```
 
 #### Solution
+
 ```bash
 # Check current migration status
 pnpm run migration:show
@@ -210,11 +225,13 @@ DROP TABLE IF EXISTS users CASCADE;
 ### Slow database queries
 
 #### Problem
+
 ```bash
 Query took 5000ms (expected < 100ms)
 ```
 
 #### Solution
+
 ```bash
 # Check query execution plan
 EXPLAIN ANALYZE SELECT * FROM transactions WHERE user_id = '...';
@@ -237,11 +254,13 @@ docker compose logs postgres | grep "duration:"
 ### NestJS won't start
 
 #### Problem
+
 ```bash
 Error: Nest can't resolve dependencies of the AuthService
 ```
 
 #### Solution
+
 ```bash
 # Check module imports
 # Ensure all dependencies are provided in module
@@ -267,11 +286,13 @@ pnpm run build
 ### TypeScript compilation errors
 
 #### Problem
+
 ```bash
 error TS2339: Property 'id' does not exist on type 'User'
 ```
 
 #### Solution
+
 ```bash
 # Regenerate TypeORM entities
 pnpm run typeorm entity:create --name User
@@ -298,12 +319,14 @@ pnpm run build
 ### API returns 500 Internal Server Error
 
 #### Problem
+
 ```bash
 POST /api/auth/login
 500 Internal Server Error
 ```
 
 #### Solution
+
 ```bash
 # Check backend logs
 docker compose logs backend --tail=100
@@ -332,11 +355,13 @@ app.useLogger(['error', 'warn', 'debug', 'log']);
 ### Next.js won't start
 
 #### Problem
+
 ```bash
 Error: Cannot find module '@m-tracking/common'
 ```
 
 #### Solution
+
 ```bash
 # Build shared libraries first
 pnpm run build --filter=@m-tracking/common
@@ -360,11 +385,13 @@ packages:
 ### Hydration mismatch errors
 
 #### Problem
+
 ```bash
 Warning: Text content did not match. Server: "..." Client: "..."
 ```
 
 #### Solution
+
 ```typescript
 // Avoid using browser-only APIs during SSR
 
@@ -398,12 +425,14 @@ const Component = () => {
 ### API calls fail with CORS errors
 
 #### Problem
+
 ```bash
 Access to fetch at 'http://localhost:4000/api/auth/login' from origin
 'http://localhost:3000' has been blocked by CORS policy
 ```
 
 #### Solution
+
 ```typescript
 // Backend: services/backend/src/main.ts
 app.enableCors({
@@ -424,43 +453,45 @@ NEXT_PUBLIC_API_URL=http://localhost:4000
 ### JWT token invalid or expired
 
 #### Problem
+
 ```bash
 401 Unauthorized: Token has expired
 ```
 
 #### Solution
+
 ```typescript
 // Implement token refresh logic
 
 // Frontend: api/auth.ts
 export const refreshToken = async () => {
-  const refreshToken = localStorage.getItem('refreshToken');
+  const refreshToken = localStorage.getItem('refreshToken')
   const response = await fetch('/api/auth/refresh', {
     method: 'POST',
     body: JSON.stringify({ refreshToken }),
-  });
+  })
 
   if (!response.ok) {
     // Redirect to login
-    window.location.href = '/login';
-    return;
+    window.location.href = '/login'
+    return
   }
 
-  const { accessToken } = await response.json();
-  localStorage.setItem('accessToken', accessToken);
-};
+  const { accessToken } = await response.json()
+  localStorage.setItem('accessToken', accessToken)
+}
 
 // Add interceptor to automatically refresh
 axios.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  response => response,
+  async error => {
     if (error.response.status === 401) {
-      await refreshToken();
-      return axios.request(error.config);
+      await refreshToken()
+      return axios.request(error.config)
     }
-    return Promise.reject(error);
+    return Promise.reject(error)
   }
-);
+)
 ```
 
 ---
@@ -468,16 +499,18 @@ axios.interceptors.response.use(
 ### Session not persisting
 
 #### Problem
+
 ```
 User logged in but session lost on page refresh
 ```
 
 #### Solution
+
 ```typescript
 // Check token storage
 
 // ✅ Good - Store in localStorage or cookies
-localStorage.setItem('accessToken', token);
+localStorage.setItem('accessToken', token)
 
 // Or use httpOnly cookies (more secure)
 // Backend:
@@ -486,16 +519,16 @@ res.cookie('accessToken', token, {
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'strict',
   maxAge: 15 * 60 * 1000, // 15 minutes
-});
+})
 
 // Frontend: Verify token on app initialization
 // app/layout.tsx
 useEffect(() => {
-  const token = localStorage.getItem('accessToken');
+  const token = localStorage.getItem('accessToken')
   if (token) {
-    setIsAuthenticated(true);
+    setIsAuthenticated(true)
   }
-}, []);
+}, [])
 ```
 
 ---
@@ -503,11 +536,13 @@ useEffect(() => {
 ### OAuth redirect fails
 
 #### Problem
+
 ```bash
 Error: redirect_uri_mismatch
 ```
 
 #### Solution
+
 ```bash
 # 1. Check OAuth provider configuration
 # Google Console: https://console.cloud.google.com/apis/credentials
@@ -542,11 +577,13 @@ providers: [
 ### Slow API response times
 
 #### Problem
+
 ```bash
 GET /api/transactions took 3000ms (expected < 200ms)
 ```
 
 #### Solution
+
 ```bash
 # 1. Add database indexes
 CREATE INDEX idx_transactions_user_id ON transactions(user_id);
@@ -597,11 +634,13 @@ const transactions = await this.repository
 ### High memory usage
 
 #### Problem
+
 ```bash
 FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
 ```
 
 #### Solution
+
 ```bash
 # Increase Node.js memory limit
 NODE_OPTIONS="--max-old-space-size=4096" pnpm run dev
@@ -632,12 +671,14 @@ clinic doctor -- node dist/main.js
 ### Sentry not capturing errors
 
 #### Problem
+
 ```bash
 # Errors not appearing in Sentry dashboard
 # Console shows: ⚠️  Sentry DSN not configured
 ```
 
 #### Solution
+
 ```bash
 # 1. Verify environment variables are set
 echo $SENTRY_DSN  # Backend
@@ -664,12 +705,14 @@ pnpm dev
 ### Source maps not working
 
 #### Problem
+
 ```bash
 # Stack traces show minified code
 # Can't identify error source location
 ```
 
 #### Solution
+
 ```bash
 # Frontend (Next.js)
 # 1. Verify webpack plugin is enabled
@@ -705,12 +748,14 @@ npx @sentry/cli sourcemaps upload --org=m-tracking --project=backend ./dist
 ### Too many Sentry events
 
 #### Problem
+
 ```bash
 # Sentry quota exceeded
 # Receiving quota warning emails
 ```
 
 #### Solution
+
 ```typescript
 // 1. Adjust sample rates in production
 // services/backend/src/shared/sentry/sentry.config.ts
@@ -748,11 +793,13 @@ beforeSend(event) {
 ### PII leaking to Sentry
 
 #### Problem
+
 ```bash
 # Sensitive data (emails, amounts) visible in Sentry
 ```
 
 #### Solution
+
 ```typescript
 // Verify beforeSend hook is active
 
@@ -787,12 +834,14 @@ console.log(scrubSensitiveData(testEvent));
 ### Sentry performance overhead
 
 #### Problem
+
 ```bash
 # Application slowdown after adding Sentry
 # High CPU usage
 ```
 
 #### Solution
+
 ```typescript
 // 1. Reduce sampling in production
 tracesSampleRate: 0.1,     // 10% of requests
@@ -823,6 +872,7 @@ Sentry.captureException(error);  // Don't await
 ### Works locally but fails in production
 
 #### Checklist
+
 ```bash
 # 1. Environment variables
 # Ensure all .env vars are set in production
@@ -857,6 +907,7 @@ docker compose logs --tail=200
 If your issue isn't covered here:
 
 1. **Check logs**:
+
    ```bash
    docker compose logs --tail=200
    ```
@@ -883,6 +934,7 @@ If your issue isn't covered here:
 ## Useful Commands
 
 ### Health Checks
+
 ```bash
 # Check all services
 docker compose ps
@@ -901,6 +953,7 @@ docker exec -it mtracking-redis redis-cli ping
 ```
 
 ### Logs
+
 ```bash
 # All services
 docker compose logs -f
@@ -913,6 +966,7 @@ docker compose logs | grep ERROR
 ```
 
 ### Clean Reset
+
 ```bash
 # Nuclear option - full reset (deletes all data)
 docker compose down -v

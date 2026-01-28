@@ -20,4 +20,4 @@ module.exports = {
   moduleNameMapper: {
     '^@m-tracking/(.*)$': '<rootDir>/../../libs/$1/src',
   },
-};
+}

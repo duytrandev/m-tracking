@@ -157,6 +157,7 @@ JWT_EXPIRES_IN=15m
 ```
 
 **Benefits:**
+
 - Catches bugs at compile time
 - Better IDE autocomplete
 - Safer refactoring
@@ -178,11 +179,13 @@ import type { Transaction } from '@m-tracking/types'
 ### Nx Integration
 
 **Project Tags:**
+
 - `type:app` - Backend application
 - `scope:backend` - Can only import shared libraries
 - `platform:node` - Node.js runtime
 
 **Module Boundaries Enforced:**
+
 - ✅ Can import: `@m-tracking/common`, `@m-tracking/types`, `@m-tracking/utils`, `@m-tracking/constants`
 - ❌ Cannot import: Frontend code (`scope:frontend`)
 
@@ -258,11 +261,13 @@ pnpm migration:show
 **Base URL:** `http://localhost:4000/api/v1`
 
 **Health Check:**
+
 ```bash
 GET /api/v1/health
 ```
 
 **Authentication:**
+
 ```bash
 POST /api/v1/auth/register
 POST /api/v1/auth/login
@@ -271,6 +276,7 @@ POST /api/v1/auth/logout
 ```
 
 **Transactions:**
+
 ```bash
 GET    /api/v1/transactions
 POST   /api/v1/transactions
@@ -290,14 +296,9 @@ DELETE /api/v1/transactions/:id
 ```typescript
 // Feature module pattern
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Transaction]),
-  ],
+  imports: [TypeOrmModule.forFeature([Transaction])],
   controllers: [TransactionsController],
-  providers: [
-    TransactionsService,
-    TransactionRepository,
-  ],
+  providers: [TransactionsService, TransactionRepository],
   exports: [TransactionsService], // Only export what's needed
 })
 export class TransactionsModule {}
@@ -324,7 +325,7 @@ export default registerAs('database', () => ({
 export class TransactionRepository {
   constructor(
     @InjectRepository(Transaction)
-    private readonly repository: Repository<Transaction>,
+    private readonly repository: Repository<Transaction>
   ) {}
 
   async findByUserId(userId: string): Promise<Transaction[]> {
@@ -383,6 +384,7 @@ Test files: `test/**/*.e2e-spec.ts`
 ### GitHub Actions
 
 Automated workflow on every PR:
+
 1. Type checking
 2. Linting
 3. Unit tests
@@ -390,6 +392,7 @@ Automated workflow on every PR:
 5. E2E tests
 
 **Nx Affected Commands:**
+
 - Only tests changed code (70-85% faster)
 - Cache results across CI runs
 
@@ -435,6 +438,7 @@ cat tsconfig.json | grep paths
 ### Decorator Errors
 
 Verify these are set in `tsconfig.json`:
+
 ```json
 {
   "emitDecoratorMetadata": true,

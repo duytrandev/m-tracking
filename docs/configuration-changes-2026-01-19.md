@@ -12,6 +12,7 @@
 Comprehensive monorepo configuration improvements implemented based on 2026 best practices for Nx + pnpm + TypeScript. Changes improve type safety, build performance, dependency management, and developer experience.
 
 **Impact:**
+
 - ✅ **Type Safety**: Strict mode enabled across all projects (100% type coverage)
 - ✅ **Build Performance**: Nx caching optimized (expected 30-70% CI time reduction)
 - ✅ **Dependency Management**: Workspace protocol implemented
@@ -27,6 +28,7 @@ Comprehensive monorepo configuration improvements implemented based on 2026 best
 **File: `.npmrc`**
 
 **Changes:**
+
 ```ini
 # Added workspace protocol configuration
 link-workspace-packages=true
@@ -38,7 +40,8 @@ strict-peer-dependencies=true  # Changed from false
 ```
 
 **Impact:**
-- Enables workspace:* protocol for internal dependencies
+
+- Enables workspace:\* protocol for internal dependencies
 - Prevents phantom dependencies
 - Enforces stricter dependency management
 
@@ -47,6 +50,7 @@ strict-peer-dependencies=true  # Changed from false
 **File: `pnpm-workspace.yaml`**
 
 **Changes:**
+
 ```yaml
 # Before
 packages:
@@ -64,6 +68,7 @@ packages:
 ```
 
 **Impact:**
+
 - Removed redundant package patterns
 - Cleaner workspace configuration
 
@@ -74,6 +79,7 @@ packages:
 **File: `tsconfig.base.json` (NEW)**
 
 **Changes:**
+
 - Created centralized base configuration
 - Enabled full strict mode:
   - `strict: true`
@@ -86,6 +92,7 @@ packages:
   - `noUncheckedIndexedAccess: true`
 
 - Added centralized path mappings:
+
   ```json
   "@m-tracking/common": ["libs/common/src/index.ts"],
   "@m-tracking/types": ["libs/types/src/index.ts"],
@@ -99,6 +106,7 @@ packages:
   - `moduleResolution: bundler`
 
 **Impact:**
+
 - Single source of truth for TypeScript configuration
 - Full type safety across monorepo
 - Prevents circular dependencies
@@ -109,6 +117,7 @@ packages:
 **File: `tsconfig.json` (ROOT)**
 
 **Changes:**
+
 ```json
 // Before: Full compiler options defined
 {
@@ -131,6 +140,7 @@ packages:
 ```
 
 **Impact:**
+
 - IDE navigation across monorepo
 - Prevents circular dependencies
 - Enables TypeScript project references
@@ -140,6 +150,7 @@ packages:
 **File: `services/backend/tsconfig.json`**
 
 **Changes:**
+
 ```json
 // Now extends tsconfig.base.json
 {
@@ -163,6 +174,7 @@ packages:
 ```
 
 **Impact:**
+
 - Inherits strict mode from base
 - Full type safety in backend
 - Incremental builds enabled
@@ -172,6 +184,7 @@ packages:
 **File: `apps/frontend/tsconfig.json`**
 
 **Changes:**
+
 ```json
 {
   "extends": "../../tsconfig.base.json",
@@ -193,6 +206,7 @@ packages:
 ```
 
 **Impact:**
+
 - Inherits strict mode from base
 - Can import shared libraries
 - Incremental builds enabled
@@ -202,6 +216,7 @@ packages:
 **Files: `libs/*/tsconfig.json` (4 files)**
 
 **Changes:**
+
 ```json
 // All libraries now extend base and use same pattern
 {
@@ -218,6 +233,7 @@ packages:
 ```
 
 **Impact:**
+
 - Consistent configuration across libraries
 - Incremental builds enabled
 - Ready for TypeScript project references
@@ -229,27 +245,29 @@ packages:
 **Files: `services/backend/project.json`, `apps/frontend/project.json`**
 
 **Changes:**
+
 ```json
 // All npm commands replaced with pnpm
 {
   "targets": {
     "dev": {
-      "command": "pnpm dev"     // Was: npm run dev
+      "command": "pnpm dev" // Was: npm run dev
     },
     "build": {
-      "command": "pnpm build"   // Was: npm run build
+      "command": "pnpm build" // Was: npm run build
     },
     "lint": {
-      "command": "pnpm lint"    // Was: npm run lint
+      "command": "pnpm lint" // Was: npm run lint
     },
     "test": {
-      "command": "pnpm test"    // Was: npm run test
+      "command": "pnpm test" // Was: npm run test
     }
   }
 }
 ```
 
 **Impact:**
+
 - Consistent use of pnpm across monorepo
 - Faster command execution
 
@@ -260,6 +278,7 @@ packages:
 **File: `.github/workflows/ci.yml` (NEW)**
 
 **Changes:**
+
 - Created automated CI pipeline with:
   - Node.js 20.10.0 setup
   - pnpm 10.28.0 installation
@@ -269,6 +288,7 @@ packages:
   - Code coverage upload
 
 **Key Features:**
+
 ```yaml
 # Lint only affected projects
 pnpm nx affected -t lint --base=$NX_BASE --head=$NX_HEAD --parallel=3
@@ -281,6 +301,7 @@ pnpm nx affected -t build --base=$NX_BASE --head=$NX_HEAD --parallel=3
 ```
 
 **Impact:**
+
 - Automated quality gates on every PR
 - 70-85% faster CI (only tests affected projects)
 - Consistent testing across environments
@@ -297,6 +318,7 @@ pnpm nx affected -t build --base=$NX_BASE --head=$NX_HEAD --parallel=3
 **Changes:**
 
 **Added specific named inputs:**
+
 ```json
 {
   "namedInputs": {
@@ -337,6 +359,7 @@ pnpm nx affected -t build --base=$NX_BASE --head=$NX_HEAD --parallel=3
 ```
 
 **Added parallel execution limit:**
+
 ```json
 {
   "parallel": 3
@@ -344,6 +367,7 @@ pnpm nx affected -t build --base=$NX_BASE --head=$NX_HEAD --parallel=3
 ```
 
 **Updated production inputs:**
+
 ```json
 {
   "production": [
@@ -352,12 +376,13 @@ pnpm nx affected -t build --base=$NX_BASE --head=$NX_HEAD --parallel=3
     "!{projectRoot}/tsconfig.spec.json",
     "!{projectRoot}/jest.config.[jt]s",
     "!{projectRoot}/.eslintrc.json",
-    "!{projectRoot}/**/*.md"    // Added - exclude markdown
+    "!{projectRoot}/**/*.md" // Added - exclude markdown
   ]
 }
 ```
 
 **Impact:**
+
 - Accurate cache invalidation
 - Prevents stale cache hits
 - Optimized for backend (NestJS) and frontend (Next.js)
@@ -372,6 +397,7 @@ pnpm nx affected -t build --base=$NX_BASE --head=$NX_HEAD --parallel=3
 Created Nx project configuration for all shared libraries:
 
 **Example: `libs/common/project.json`**
+
 ```json
 {
   "name": "common",
@@ -398,6 +424,7 @@ Created Nx project configuration for all shared libraries:
 ```
 
 **Impact:**
+
 - Libraries now visible to Nx
 - Can use `nx run common:build`, `nx run types:build`, etc.
 - Libraries participate in Nx caching
@@ -410,6 +437,7 @@ Created Nx project configuration for all shared libraries:
 **File: `.eslintrc.json` (ROOT)**
 
 **Changes:**
+
 ```json
 {
   "overrides": [
@@ -448,6 +476,7 @@ Created Nx project configuration for all shared libraries:
 ```
 
 **Impact:**
+
 - Enforces architectural boundaries at compile/lint time
 - Prevents circular dependencies
 - Frontend can't import backend code (and vice versa)
@@ -463,6 +492,7 @@ Created Nx project configuration for all shared libraries:
 **Changes:**
 
 **Added exports field:**
+
 ```json
 {
   "exports": {
@@ -476,6 +506,7 @@ Created Nx project configuration for all shared libraries:
 ```
 
 **Added tree-shaking support:**
+
 ```json
 {
   "sideEffects": false
@@ -483,6 +514,7 @@ Created Nx project configuration for all shared libraries:
 ```
 
 **Updated entry points:**
+
 ```json
 {
   "main": "./dist/index.js",
@@ -492,6 +524,7 @@ Created Nx project configuration for all shared libraries:
 ```
 
 **Impact:**
+
 - Modern Node.js entry point resolution
 - Enables tree-shaking (20-30% smaller bundles)
 - Proper TypeScript types resolution
@@ -502,6 +535,7 @@ Created Nx project configuration for all shared libraries:
 ## Files Changed Summary
 
 ### Created Files (7 files)
+
 1. `tsconfig.base.json` - Base TypeScript configuration
 2. `.github/workflows/ci.yml` - CI/CD pipeline
 3. `libs/common/project.json` - Nx project config
@@ -511,6 +545,7 @@ Created Nx project configuration for all shared libraries:
 7. `docs/configuration-changes-2026-01-19.md` - This document
 
 ### Modified Files (13 files)
+
 1. `.npmrc` - Workspace protocol + strict peer deps
 2. `pnpm-workspace.yaml` - Removed redundant patterns
 3. `tsconfig.json` (root) - Project references only
@@ -539,26 +574,32 @@ Created Nx project configuration for all shared libraries:
 ### Tests Performed
 
 1. **Type Checking:**
+
    ```bash
    pnpm nx run-many -t type-check --all
    ```
+
    - ✅ types - PASSED
    - ✅ constants - PASSED
    - ✅ utils - PASSED
    - ⚠️ common - FAILED (pre-existing code issue, not config)
 
 2. **Nx Graph:**
+
    ```bash
    pnpm nx graph
    ```
+
    - ✅ All 7 projects detected
    - ✅ All targets available (build, lint, test, type-check)
    - ✅ Dependencies correctly mapped
 
 3. **Lint:**
+
    ```bash
    pnpm nx run-many -t lint --all
    ```
+
    - ⚠️ Needs eslint-config-prettier (expected)
    - ✅ Module boundary rules active
 
@@ -582,21 +623,21 @@ Created Nx project configuration for all shared libraries:
 
 ### Immediate Benefits (Phase 1)
 
-| Benefit | Before | After | Improvement |
-|---------|--------|-------|-------------|
-| Type Coverage | 60% | 100% | **+40%** |
-| CI/CD | Manual | Automated | **100%** |
-| Dependency Mgmt | Ad-hoc | workspace:* | **Standardized** |
-| Build Isolation | Weak | Strict | **Strong** |
+| Benefit         | Before | After        | Improvement      |
+| --------------- | ------ | ------------ | ---------------- |
+| Type Coverage   | 60%    | 100%         | **+40%**         |
+| CI/CD           | Manual | Automated    | **100%**         |
+| Dependency Mgmt | Ad-hoc | workspace:\* | **Standardized** |
+| Build Isolation | Weak   | Strict       | **Strong**       |
 
 ### Performance Benefits (Phase 2)
 
-| Metric | Before | Expected After | Improvement |
-|--------|--------|----------------|-------------|
-| CI Build Time | 15-20 min | 3-5 min | **70-85%** |
-| Cache Hit Rate | 0% | 85%+ | **N/A** |
-| Local Rebuild | 2-5 min | 30-60 sec | **75%** |
-| Bundle Size | Baseline | -20-30% | **Smaller** |
+| Metric         | Before    | Expected After | Improvement |
+| -------------- | --------- | -------------- | ----------- |
+| CI Build Time  | 15-20 min | 3-5 min        | **70-85%**  |
+| Cache Hit Rate | 0%        | 85%+           | **N/A**     |
+| Local Rebuild  | 2-5 min   | 30-60 sec      | **75%**     |
+| Bundle Size    | Baseline  | -20-30%        | **Smaller** |
 
 ### Developer Experience
 
@@ -650,6 +691,7 @@ docker run -p 8080:8080 \
 ### Phase 3: Domain-Driven Refactoring (Optional)
 
 **Not Implemented** (deferred to future as optional):
+
 - Refactor libs/ to domain structure (user/, auth/, transaction/, budget/)
 - Split libs/common into decorators, validators, interfaces
 - Add comprehensive library documentation (README.md per lib)
@@ -659,6 +701,7 @@ docker run -p 8080:8080 \
 ### Phase 4: Advanced Optimization (Optional)
 
 **Not Implemented** (deferred to future as optional):
+
 - Implement TypeScript project references (when 15+ packages)
 - Add Changesets for versioning (if publishing to npm)
 - Deployment workflows (staging, production)
@@ -702,7 +745,7 @@ pnpm nx run-many -t build --all
 Use this checklist to verify configuration is working:
 
 - [x] TypeScript strict mode enabled everywhere
-- [x] workspace:* protocol configured (link-workspace-packages=true)
+- [x] workspace:\* protocol configured (link-workspace-packages=true)
 - [x] CI workflow with automated tests/linting
 - [x] Nx caching optimized with specific inputs
 - [x] Module boundaries enforced via ESLint

@@ -83,6 +83,7 @@ NEXT_PUBLIC_API_MOCKING=disabled  # Set to 'enabled' for MSW
 ```
 
 **Benefits:**
+
 - Catches bugs at compile time
 - Better IDE autocomplete
 - Safer refactoring
@@ -103,10 +104,12 @@ import { TRANSACTION_CATEGORIES } from '@m-tracking/constants'
 ### Nx Integration
 
 **Project Tags:**
+
 - `type:app` - Frontend application
 - `scope:frontend` - Can only import shared libraries
 
 **Module Boundaries Enforced:**
+
 - ✅ Can import: `@m-tracking/common`, `@m-tracking/types`, `@m-tracking/utils`, `@m-tracking/constants`
 - ❌ Cannot import: Backend code (`scope:backend`)
 
@@ -211,7 +214,7 @@ export default async function Page() {
 }
 
 // ⚡ Only when needed: Client Component
-'use client'
+;('use client')
 export function InteractiveButton() {
   const [count, setCount] = useState(0)
   return <button onClick={() => setCount(count + 1)}>{count}</button>
@@ -232,9 +235,9 @@ const { data, isLoading } = useQuery({
 // Client state (UI state)
 import { create } from 'zustand'
 
-const useAuthStore = create((set) => ({
+const useAuthStore = create(set => ({
   user: null,
-  login: (user) => set({ user }),
+  login: user => set({ user }),
   logout: () => set({ user: null }),
 }))
 ```
@@ -319,6 +322,7 @@ Mock handlers are defined in `src/mocks/handlers.ts`.
 ### GitHub Actions
 
 Automated workflow on every PR:
+
 1. Type checking
 2. Linting
 3. Unit tests
@@ -326,6 +330,7 @@ Automated workflow on every PR:
 5. E2E tests
 
 **Nx Affected Commands:**
+
 - Only tests changed code (70-85% faster)
 - Cache results across CI runs
 

@@ -39,6 +39,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - ✅ Production hardening documentation and setup instructions
 
 **Test Coverage Achievement:**
+
 - oauth.controller.spec.ts: 6 tests ✅ PASSING
 - oauth.service.spec.ts: 7 tests ✅ PASSING
 - auth.service.spec.ts: 16 tests ✅ PASSING
@@ -47,6 +48,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - **Total: 64/64 tests PASSING (100% pass rate)**
 
 **Files Created:**
+
 - guards/rate-limit.guard.ts - Rate limiting implementation
 - services/auth.service.spec.ts - Comprehensive auth service tests
 - services/password.service.spec.ts - Password hashing tests (34 test cases)
@@ -54,6 +56,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - Additional test designs for token.service, session.service, auth.controller
 
 **Files Modified:**
+
 - auth.module.ts - Added ThrottlerModule + configurable JWT key paths
 - token.service.ts - Environment variable JWT key paths
 - jwt.strategy.ts - Configurable key path loading
@@ -64,6 +67,7 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - package.json - Added express, @swc/core, unplugin-swc dependencies
 
 **Security Improvements:**
+
 - Configurable JWT RSA key paths for production deployment
 - Throttling/rate limiting on all authentication endpoints
 - Token blacklisting implementation with Redis
@@ -71,12 +75,14 @@ This changelog documents all notable changes, features, fixes, and updates to M-
 - Environment variable validation for production
 
 **TypeORM Metadata Fix:**
+
 - Resolved TypeORM ColumnTypeUndefinedError affecting test execution
 - Implemented SWC transpiler with decoratorMetadata: true
 - All 76 previously blocked test cases now execute
 - Test execution time optimized to 6.5 seconds
 
 **Known Issues to Address (90 min effort):**
+
 - Remove unused `private` from jwt.strategy.ts constructor (2 min)
 - Add explicit type to Permission entity @Column (5 min)
 - Add error handling for JWT key file loading (15 min)

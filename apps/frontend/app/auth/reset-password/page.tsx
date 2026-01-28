@@ -40,7 +40,7 @@ export default function ResetPasswordPage() {
 
   // Note: React Hook Form's watch() function is designed to work this way
   // and cannot be memoized. This is expected behavior.
-   
+
   const password = watch('password')
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export default function ResetPasswordPage() {
   return (
     <AuthCard title={t('title')}>
       <form
-        onSubmit={(e) => {
+        onSubmit={e => {
           void handleSubmit(onSubmit)(e)
         }}
         className="space-y-6"

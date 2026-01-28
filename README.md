@@ -69,6 +69,7 @@ pnpm run dev
 ```
 
 Your application will be available at:
+
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:4000
 - **Analytics API**: http://localhost:5000
@@ -123,6 +124,7 @@ For complete command reference and advanced usage, see [docs/development-guide.m
 ## 🛠️ Technology Stack
 
 ### Backend
+
 - **NestJS** 11.1.12 (TypeScript)
 - **FastAPI** (Python 3.13+)
 - **PostgreSQL** 17.7 + TimescaleDB
@@ -130,6 +132,7 @@ For complete command reference and advanced usage, see [docs/development-guide.m
 - **RabbitMQ** 3.12
 
 ### Frontend
+
 - **Next.js** 16.1
 - **React** 19.2
 - **TypeScript** 5.9
@@ -138,6 +141,7 @@ For complete command reference and advanced usage, see [docs/development-guide.m
 - **Zustand** + **React Query**
 
 ### Tools
+
 - **Nx** 22.3.3 (Monorepo)
 - **pnpm** 10.28.0
 - **Docker** + Docker Compose
@@ -188,6 +192,7 @@ docker exec -it mtracking-redis redis-cli
 ### RabbitMQ Management
 
 Open http://localhost:15672
+
 - Username: `mtracking`
 - Password: `mtracking_dev_password`
 
@@ -195,24 +200,25 @@ Open http://localhost:15672
 
 ## 📚 Documentation
 
-| Document | Description |
-|----------|-------------|
-| [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) | Complete technical architecture and folder structure |
-| [CONTRIBUTING.md](./CONTRIBUTING.md) | Development workflow and contribution guidelines |
-| [docs/prd.md](./docs/prd.md) | Product Requirements Document |
-| [docs/system-architecture.md](./docs/system-architecture.md) | System architecture and design decisions |
-| [docs/api-documentation.md](./docs/api-documentation.md) | API endpoints and specifications |
-| [docs/code-standards.md](./docs/code-standards.md) | Coding standards and conventions |
-| [docs/development-guide.md](./docs/development-guide.md) | Detailed development guide |
-| [docs/deployment.md](./docs/deployment.md) | Deployment guide and procedures |
-| [docs/troubleshooting.md](./docs/troubleshooting.md) | Common issues and solutions |
-| [docs/testing.md](./docs/testing.md) | Testing strategies and guidelines |
+| Document                                                     | Description                                          |
+| ------------------------------------------------------------ | ---------------------------------------------------- |
+| [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md)               | Complete technical architecture and folder structure |
+| [CONTRIBUTING.md](./CONTRIBUTING.md)                         | Development workflow and contribution guidelines     |
+| [docs/prd.md](./docs/prd.md)                                 | Product Requirements Document                        |
+| [docs/system-architecture.md](./docs/system-architecture.md) | System architecture and design decisions             |
+| [docs/api-documentation.md](./docs/api-documentation.md)     | API endpoints and specifications                     |
+| [docs/code-standards.md](./docs/code-standards.md)           | Coding standards and conventions                     |
+| [docs/development-guide.md](./docs/development-guide.md)     | Detailed development guide                           |
+| [docs/deployment.md](./docs/deployment.md)                   | Deployment guide and procedures                      |
+| [docs/troubleshooting.md](./docs/troubleshooting.md)         | Common issues and solutions                          |
+| [docs/testing.md](./docs/testing.md)                         | Testing strategies and guidelines                    |
 
 ---
 
 ## 👥 Contributing
 
 We welcome contributions! Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for:
+
 - Development workflow
 - Branch strategy
 - Commit conventions
@@ -221,6 +227,7 @@ We welcome contributions! Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for:
 - Code standards
 
 **Quick Guidelines:**
+
 - Use **kebab-case** for file names
 - Follow **YAGNI, KISS, DRY** principles
 - Maximum **200 lines per file**
@@ -283,4 +290,4 @@ _(To be determined)_
 
 **Built with ❤️ for better financial awareness**
 
-*Last Updated: January 19, 2026*
+_Last Updated: January 19, 2026_

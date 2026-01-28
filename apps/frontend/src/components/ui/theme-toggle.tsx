@@ -30,7 +30,7 @@ export function ThemeToggle({
   const [mounted, setMounted] = useState(false)
 
   // Prevent hydration mismatch - standard Next.js pattern
-   
+
   useEffect(() => {
     setMounted(true)
   }, [])

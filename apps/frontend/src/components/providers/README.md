@@ -5,6 +5,7 @@ This directory contains the Motion (Framer Motion) provider setup for the M-Trac
 ## Overview
 
 Motion is a production-ready animation library for React that provides:
+
 - Declarative animations
 - Gesture support (drag, tap, hover)
 - Layout animations
@@ -14,6 +15,7 @@ Motion is a production-ready animation library for React that provides:
 ## Installation
 
 Motion is already installed in this project:
+
 ```bash
 pnpm add motion --filter @m-tracking/frontend
 ```
@@ -27,20 +29,18 @@ Current version: `12.27.1`
 The `MotionProvider` component wraps the application with LazyMotion for optimized bundle size.
 
 **Features:**
+
 - Uses `domAnimation` features (basic animations, gestures, layout animations, SVG animations)
 - Lazy loads animation features to reduce initial bundle size
 - Strict mode enabled for better error reporting
 
 **Usage:**
+
 ```tsx
 import { MotionProvider } from '@/components/providers'
 
 export default function App({ children }) {
-  return (
-    <MotionProvider>
-      {children}
-    </MotionProvider>
-  )
+  return <MotionProvider>{children}</MotionProvider>
 }
 ```
 
@@ -53,6 +53,7 @@ Detects user's reduced motion preference for accessibility compliance.
 **Returns:** `boolean` - `true` if user prefers reduced motion
 
 **Usage:**
+
 ```tsx
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
 import { m } from 'motion/react'
@@ -74,6 +75,7 @@ function MyComponent() {
 ## Examples
 
 See `motion-provider.example.tsx` for comprehensive usage examples including:
+
 - Basic animations
 - Hover/tap interactions
 - Stagger animations
@@ -82,6 +84,7 @@ See `motion-provider.example.tsx` for comprehensive usage examples including:
 ## Best Practices
 
 1. **Always respect reduced motion preference:**
+
    ```tsx
    const prefersReducedMotion = useReducedMotion()
    transition={{ duration: prefersReducedMotion ? 0 : 0.3 }}
@@ -91,6 +94,7 @@ See `motion-provider.example.tsx` for comprehensive usage examples including:
    Motion is configured with `domAnimation` features for optimal bundle size.
 
 3. **Import from motion/react:**
+
    ```tsx
    import { m } from 'motion/react' // Optimized import
    ```

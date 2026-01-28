@@ -14,7 +14,7 @@ Added SSR guards to the `safeLocalStorage` wrapper:
 
 ```typescript
 const safeLocalStorage: StateStorage = {
-  getItem: (name) => {
+  getItem: name => {
     // Guard: Only access localStorage in browser environment
     if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
       return null
@@ -34,15 +34,18 @@ const safeLocalStorage: StateStorage = {
 Created reusable utilities for safe browser storage access:
 
 **Environment Checks:**
+
 - `isBrowser()` - Checks if running in browser vs SSR
 - `isLocalStorageAvailable()` - Checks if localStorage is accessible
 - `isSessionStorageAvailable()` - Checks if sessionStorage is accessible
 
 **Safe Storage Objects:**
+
 - `safeLocalStorage` - SSR-safe localStorage wrapper
 - `safeSessionStorage` - SSR-safe sessionStorage wrapper
 
 **Features:**
+
 - ✅ SSR-safe (returns null/false during SSR, no errors thrown)
 - ✅ Handles private browsing mode (storage disabled)
 - ✅ Handles quota exceeded errors (attempts to clear and retry)
@@ -61,7 +64,10 @@ const success = safeLocalStorage.setItem('theme', 'dark')
 const removed = safeLocalStorage.removeItem('theme')
 
 // JSON operations
-interface UserPrefs { theme: string; language: string }
+interface UserPrefs {
+  theme: string
+  language: string
+}
 const prefs = safeLocalStorage.getJSON<UserPrefs>('prefs')
 safeLocalStorage.setJSON('prefs', { theme: 'dark', language: 'en' })
 ```
@@ -71,6 +77,7 @@ safeLocalStorage.setJSON('prefs', { theme: 'dark', language: 'en' })
 **File:** `apps/frontend/src/lib/utils/safe-storage.test.ts`
 
 **Test Coverage:**
+
 - ✅ 41 tests, 100% passing
 - ✅ Environment detection (browser vs SSR)
 - ✅ Storage availability checks
@@ -103,6 +110,7 @@ export {
 **File:** `docs/frontend-storage-guide.md`
 
 Comprehensive guide covering:
+
 - ✅ The SSR problem and why guards are needed
 - ✅ How to use the safe storage utilities
 - ✅ Best practices and common patterns
@@ -113,23 +121,28 @@ Comprehensive guide covering:
 ## Benefits
 
 ### 1. SSR Safety
+
 - **Before:** Direct `localStorage` access caused ReferenceError during SSR
 - **After:** Guards prevent errors, gracefully return null/false during SSR
 
 ### 2. Private Browsing Support
+
 - Handles browsers with storage disabled (e.g., Safari private mode)
 - Gracefully degrades instead of throwing exceptions
 
 ### 3. Quota Management
+
 - Automatically attempts to clear storage and retry on quota exceeded
 - Logs warnings for debugging
 
 ### 4. Type Safety
+
 - TypeScript generics for JSON operations
 - Explicit return types (boolean for success/failure)
 - Type inference for stored data
 
 ### 5. Developer Experience
+
 - Single import: `import { safeLocalStorage } from '@/lib/utils'`
 - Consistent API across the codebase
 - Comprehensive documentation and examples
@@ -145,12 +158,12 @@ function MyComponent() {
   const [theme, setTheme] = useState(
     localStorage.getItem('theme') ?? 'system' // SSR error!
   )
-  
+
   const updateTheme = (newTheme: string) => {
     localStorage.setItem('theme', newTheme)
     setTheme(newTheme)
   }
-  
+
   return <div>{theme}</div>
 }
 ```
@@ -163,7 +176,7 @@ import { safeLocalStorage } from '@/lib/utils'
 
 function MyComponent() {
   const [theme, setTheme] = useState<string>('system') // SSR-safe default
-  
+
   // Hydrate from storage after mount (client-side only)
   useEffect(() => {
     const stored = safeLocalStorage.getItem('theme')
@@ -171,7 +184,7 @@ function MyComponent() {
       setTheme(stored)
     }
   }, [])
-  
+
   const updateTheme = (newTheme: string) => {
     if (safeLocalStorage.setItem('theme', newTheme)) {
       setTheme(newTheme)
@@ -179,7 +192,7 @@ function MyComponent() {
       console.warn('Failed to save theme preference')
     }
   }
-  
+
   return <div>{theme}</div>
 }
 ```
@@ -187,15 +200,17 @@ function MyComponent() {
 ## Testing Results
 
 ### Safe Storage Tests
+
 ```
 ✅ 41 tests passing
 - Environment checks: 8 tests
-- localStorage operations: 16 tests  
+- localStorage operations: 16 tests
 - sessionStorage operations: 10 tests
 - JSON operations: 7 tests
 ```
 
 ### UI Store Tests
+
 ```
 ✅ 29 tests passing
 - Theme management
@@ -204,6 +219,7 @@ function MyComponent() {
 ```
 
 ### Total
+
 ```
 ✅ 70/70 tests passing
 ✅ 0 linter errors
@@ -213,10 +229,12 @@ function MyComponent() {
 ## Affected Files
 
 ### Modified
+
 1. `apps/frontend/src/lib/store/ui-store.ts` - Added SSR guards
 2. `apps/frontend/src/lib/utils.ts` - Added exports
 
 ### Created
+
 1. `apps/frontend/src/lib/utils/safe-storage.ts` - Core utilities
 2. `apps/frontend/src/lib/utils/safe-storage.test.ts` - Comprehensive tests
 3. `docs/frontend-storage-guide.md` - Developer documentation

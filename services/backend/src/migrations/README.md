@@ -51,6 +51,7 @@ Example: `1704067200000-create-users-table.ts`
 ## Database Extensions
 
 Required PostgreSQL extensions:
+
 - TimescaleDB (time-series optimization)
 - pgvector (vector similarity search for AI)
 
