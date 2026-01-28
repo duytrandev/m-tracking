@@ -55,11 +55,7 @@ export {
 } from './react.js'
 
 // NestJS/Backend configuration
-export {
-  nestjsRules,
-  migrationRules,
-  sharedUtilityRules,
-} from './nestjs.js'
+export { nestjsRules, migrationRules, sharedUtilityRules } from './nestjs.js'
 
 // Testing configuration
 export {
