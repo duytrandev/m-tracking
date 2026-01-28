@@ -1,18 +1,19 @@
 import { defineConfig } from 'eslint/config'
 import {
-  ignores,
   baseRules,
-  typescriptRules,
-  disableTypeCheckedForTests,
-  nxPlugin,
+  consoleAllowList,
+  ignores,
+  migrationRules,
   moduleBoundaryRules,
+  nestjsRules,
+  nxPlugin,
   reactPlugins,
   reactRecommendedRules,
   reactRules,
-  consoleAllowList,
-  nestjsRules,
-  migrationRules,
+  testFilePatterns,
+  mockFilePatterns,
   testRules,
+  typescriptRules,
 } from './tooling/eslint/index.js'
 
 export default defineConfig(
@@ -21,9 +22,6 @@ export default defineConfig(
 
   // Base JS & TS rules (includes Prettier)
   ...baseRules,
-
-  // Disable type-checked for tests
-  disableTypeCheckedForTests,
 
   // Global TypeScript Project Service & Rules
   {
@@ -51,6 +49,7 @@ export default defineConfig(
       ...reactRules,
     },
   },
+  // Files that legitimately need console (frontend paths are already full patterns)
   {
     files: consoleAllowList.map(pattern => `apps/frontend/${pattern}`),
     rules: { 'no-console': 'off' },
@@ -82,18 +81,24 @@ export default defineConfig(
 
   // Tests and Mocks Overrides (Global)
   {
-    files: [
-      '**/*.test.ts',
-      '**/*.test.tsx',
-      '**/*.spec.ts',
-      '**/*.spec.tsx',
-      '**/vitest.*.ts',
-      '**/mock-data.ts',
-      '**/mocks/**/*.ts',
-      'src/**/mock-data.ts',
-      'apps/frontend/**/mock-data.ts',
-      'apps/frontend/src/features/spending/mock-data.ts',
-    ],
+    files: testFilePatterns,
+    ignores: mockFilePatterns,
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: testRules,
+  },
+  {
+    files: mockFilePatterns,
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
     rules: testRules,
   }
 )

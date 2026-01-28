@@ -1,23 +1,23 @@
-import { vi, describe, it, expect, beforeEach } from 'vitest'
+import {
+  ConflictException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
 import { Repository, UpdateResult } from 'typeorm'
-import {
-  ConflictException,
-  UnauthorizedException,
-  NotFoundException,
-} from '@nestjs/common'
-import { AuthService } from './auth.service'
-import { User } from '../entities/user.entity'
-import { Role } from '../entities/role.entity'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { RegisterDto } from '../dto/register.dto'
 import { EmailVerificationToken } from '../entities/email-verification-token.entity'
 import { PasswordResetToken } from '../entities/password-reset-token.entity'
+import { Role } from '../entities/role.entity'
 import { Session } from '../entities/session.entity'
-import { PasswordService } from './password.service'
+import { User } from '../entities/user.entity'
+import { AuthService } from './auth.service'
 import { EmailService } from './email.service'
-import { TokenService } from './token.service'
+import { PasswordService } from './password.service'
 import { SessionService } from './session.service'
-import { RegisterDto } from '../dto/register.dto'
+import { TokenService } from './token.service'
 
 describe('AuthService', () => {
   let service: AuthService
@@ -36,9 +36,30 @@ describe('AuthService', () => {
     password: 'hashedPassword',
     name: 'Test User',
     emailVerified: true,
-    avatar: null,
+    avatar: '',
+    phone: '',
+    phoneVerified: false,
+    twoFactorEnabled: false,
+    twoFactorSecret: '',
     roles: [{ id: 'role-1', name: 'user' }],
-  } as User
+    preferences: {
+      theme: 'light',
+      language: 'en',
+      currency: 'USD',
+      timezone: 'UTC',
+      notifications: {
+        email: true,
+        push: true,
+        sms: false,
+      },
+    },
+    sessions: [],
+    oauthAccounts: [],
+    passwordResetTokens: [],
+    emailVerificationTokens: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  } as unknown as User
 
   const mockRole = {
     id: 'role-1',
@@ -408,10 +429,10 @@ describe('AuthService', () => {
       vi.spyOn(passwordService, 'generateToken').mockReturnValue('reset-token')
       vi.spyOn(passwordService, 'hashToken').mockReturnValue('hashed-token')
       vi.spyOn(resetTokenRepository, 'create').mockReturnValue(
-        {} as UpdateResult
+        {} as unknown as PasswordResetToken
       )
       vi.spyOn(resetTokenRepository, 'save').mockResolvedValue(
-        {} as UpdateResult
+        {} as unknown as PasswordResetToken
       )
       vi.spyOn(emailService, 'sendPasswordResetEmail').mockResolvedValue(
         undefined

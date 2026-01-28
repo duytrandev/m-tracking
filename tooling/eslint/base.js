@@ -32,18 +32,18 @@ export const ignores = globalIgnores([
 /**
  * Base JavaScript/TypeScript rules
  */
-export const baseRules = defineConfig(
+export const baseRules = [
   // Base JS recommended rules
   js.configs.recommended,
 
   // TypeScript recommended + strict rules
   ...tseslint.configs.recommendedTypeChecked,
-  tseslint.configs.recommended,
-  tseslint.configs.strict,
+  ...tseslint.configs.recommended,
+  ...tseslint.configs.strict,
 
   // Prettier - disable conflicting rules
-  prettier
-)
+  prettier,
+]
 
 /**
  * Common TypeScript rules for all projects

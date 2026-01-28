@@ -8,7 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, Between } from 'typeorm'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
-import { Cache } from 'cache-manager'
+import type { Cache } from 'cache-manager'
 import { Transaction, TransactionType } from './entities/transaction.entity'
 import { Category } from './entities/category.entity'
 import { CreateTransactionDto } from './dto/create-transaction.dto'

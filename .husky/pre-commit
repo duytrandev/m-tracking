@@ -15,7 +15,7 @@ pnpm nx affected -t type-check --parallel=3 || {
   exit 1
 }
 
-# Run tests on affected projects (optional - comment out if too slow)
+# # Run tests on affected projects
 # echo "\n🧪 Testing affected projects..."
 # pnpm nx affected -t test --parallel=3 || {
 #   echo "❌ Tests failed. Please fix failing tests."

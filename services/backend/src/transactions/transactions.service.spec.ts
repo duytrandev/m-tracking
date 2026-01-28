@@ -1,18 +1,18 @@
-import { vi, describe, it, expect, beforeEach } from 'vitest'
+import { CACHE_MANAGER } from '@nestjs/cache-manager'
+import { ForbiddenException, NotFoundException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
-import { NotFoundException, ForbiddenException } from '@nestjs/common'
-import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Cache } from 'cache-manager'
-import { TransactionsService } from './transactions.service'
-import { Transaction, TransactionType } from './entities/transaction.entity'
-import { Category } from './entities/category.entity'
-import { CreateTransactionDto } from './dto/create-transaction.dto'
-import { UpdateTransactionDto } from './dto/update-transaction.dto'
+import { Repository, SelectQueryBuilder } from 'typeorm'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { CreateCategoryDto } from './dto/create-category.dto'
+import { CreateTransactionDto } from './dto/create-transaction.dto'
 import { PaginationDto } from './dto/pagination.dto'
 import { SpendingQueryDto, TimePeriod } from './dto/spending-query.dto'
+import { UpdateTransactionDto } from './dto/update-transaction.dto'
+import { Category } from './entities/category.entity'
+import { Transaction, TransactionType } from './entities/transaction.entity'
+import { TransactionsService } from './transactions.service'
 
 describe('TransactionsService', () => {
   let service: TransactionsService
@@ -41,7 +41,7 @@ describe('TransactionsService', () => {
     description: 'Lunch',
     date: new Date('2025-01-22'),
     currency: 'USD',
-    notes: null,
+    notes: '',
     createdAt: new Date(),
     updatedAt: new Date(),
     category: mockCategory,
@@ -109,7 +109,9 @@ describe('TransactionsService', () => {
       vi.spyOn(categoryRepository, 'findOne').mockResolvedValue(mockCategory)
       vi.spyOn(transactionRepository, 'create').mockReturnValue(mockTransaction)
       vi.spyOn(transactionRepository, 'save').mockResolvedValue(mockTransaction)
-      vi.spyOn(cacheManager, 'del').mockResolvedValue(undefined)
+      vi.spyOn(cacheManager, 'del').mockResolvedValue(
+        undefined as unknown as boolean
+      )
 
       const result = await service.createTransaction(mockUserId, dto)
 
@@ -152,7 +154,9 @@ describe('TransactionsService', () => {
       vi.spyOn(categoryRepository, 'findOne').mockResolvedValue(mockCategory)
       vi.spyOn(transactionRepository, 'create').mockReturnValue(mockTransaction)
       vi.spyOn(transactionRepository, 'save').mockResolvedValue(mockTransaction)
-      vi.spyOn(cacheManager, 'del').mockResolvedValue(undefined)
+      vi.spyOn(cacheManager, 'del').mockResolvedValue(
+        undefined as unknown as boolean
+      )
 
       await service.createTransaction(mockUserId, dto)
 
@@ -274,7 +278,9 @@ describe('TransactionsService', () => {
       vi.spyOn(transactionRepository, 'save').mockResolvedValue(
         updatedTransaction
       )
-      vi.spyOn(cacheManager, 'del').mockResolvedValue(undefined)
+      vi.spyOn(cacheManager, 'del').mockResolvedValue(
+        undefined as unknown as boolean
+      )
 
       const result = await service.updateTransaction(
         mockUserId,
@@ -302,7 +308,9 @@ describe('TransactionsService', () => {
         mockTransaction
       )
       vi.spyOn(transactionRepository, 'save').mockResolvedValue(mockTransaction)
-      vi.spyOn(cacheManager, 'del').mockResolvedValue(undefined)
+      vi.spyOn(cacheManager, 'del').mockResolvedValue(
+        undefined as unknown as boolean
+      )
 
       await service.updateTransaction(mockUserId, mockTransactionId, dto)
 
@@ -317,8 +325,12 @@ describe('TransactionsService', () => {
       vi.spyOn(transactionRepository, 'findOne').mockResolvedValue(
         mockTransaction
       )
-      vi.spyOn(transactionRepository, 'remove').mockResolvedValue(undefined)
-      vi.spyOn(cacheManager, 'del').mockResolvedValue(undefined)
+      vi.spyOn(transactionRepository, 'remove').mockResolvedValue(
+        mockTransaction
+      )
+      vi.spyOn(cacheManager, 'del').mockResolvedValue(
+        undefined as unknown as boolean
+      )
 
       await service.deleteTransaction(mockUserId, mockTransactionId)
 
@@ -338,8 +350,12 @@ describe('TransactionsService', () => {
       vi.spyOn(transactionRepository, 'findOne').mockResolvedValue(
         mockTransaction
       )
-      vi.spyOn(transactionRepository, 'remove').mockResolvedValue(undefined)
-      vi.spyOn(cacheManager, 'del').mockResolvedValue(undefined)
+      vi.spyOn(transactionRepository, 'remove').mockResolvedValue(
+        mockTransaction
+      )
+      vi.spyOn(cacheManager, 'del').mockResolvedValue(
+        undefined as unknown as boolean
+      )
 
       await service.deleteTransaction(mockUserId, mockTransactionId)
 
@@ -420,7 +436,7 @@ describe('TransactionsService', () => {
   describe('deleteCategory', () => {
     it('should delete a category successfully', async () => {
       vi.spyOn(categoryRepository, 'findOne').mockResolvedValue(mockCategory)
-      vi.spyOn(categoryRepository, 'remove').mockResolvedValue(undefined)
+      vi.spyOn(categoryRepository, 'remove').mockResolvedValue(mockCategory)
 
       await service.deleteCategory(mockUserId, mockCategoryId)
 
@@ -479,14 +495,14 @@ describe('TransactionsService', () => {
 
       vi.spyOn(cacheManager, 'get').mockResolvedValue(null)
       vi.spyOn(transactionRepository, 'createQueryBuilder').mockReturnValue(
-        mockQueryBuilder as any
+        mockQueryBuilder as unknown as SelectQueryBuilder<Transaction>
       )
       vi.spyOn(cacheManager, 'set').mockResolvedValue(undefined)
 
       const result = await service.getSpendingSummary(mockUserId, query)
 
       expect(result).toBeDefined()
-      expect(result.period).toBe(TimePeriod.MONTH)
+      expect((result as { period?: TimePeriod }).period).toBe(TimePeriod.MONTH)
       expect(cacheManager.set).toHaveBeenCalled()
     })
 
@@ -522,14 +538,17 @@ describe('TransactionsService', () => {
 
       vi.spyOn(cacheManager, 'get').mockResolvedValue(null)
       vi.spyOn(transactionRepository, 'createQueryBuilder').mockReturnValue(
-        mockQueryBuilder as any
+        mockQueryBuilder as unknown as SelectQueryBuilder<Transaction>
       )
       vi.spyOn(cacheManager, 'set').mockResolvedValue(undefined)
 
       const result = await service.getSpendingSummary(mockUserId, query)
 
-      expect(result.categoryBreakdown).toHaveLength(1)
-      expect(result.categoryBreakdown[0]).toMatchObject({
+      const resultWithBreakdown = result as {
+        categoryBreakdown?: Array<{ categoryId: string; categoryName: string }>
+      }
+      expect(resultWithBreakdown.categoryBreakdown).toHaveLength(1)
+      expect(resultWithBreakdown.categoryBreakdown![0]).toMatchObject({
         categoryId: 'cat-1',
         categoryName: 'Food',
       })
@@ -660,7 +679,9 @@ describe('TransactionsService', () => {
       vi.spyOn(categoryRepository, 'findOne').mockResolvedValue(mockCategory)
       vi.spyOn(transactionRepository, 'create').mockReturnValue(mockTransaction)
       vi.spyOn(transactionRepository, 'save').mockResolvedValue(mockTransaction)
-      vi.spyOn(cacheManager, 'del').mockResolvedValue(undefined)
+      vi.spyOn(cacheManager, 'del').mockResolvedValue(
+        undefined as unknown as boolean
+      )
 
       await service.createTransaction(mockUserId, dto)
 
@@ -676,7 +697,9 @@ describe('TransactionsService', () => {
         mockTransaction
       )
       vi.spyOn(transactionRepository, 'save').mockResolvedValue(mockTransaction)
-      vi.spyOn(cacheManager, 'del').mockResolvedValue(undefined)
+      vi.spyOn(cacheManager, 'del').mockResolvedValue(
+        undefined as unknown as boolean
+      )
 
       await service.updateTransaction(mockUserId, mockTransactionId, dto)
 
@@ -689,8 +712,12 @@ describe('TransactionsService', () => {
       vi.spyOn(transactionRepository, 'findOne').mockResolvedValue(
         mockTransaction
       )
-      vi.spyOn(transactionRepository, 'remove').mockResolvedValue(undefined)
-      vi.spyOn(cacheManager, 'del').mockResolvedValue(undefined)
+      vi.spyOn(transactionRepository, 'remove').mockResolvedValue(
+        mockTransaction
+      )
+      vi.spyOn(cacheManager, 'del').mockResolvedValue(
+        undefined as unknown as boolean
+      )
 
       await service.deleteTransaction(mockUserId, mockTransactionId)
 

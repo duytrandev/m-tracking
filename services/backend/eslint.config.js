@@ -1,8 +1,8 @@
 import { defineConfig } from 'eslint/config'
 import rootConfig from '../../eslint.config.js'
 import {
-  nestjsRules,
   migrationRules,
+  nestjsRules,
   sharedUtilityRules,
 } from '../../tooling/eslint/index.js'
 
@@ -13,11 +13,11 @@ export default defineConfig(
   // Backend-specific TypeScript rules with type-aware linting
   {
     files: ['**/*.ts'],
-    ignores: ['**/*.spec.ts', 'vitest.config.ts', 'vitest.setup.ts'],
+    ignores: ['vitest.config.ts', 'vitest.setup.ts'],
     languageOptions: {
       parserOptions: {
         projectService: {
-          allowDefaultProject: ['ormconfig.ts'],
+          allowDefaultProject: ['*.ts', 'ormconfig.ts'],
         },
         tsconfigRootDir: import.meta.dirname,
       },
@@ -35,5 +35,18 @@ export default defineConfig(
   {
     files: ['**/shared/**/*.ts'],
     rules: sharedUtilityRules,
+  },
+
+  // Backend test files with type-aware linting
+  {
+    files: ['**/*.spec.ts', '**/*.test.ts'],
+    languageOptions: {
+      parserOptions: {
+        projectService: {
+          allowDefaultProject: ['*.ts', 'ormconfig.ts'],
+        },
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
   }
 )

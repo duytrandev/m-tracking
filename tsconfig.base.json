@@ -47,6 +47,10 @@
     "target": "ES2022",
     "lib": ["ES2022"],
 
+    // Decorator Support (required for NestJS)
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
     // Path Mappings (centralized)
     "baseUrl": ".",
     "paths": {

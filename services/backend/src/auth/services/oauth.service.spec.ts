@@ -1,13 +1,14 @@
+import { ConflictException, UnauthorizedException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
-import { ConflictException, UnauthorizedException } from '@nestjs/common'
-import { OAuthService, OAuthProfile } from './oauth.service'
-import { User } from '../entities/user.entity'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { OAuthAccount } from '../entities/oauth-account.entity'
 import { Role } from '../entities/role.entity'
-import { TokenService } from './token.service'
+import { User } from '../entities/user.entity'
+import { OAuthProfile, OAuthService } from './oauth.service'
 import { SessionService } from './session.service'
+import { TokenService } from './token.service'
 
 describe('OAuthService', () => {
   let service: OAuthService
@@ -260,8 +261,8 @@ describe('OAuthService', () => {
       const result = await service.getLinkedAccounts(mockUser.id)
 
       expect(result).toHaveLength(2)
-      expect(result[0].provider).toBe('google')
-      expect(result[1].provider).toBe('github')
+      expect(result[0]?.provider).toBe('google')
+      expect(result[1]?.provider).toBe('github')
     })
   })
 })

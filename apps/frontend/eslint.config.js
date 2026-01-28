@@ -5,6 +5,8 @@ import {
   reactRecommendedRules,
   reactRules,
   consoleAllowList,
+  testFilePatterns,
+  mockFilePatterns,
   testRules,
 } from '../../tooling/eslint/index.js'
 
@@ -30,20 +32,13 @@ export default defineConfig(
 
   // Test files - relaxed rules
   {
-    files: [
-      '**/*.test.ts',
-      '**/*.test.tsx',
-      '**/*.spec.ts',
-      '**/*.spec.tsx',
-      '**/vitest.*.ts',
-      'src/**/*.test.ts',
-    ],
+    files: testFilePatterns,
     rules: testRules,
   },
 
   // Mock files - relaxed rules
   {
-    files: ['**/mock-data.ts', 'src/**/mock-data.ts', '**/mocks/**/*.ts'],
+    files: mockFilePatterns,
     rules: testRules,
   },
 

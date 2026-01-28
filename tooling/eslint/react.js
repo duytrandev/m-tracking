@@ -11,7 +11,7 @@ import jsxA11y from 'eslint-plugin-jsx-a11y'
 
 export const reactPlugins = {
   'jsx-a11y': jsxA11y,
-  'react-hooks': reactHooks.default || reactHooks,
+  'react-hooks': reactHooks,
 }
 
 /**
@@ -19,7 +19,7 @@ export const reactPlugins = {
  */
 export const reactRecommendedRules = {
   ...jsxA11y.configs.recommended.rules,
-  ...(reactHooks.default || reactHooks).configs.recommended.rules,
+  ...reactHooks.configs.recommended.rules,
 }
 
 /**

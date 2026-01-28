@@ -1,21 +1,21 @@
 import {
-  Injectable,
   ConflictException,
-  UnauthorizedException,
-  NotFoundException,
+  Injectable,
   Logger,
+  NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
-import { User } from '../entities/user.entity'
+import { RegisterDto } from '../dto/register.dto'
 import { EmailVerificationToken } from '../entities/email-verification-token.entity'
 import { PasswordResetToken } from '../entities/password-reset-token.entity'
 import { Role } from '../entities/role.entity'
-import { RegisterDto } from '../dto/register.dto'
-import { PasswordService } from './password.service'
+import { User } from '../entities/user.entity'
 import { EmailService } from './email.service'
-import { TokenService } from './token.service'
+import { PasswordService } from './password.service'
 import { SessionService } from './session.service'
+import { TokenService } from './token.service'
 
 @Injectable()
 export class AuthService {
@@ -43,7 +43,6 @@ export class AuthService {
    */
   async register(dto: RegisterDto): Promise<{ message: string }> {
     this.logger.log(`Registration attempt for email: ${dto.email}`)
-
     // Check if user already exists
     const existingUser = await this.userRepository.findOne({
       where: { email: dto.email },

@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest'
-import { validate } from 'class-validator'
 import { plainToInstance } from 'class-transformer'
+import { validate } from 'class-validator'
+import { describe, expect, it } from 'vitest'
 import { PaginationDto } from './pagination.dto'
 
 describe('PaginationDto', () => {
@@ -105,7 +105,7 @@ describe('PaginationDto', () => {
       const errors = await validate(dto)
 
       expect(errors.length).toBeGreaterThan(0)
-      expect(errors[0].property).toBe('page')
+      expect(errors[0]!.property).toBe('page')
     })
 
     it('should fail validation if page is negative', async () => {
@@ -117,7 +117,7 @@ describe('PaginationDto', () => {
       const errors = await validate(dto)
 
       expect(errors.length).toBeGreaterThan(0)
-      expect(errors[0].property).toBe('page')
+      expect(errors[0]!.property).toBe('page')
     })
 
     it('should fail validation if limit is 0', async () => {
@@ -129,7 +129,7 @@ describe('PaginationDto', () => {
       const errors = await validate(dto)
 
       expect(errors.length).toBeGreaterThan(0)
-      expect(errors[0].property).toBe('limit')
+      expect(errors[0]!.property).toBe('limit')
     })
 
     it('should fail validation if limit is negative', async () => {
@@ -141,7 +141,7 @@ describe('PaginationDto', () => {
       const errors = await validate(dto)
 
       expect(errors.length).toBeGreaterThan(0)
-      expect(errors[0].property).toBe('limit')
+      expect(errors[0]!.property).toBe('limit')
     })
 
     it('should fail validation if limit exceeds maximum of 100', async () => {
@@ -153,7 +153,7 @@ describe('PaginationDto', () => {
       const errors = await validate(dto)
 
       expect(errors.length).toBeGreaterThan(0)
-      expect(errors[0].property).toBe('limit')
+      expect(errors[0]!.property).toBe('limit')
     })
 
     it('should fail validation if page is not an integer', async () => {

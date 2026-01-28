@@ -2,10 +2,6 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "experimentalDecorators": true,
-    // Required for NestJS: emitDecoratorMetadata + isolatedModules conflict with TS1272
-    "isolatedModules": false,
-    "verbatimModuleSyntax": false,
     "composite": true,
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "paths": {
@@ -25,7 +21,6 @@
     "node_modules",
     "dist",
     "test",
-    "**/*.spec.ts",
     "vitest.config.ts",
     "vitest.setup.ts"
   ],

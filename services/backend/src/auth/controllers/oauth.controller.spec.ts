@@ -1,9 +1,19 @@
-import { Test, TestingModule } from '@nestjs/testing'
 import { ConfigService } from '@nestjs/config'
+import { Test, TestingModule } from '@nestjs/testing'
 import { Response } from 'express'
-import { OAuthController } from './oauth.controller'
-import { OAuthService } from '../services/oauth.service'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { JwtAuthGuard } from '../guards/jwt-auth.guard'
+import { OAuthService } from '../services/oauth.service'
+import { OAuthController } from './oauth.controller'
+
+// Mock Response interface implementation for testing
+const createMockResponse = (): Response => {
+  const mockResponse = {
+    redirect: vi.fn(),
+  } as unknown as Response
+
+  return mockResponse
+}
 
 describe('OAuthController', () => {
   let controller: OAuthController
@@ -17,10 +27,6 @@ describe('OAuthController', () => {
 
   const mockConfigService = {
     get: vi.fn().mockReturnValue('http://localhost:3000'),
-  }
-
-  const mockResponse = {
-    redirect: vi.fn(),
   }
 
   const mockRequest = {
@@ -75,10 +81,9 @@ describe('OAuthController', () => {
 
       mockOAuthService.handleOAuthCallback.mockResolvedValue(mockResult)
 
-      await controller.googleCallback(
-        mockRequest,
-        mockResponse as unknown as Response
-      )
+      const mockResponse = createMockResponse()
+
+      await controller.googleCallback(mockRequest, mockResponse)
 
       expect(oauthService.handleOAuthCallback).toHaveBeenCalledWith(
         mockRequest.user,
@@ -97,10 +102,9 @@ describe('OAuthController', () => {
         new Error('OAuth failed')
       )
 
-      await controller.googleCallback(
-        mockRequest,
-        mockResponse as unknown as Response
-      )
+      const mockResponse = createMockResponse()
+
+      await controller.googleCallback(mockRequest, mockResponse)
 
       expect(mockResponse.redirect).toHaveBeenCalledWith(
         expect.stringContaining('http://localhost:3000/auth/error')
@@ -126,10 +130,9 @@ describe('OAuthController', () => {
 
       mockOAuthService.handleOAuthCallback.mockResolvedValue(mockResult)
 
-      await controller.githubCallback(
-        mockRequest,
-        mockResponse as unknown as Response
-      )
+      const mockResponse = createMockResponse()
+
+      await controller.githubCallback(mockRequest, mockResponse)
 
       expect(mockResponse.redirect).toHaveBeenCalledWith(
         expect.stringContaining('http://localhost:3000/auth/callback')
@@ -152,10 +155,9 @@ describe('OAuthController', () => {
 
       mockOAuthService.handleOAuthCallback.mockResolvedValue(mockResult)
 
-      await controller.facebookCallback(
-        mockRequest,
-        mockResponse as unknown as Response
-      )
+      const mockResponse = createMockResponse()
+
+      await controller.facebookCallback(mockRequest, mockResponse)
 
       expect(mockResponse.redirect).toHaveBeenCalledWith(
         expect.stringContaining('http://localhost:3000/auth/callback')
@@ -191,7 +193,7 @@ describe('OAuthController', () => {
       const result = await controller.getLinkedAccounts('user-123')
 
       expect(result.accounts).toHaveLength(2)
-      expect(result.accounts[0].provider).toBe('google')
+      expect(result.accounts[0]!.provider).toBe('google')
     })
   })
 

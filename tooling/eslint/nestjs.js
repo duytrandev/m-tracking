@@ -10,8 +10,6 @@
  * NestJS-specific rules
  */
 export const nestjsRules = {
-  // Allow I prefix for interfaces (NestJS convention)
-  '@typescript-eslint/interface-name-prefix': 'off',
   // Allow decorated classes (NestJS modules, controllers, etc.)
   '@typescript-eslint/no-extraneous-class': [
     'error',
