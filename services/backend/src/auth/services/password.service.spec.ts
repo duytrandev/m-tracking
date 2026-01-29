@@ -319,7 +319,7 @@ describe('PasswordService', () => {
       expect(tokenHash.length).toBe(64)
     })
 
-    it('should support email verification flow', async () => {
+    it('should support email verification flow', () => {
       const verificationToken = service.generateToken()
       const tokenHash = service.hashToken(verificationToken)
 

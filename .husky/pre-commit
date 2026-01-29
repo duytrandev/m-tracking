@@ -1,25 +1,14 @@
 
+#!/bin/bash
+# husky pre-commit hook
+
 echo "🔍 Running pre-commit checks..."
 
-# Run lint-staged for formatting and linting of staged files
-echo "\n📝 Checking staged files (lint + format)..."
+# Stage 1: Fast linting and formatting (immediate feedback)
+echo "\n📝 Running lint-staged on staged files..."
 pnpm lint-staged || {
   echo "❌ Lint-staged checks failed. Please fix the issues above."
   exit 1
 }
 
-# Type check affected projects (fast, only checks changed code)
-echo "\n🔎 Type checking affected projects..."
-pnpm nx affected -t type-check --parallel=3 || {
-  echo "❌ Type check failed. Please fix TypeScript errors."
-  exit 1
-}
-
-# # Run tests on affected projects
-# echo "\n🧪 Testing affected projects..."
-# pnpm nx affected -t test --parallel=3 || {
-#   echo "❌ Tests failed. Please fix failing tests."
-#   exit 1
-# }
-
-echo "✅ All pre-commit checks passed!\n"
+echo "✅ Pre-commit checks passed! (Type checking will run on push)\n"

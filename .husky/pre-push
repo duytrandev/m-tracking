@@ -1,0 +1,21 @@
+#!/bin/bash
+# husky pre-push hook
+
+echo "🚀 Running pre-push checks..."
+
+# Stage 1: Type check affected projects (comprehensive but incremental)
+echo "\n🔎 Type checking affected projects..."
+pnpm nx affected -t type-check --parallel=3 || {
+  echo "❌ Type check failed. Please fix TypeScript errors before pushing."
+  exit 1
+}
+
+# Optional: Add test execution for additional confidence
+# Uncomment the following if you want tests to run on push:
+# echo "\n🧪 Running tests on affected projects..."
+# pnpm nx affected -t test --parallel=3 || {
+#   echo "❌ Tests failed. Please fix failing tests before pushing."
+#   exit 1
+# }
+
+echo "✅ All pre-push checks passed! Ready to push.\n"
