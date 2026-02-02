@@ -69,6 +69,7 @@
   "targetDefaults": {
     "type-check": {
       "inputs": ["default", "^production"],
+      "dependsOn": ["^build"],
       "cache": true
     },
     "format": {

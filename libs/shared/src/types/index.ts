@@ -3,15 +3,8 @@
  * Type definitions shared across backend and frontend
  */
 
-// User types
-export interface User {
-  id: string
-  email: string
-  firstName: string
-  lastName: string
-  createdAt: Date
-  updatedAt: Date
-}
+// Note: User types are now in interfaces/user.interface.ts
+// Import from '@m-tracking/shared' directly
 
 // Transaction types
 export interface Transaction {
@@ -57,18 +50,5 @@ export interface BankAccount {
   updatedAt: Date
 }
 
-// API Response types
-export interface ApiResponse<T = unknown> {
-  success: boolean
-  data?: T
-  error?: string
-  message?: string
-}
-
-export interface PaginatedResponse<T> {
-  data: T[]
-  total: number
-  page: number
-  limit: number
-  totalPages: number
-}
+// Note: API Response types are now in interfaces/api-response.interface.ts
+// Import from '@m-tracking/shared' directly

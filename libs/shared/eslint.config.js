@@ -3,10 +3,10 @@ import { defineConfig } from 'eslint/config'
 import rootConfig from '../../eslint.config.js'
 
 export default defineConfig(
-  // Extend root config
+  // Extend root config (handles all TypeScript and test file rules)
   rootConfig,
 
-  // Shared library overrides
+  // Shared library specific overrides
   {
     files: ['**/*.ts'],
     ignores: ['**/*.spec.ts'],
@@ -14,12 +14,6 @@ export default defineConfig(
       globals: {
         setTimeout: 'readonly',
         clearTimeout: 'readonly',
-      },
-      parserOptions: {
-        projectService: {
-          allowDefaultProject: ['vitest.config.ts'],
-        },
-        tsconfigRootDir: import.meta.dirname,
       },
     },
     rules: {

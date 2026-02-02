@@ -18,7 +18,9 @@
       "options": {
         "command": "command -v poetry > /dev/null 2>&1 && poetry build || echo 'Poetry not installed - skipping build. Install: curl -sSL https://install.python-poetry.org | python3 -'",
         "cwd": "services/analytics"
-      }
+      },
+      "cache": true,
+      "inputs": ["pythonBuild"]
     },
     "lint": {
       "executor": "nx:run-commands",

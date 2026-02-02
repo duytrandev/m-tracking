@@ -1,445 +1,376 @@
-# M-Tracking - Product Development Requirements & Project Overview
+# M-Tracking Project Overview & Requirements
 
-**Version:** 1.0.0 | **Status:** Active Development | **Last Updated:** January 21, 2026
-
----
-
-## 1. Vision & Objectives
-
-### Vision Statement
-
-M-Tracking is an AI-powered personal finance management platform that eliminates manual transaction tracking by integrating directly with banking APIs, Telegram bots, and intelligent LLM-driven insights to help users achieve real-time financial awareness and better control over spending.
-
-### Primary Objectives
-
-1. **Reduce Financial Friction** - Automatic transaction aggregation eliminates manual entry overhead
-2. **Provide Actionable Insights** - LLM-powered analysis reveals spending patterns and opportunities
-3. **Support Multi-Channel Access** - Telegram bot for chat-based entry + web dashboard for dashboard views
-4. **Enable Global Users** - Multi-currency and multi-language support with local payment integrations
+**Version**: 1.0 | **Last Updated**: February 1, 2026 | **Status**: Phase 1 MVP
 
 ---
 
-## 2. Target Users & Use Cases
+## Executive Summary
 
-### Primary Users
-
-- **Personal Finance Enthusiasts** - Age 25-45, tech-savvy, wants financial control
-- **Expat Communities** - Managing multi-currency expenses (Vietnam, Asia region focus)
-- **Small Business Owners** - Tracking personal and business expenses
-
-### Use Cases
-
-#### Use Case 1: Automatic Transaction Tracking
-
-**Actor:** User
-**Flow:**
-
-1. User connects bank account via Plaid/Tink
-2. System auto-syncs transactions daily
-3. Transactions categorized by LLM
-4. Dashboard displays spending overview
-
-#### Use Case 2: Manual Entry via Telegram
-
-**Actor:** User
-**Flow:**
-
-1. User sends `/expense $50 coffee @meals` to bot
-2. Bot parses amount, merchant, category
-3. Transaction recorded to dashboard
-4. Weekly summary report sent
-
-#### Use Case 3: Spending Analytics
-
-**Actor:** User
-**Flow:**
-
-1. User opens dashboard
-2. Views spending charts (by category, by merchant)
-3. Receives AI-driven insights ("Increased coffee spending 23% vs last month")
-4. Adjusts budget or spending behavior
+M-Tracking is an AI-powered personal finance management platform that automatically aggregates bank transactions, provides intelligent spending insights through LLM technology, and delivers a hybrid Telegram bot + web dashboard experience. The MVP (Phase 1) focuses on establishing a 26-week foundation with core features for transaction aggregation, AI-powered categorization, budget management, and dual-interface support (web + Telegram).
 
 ---
 
-## 3. Core Features & Capabilities
+## Product Vision
 
-### Feature Set - Phase 1 (Current)
+Eliminate manual transaction tracking by integrating directly with banking APIs (Plaid, Tink, momo.vn, Stripe), while supporting manual entry for cash/untracked accounts via Telegram chat. Enable real-time financial awareness and better spending control through intelligent AI-powered insights delivered via web dashboard and Telegram bot.
 
-#### 3.1 Authentication & Authorization
+---
 
-- Email/password registration with verification
-- OAuth 2.0 integration (Google, GitHub, Facebook)
-- Two-factor authentication (TOTP)
-- Magic link passwordless login
-- Session management with device tracking
+## Target Users
 
-#### 3.2 Transaction Management
+**Primary Audience:**
 
-- Manual transaction entry (amount, category, merchant, date, description)
-- Transaction listing with filtering (date range, category, amount)
-- Transaction categorization (10 predefined + custom)
-- Spending summary aggregation (daily, weekly, monthly)
-- Transaction search and sorting
+- Young professionals (25-35): Tech-savvy, expect modern UX, want automated tracking
+- Family budget managers (35-50): Manage household finances, need visibility into spending
+- Freelancers & gig workers: Variable income, need cash flow visibility
 
-#### 3.3 Web Dashboard
+**Common Needs:**
 
-- Next.js-based responsive UI
-- Dashboard overview (spending widgets, charts)
-- Transaction list page with filters
-- User profile & settings management
-- Preferences (theme, language, notifications)
-- Security settings (password, 2FA, sessions)
-
-#### 3.4 Budget Management (Placeholder)
-
-- Budget creation by category
-- Period-based budgets (weekly, monthly, yearly)
-- Budget vs actual spending comparison
-- Alert thresholds (80%, 100%)
-
-### Feature Set - Phase 2 (Planned)
-
-#### 3.5 Bank Account Integration
-
-- Plaid integration (US, EU banks)
-- Tink integration (European banks)
-- MoMo integration (Vietnam payments)
-- Real-time transaction sync
-- Account balance tracking
+- Automatic transaction collection (bank APIs + manual Telegram entry)
+- Clear spending categorization (AI-powered)
+- Budget creation and tracking with real-time alerts
+- Visual dashboards and reports (web + Telegram bot)
 - Multi-account support
-
-#### 3.6 Telegram Bot Interface
-
-- Natural language transaction entry
-- Transaction parsing via LLM
-- Weekly spending reports
-- Budget alerts
-- Account management commands
-
-#### 3.7 AI-Powered Insights
-
-- Transaction categorization using LLM
-- Spending pattern analysis
-- Merchant learning (auto-categorization)
-- Anomaly detection (unusual spending)
-- Personalized recommendations
+- Secure bank connections
+- Proactive notifications via Telegram
 
 ---
 
-## 4. Technical Requirements
+## Phase 1 MVP Scope (26 Weeks)
 
-### 4.1 Functional Requirements (FR)
+### Core Features Implemented
 
-| ID   | Requirement                            | Priority | Status      |
-| ---- | -------------------------------------- | -------- | ----------- |
-| FR1  | Users can register and authenticate    | Critical | Implemented |
-| FR2  | Users can manually enter transactions  | Critical | Implemented |
-| FR3  | Users can view transaction history     | High     | Implemented |
-| FR4  | System categorizes transactions        | High     | In Progress |
-| FR5  | Users can connect bank accounts        | High     | Placeholder |
-| FR6  | Users can manage budgets               | Medium   | Placeholder |
-| FR7  | Telegram bot accepts transaction input | Medium   | Placeholder |
-| FR8  | System sends AI-powered insights       | Medium   | Placeholder |
-| FR9  | Users can export transaction data      | Low      | Planned     |
-| FR10 | System syncs transactions in real-time | High     | Placeholder |
+**Authentication & Onboarding (Epic 1)**
 
-### 4.2 Non-Functional Requirements (NFR)
+- Email/password registration with email verification
+- OAuth login (Google, GitHub, Facebook)
+- 2FA (TOTP) support
+- Password reset flow
+- Profile management (name, email, language, currency preferences)
+- Multi-language support (English, Vietnamese)
+- JWT-based session management (15m access, 7d refresh tokens)
 
-| ID   | Requirement            | Target                | Implementation                   |
-| ---- | ---------------------- | --------------------- | -------------------------------- |
-| NFR1 | Authentication latency | < 200ms               | JWT with caching                 |
-| NFR2 | Dashboard load time    | < 1s                  | Code splitting + Redis caching   |
-| NFR3 | Availability           | 99.5%                 | RabbitMQ queuing + failover      |
-| NFR4 | Data security          | End-to-end encryption | Bcrypt passwords, RS256 JWT      |
-| NFR5 | Concurrent users       | 10,000+               | Horizontal scaling with Nx cache |
-| NFR6 | Database connections   | 10-50 pool            | TypeORM connection pooling       |
-| NFR7 | Rate limiting          | 10 req/60s            | Global throttler                 |
-| NFR8 | Error tracking         | 100% of 5xx           | Sentry integration               |
+**Bank Integration & Transaction Collection (Epic 2)**
 
-### 4.3 Technology Stack
+- Plaid API integration (US banks)
+- Tink API integration (European banks)
+- MoMo API integration (Vietnam e-wallet)
+- Stripe transaction API support
+- Automatic transaction sync with conflict detection
+- Transaction list with search, filtering, pagination
 
-| Layer          | Technology       | Version | Purpose              |
-| -------------- | ---------------- | ------- | -------------------- |
-| **Frontend**   | Next.js          | 16.1    | Web dashboard + SSR  |
-| **Backend**    | NestJS           | 11.1    | API server           |
-| **Analytics**  | FastAPI          | 0.110   | LLM operations       |
-| **Database**   | PostgreSQL       | 17.7    | Data persistence     |
-| **Cache**      | Redis            | 7       | Session + caching    |
-| **Queue**      | RabbitMQ         | 3.12    | Job processing       |
-| **Auth**       | Passport.js      | 0.7     | Authentication       |
-| **ORM**        | TypeORM          | 0.3     | Database abstraction |
-| **LLM**        | OpenAI/Anthropic | Latest  | Text analysis        |
-| **Monitoring** | Sentry           | 10.35   | Error tracking       |
-| **Deployment** | Docker           | Latest  | Containerization     |
+**Money Management (Epic 3)**
 
----
+- 4-tier AI categorization strategy (cache → user history → global DB → LLM)
+- Manual category override with learning feedback
+- Category-based budgets (monthly periods)
+- Budget threshold alerts (80%, 100%, 120%)
+- Real-time budget calculations
+- Transaction duplicate detection
+- Manual transaction entry via Telegram
 
-## 5. System Architecture Overview
+**Dashboard & Reporting (Epic 4)**
 
-### 5.1 Architecture Pattern
+- Real-time spending overview (current month summary)
+- Interactive charts (Recharts): line, bar, pie charts
+- Category breakdown and drill-down views
+- Budget progress indicators with alerts
+- Month-over-month comparison reports
+- AI chat assistant for natural language queries
+- Transaction list with search/filter/sort
+- Responsive design (mobile browser support)
 
-**Hybrid Modular Monolith** with specialized service:
+**Telegram Bot System (Epic 6)**
 
-- NestJS monolith handles auth, transactions, budgets, banking
-- FastAPI service handles AI/LLM operations
-- Frontend (Next.js) for web dashboard
-- Telegram bot as external interface
+- Slash commands: /spending, /budget, /analyze, /add, /settings, /help
+- Manual transaction entry (natural language + slash command)
+- Daily check-in summaries (opt-in, user-configurable time)
+- Proactive notifications (large transactions, budget alerts, anomalies)
+- AI-powered financial analysis via chat
+- Customizable notification preferences
+- Bilingual support (English/Vietnamese)
 
-### 5.2 High-Level Diagram
+**Infrastructure & DevOps (Epic 5)**
 
-```
-Frontend (Next.js:3000)
-    ↓
-Backend API (NestJS:4000) ← TanStack Query
-    ├─ Auth Module
-    ├─ Transactions Module
-    ├─ Budgets Module
-    ├─ Banking Module
-    └─ Notifications Module
-        ↓
-    Database (PostgreSQL)
-    Redis Cache
-    RabbitMQ Queue
-        ↓
-Analytics Service (FastAPI:5000)
-    └─ LLM Integration
-        (OpenAI/Anthropic)
-        ↓
-External Services
-    ├─ Plaid (Bank sync)
-    ├─ Tink (Bank sync)
-    ├─ MoMo (Vietnam payments)
-    ├─ Telegram Bot API
-    └─ Sentry (Monitoring)
-```
-
-### 5.3 Data Flow
-
-1. **Authentication**: User login → JWT token → TanStack Query caching
-2. **Transactions**: Manual entry → Backend validation → PostgreSQL storage
-3. **Bank Sync**: Scheduled job → Plaid API → Transaction creation
-4. **Categorization**: New transaction → LLM → Redis cache → Category assignment
-5. **Analytics**: User request → Backend aggregation → Dashboard visualization
+- Docker Compose setup (PostgreSQL, Redis, RabbitMQ)
+- CI/CD pipeline (GitHub Actions)
+- Environment configuration
+- Monitoring setup (Sentry for error tracking)
+- Graceful error handling and logging
 
 ---
 
-## 6. Success Metrics
+## Success Metrics
 
-### 6.1 Technical Metrics
+### User Engagement
 
-- **Build Time**: < 2 minutes (cached)
-- **API Response Time**: p99 < 200ms
-- **Test Coverage**: > 80% critical paths
-- **Type Safety**: 0 implicit any types
-- **Linting Score**: 100% pass on CI
+- 70% of users connect ≥1 bank account within 7 days
+- 60% of users create a budget within 14 days
+- 50% of users link Telegram account within first week
+- 80% of users return weekly (dashboard OR bot)
+- 40%+ notification engagement rate via Telegram
+- 60% AI chat engagement monthly
 
-### 6.2 Business Metrics
+### Technical Performance
 
-- **User Adoption**: 1,000+ registered users (first quarter)
-- **Active DAU**: 300+ daily active users
-- **Retention**: 60% 30-day retention
-- **Transaction Volume**: 10,000+ transactions/month
-- **Feature Adoption**: 70% use at least 2 features
+- Dashboard loads in <2 seconds (p95)
+- Transaction sync success rate >95%
+- System uptime >99.9%
+- API response time (p95) <500ms
+- LLM categorization latency <3 seconds per batch
 
-### 6.3 Quality Metrics
+### Business KPIs
 
-- **System Uptime**: 99.5%
-- **Mean Time to Recovery**: < 5 minutes
-- **Security Incidents**: 0 (zero tolerance)
-- **Critical Bugs**: 0 in production
-- **User Satisfaction**: > 4.5/5 stars
-
----
-
-## 7. Security & Compliance
-
-### 7.1 Authentication & Authorization
-
-- **Password Policy**: bcrypt with cost 12, minimum 12 characters
-- **JWT Tokens**: RS256 asymmetric, 15-minute expiry
-- **Refresh Tokens**: httpOnly cookies, 14-day expiry
-- **Session Tracking**: Device fingerprinting, IP logging
-- **RBAC**: Role-based access control (admin, user, guest)
-
-### 7.2 Data Protection
-
-- **Encryption in Transit**: HTTPS/TLS only
-- **Encryption at Rest**: Database encryption via Supabase
-- **PII Handling**: Never log passwords, tokens, credit cards
-- **Data Retention**: User data deleted 30 days after account closure
-- **GDPR Compliance**: Right to export, right to deletion
-
-### 7.3 API Security
-
-- **Rate Limiting**: 10 requests per 60 seconds globally
-- **CORS**: Frontend origin only
-- **Helmet**: Security headers enabled
-- **Input Validation**: DTOs with whitelist mode
-- **SQL Injection**: TypeORM parameterized queries
-
-### 7.4 Secrets Management
-
-- **JWT Keys**: RSA key pairs (not committed)
-- **Database Credentials**: Via environment variables
-- **API Keys**: OAuth secrets, LLM keys via .env
-- **Rotation**: Plan for key rotation quarterly
+- 10,000 active users within 12 months
+- 30-day user retention >60%
+- LLM API costs <$0.10 per user per month (95%+ cache hit rate)
+- Infrastructure cost per user <$1.00 per month
 
 ---
 
-## 8. Deployment & Infrastructure
+## Key Technical Decisions
 
-### 8.1 Development Environment
+### Authentication
 
-- Docker Compose with PostgreSQL, Redis, RabbitMQ
-- Nx monorepo with incremental builds
-- Hot-reload for backend/frontend/analytics
-- Local Sentry mock for error testing
+- RS256 JWT signing (asymmetric, harder to forge)
+- Session tracking with device info + IP address
+- Token blacklisting via Redis
+- Rate limiting on auth endpoints (5/min)
 
-### 8.2 Staging Environment
+### AI Categorization (4-Tier Strategy)
 
-- Supabase PostgreSQL
-- Staging Redis cluster
-- Staging Sentry project
-- Feature branch CI/CD
+- **Tier 1**: Redis cache (80%+ hit rate, 0 cost)
+- **Tier 2**: User historical patterns (10% hit rate)
+- **Tier 3**: Global merchant database (5% hit rate)
+- **Tier 4**: LLM API call (5% usage, <$0.10/user/month)
 
-### 8.3 Production Environment
+### Budget Calculation
 
-- Kubernetes cluster or Docker Swarm
-- RDS PostgreSQL (managed)
-- ElastiCache Redis (managed)
-- CloudFront CDN for frontend assets
-- Production Sentry with alerts
+- Monthly periods (1st to last day of month)
+- Real-time spent calculation (excludes pending by default)
+- Customizable rollover and alert thresholds
+- Pending transaction inclusion (user preference)
 
----
+### Data Storage
 
-## 9. Project Timeline & Milestones
+- PostgreSQL 17 for relational data + TimescaleDB for time-series
+- JSONB columns for flexible data (preferences, device info)
+- Strategic indexes (user_id, category_id, date, email)
+- UUID primary keys for distributed systems
 
-### Phase 1: MVP (Completed)
+### Caching Strategy
 
-- Duration: 4 weeks
-- Status: 85% complete
-- Deliverables:
-  - Authentication system
-  - Transaction management
-  - Web dashboard
-  - Basic categorization
-
-### Phase 2: Banking Integration (Current)
-
-- Duration: 6 weeks
-- Start: Late January 2026
-- Deliverables:
-  - Plaid integration
-  - Tink integration
-  - Real-time sync
-  - MoMo integration (Vietnam)
-
-### Phase 3: AI & Insights
-
-- Duration: 4 weeks
-- Start: March 2026
-- Deliverables:
-  - LLM transaction analysis
-  - Spending patterns
-  - AI-powered recommendations
-  - Anomaly detection
-
-### Phase 4: Telegram Bot
-
-- Duration: 3 weeks
-- Start: April 2026
-- Deliverables:
-  - Transaction entry via chat
-  - Budget alerts
-  - Weekly reports
-  - Account management commands
-
-### Phase 5: Production Launch
-
-- Duration: 2 weeks
-- Start: May 2026
-- Deliverables:
-  - Production deployment
-  - User documentation
-  - Support setup
-  - Marketing materials
+- Redis for transaction summaries (5-min TTL)
+- User session caching with device info
+- Token blacklisting with automatic expiry
+- Rate limit tracking with per-minute reset
 
 ---
 
-## 10. Risk Assessment
+## Phase 2 Post-Launch Enhancements (Triggered at 10K+ users)
 
-| Risk                          | Impact   | Probability | Mitigation                                     |
-| ----------------------------- | -------- | ----------- | ---------------------------------------------- |
-| **Banking API Delays**        | Critical | Medium      | Parallel testing with sandbox APIs             |
-| **LLM Categorization Errors** | High     | High        | Manual verification, user feedback loop        |
-| **Data Privacy Breach**       | Critical | Low         | Regular security audits, penetration testing   |
-| **Performance Degradation**   | High     | Medium      | Load testing, caching optimization             |
-| **Team Availability**         | Medium   | Low         | Documentation, knowledge sharing               |
-| **Scope Creep**               | High     | Medium      | Strict sprint planning, feature prioritization |
+- **Multi-Currency Support** (3 weeks): VND, EUR, GBP with real-time exchange rates
+- **Mobile Native Apps** (8-12 weeks): React Native/Flutter for iOS and Android
+- **Investment Tracking** (4 weeks): Brokerage account integration
+- **Advanced Analytics** (4 weeks): Cash flow forecasting, spending predictions
 
 ---
 
-## 11. Dependencies & Blockers
+## Currency & Localization
 
-### External Dependencies
+**Phase 1 (MVP):**
 
-- Plaid API availability and pricing
-- Tink API availability and pricing
-- MoMo Vietnam integration requirements
-- Telegram Bot API rate limits
-- OpenAI/Anthropic API quotas
+- Currency: USD only (non-configurable)
+- Language: English and Vietnamese
+- Date/time formatting per locale
+- Telegram bot messages localized
 
-### Internal Dependencies
+**Phase 2:**
 
-- PostgreSQL setup with Supabase
-- Redis infrastructure availability
-- RabbitMQ queue service
-- Sentry project configuration
-
-### Known Blockers
-
-- None currently (Phase 2 ready to start)
+- Multi-currency support (USD, VND, EUR, GBP)
+- Real-time exchange rate integration
+- Historical rate preservation
+- Currency-specific formatting
 
 ---
 
-## 12. Success Criteria
+## Security & Compliance
 
-### Definition of Done
+**Authentication:**
 
-- [ ] All user stories implemented
-- [ ] Unit tests pass (> 80% coverage)
-- [ ] E2E tests pass
-- [ ] Code review approved
-- [ ] Documentation updated
-- [ ] No critical bugs reported
+- Passwords: bcrypt (cost 12)
+- Email verification required
+- 2FA available for security-conscious users
 
-### Go-Live Criteria
+**Data Protection:**
 
-- [ ] 99.5% uptime in staging for 7 days
-- [ ] Load testing completed (10,000+ concurrent)
-- [ ] Security audit passed
-- [ ] User documentation complete
-- [ ] Support team trained
-- [ ] Runbooks for common issues documented
+- Encryption in transit (TLS 1.2+)
+- Encryption at rest (AES-256 for sensitive fields)
+- PII masking in logs
 
----
+**Session Management:**
 
-## Appendix: Glossary
+- Multi-device support
+- Manual session termination
+- Concurrent session limits (configuration-driven)
+- Device tracking (browser, OS, IP)
 
-- **DAU**: Daily Active Users
-- **MoM**: Month-over-Month growth
-- **NFR**: Non-Functional Requirement
-- **Plaid**: Banking API platform
-- **Tink**: European banking API
-- **MoMo**: Vietnamese mobile money service
-- **LLM**: Large Language Model
-- **RBAC**: Role-Based Access Control
-- **RS256**: RSA asymmetric signing algorithm
-- **GDPR**: General Data Protection Regulation
+**Privacy:**
+
+- GDPR-compliant data retention
+- 30-day grace period for account deletion
+- Audit log retention (7 years)
+- User can revoke all sessions anytime
 
 ---
 
-**Document Version Control:**
+## External Integrations
 
-- v1.0: Initial PDR created (Jan 21, 2026)
-- v1.1: Planning (pending)
+| Service          | Type         | Status               | Notes                                |
+| ---------------- | ------------ | -------------------- | ------------------------------------ |
+| Plaid            | Bank API     | Implemented          | US banks, OAuth flow                 |
+| Tink             | Bank API     | Infrastructure ready | European banks                       |
+| MoMo             | Payment API  | Infrastructure ready | Vietnam e-wallet                     |
+| Stripe           | Transactions | Infrastructure ready | Payment processing                   |
+| OpenAI           | LLM          | Integrated           | Transaction categorization           |
+| Anthropic Claude | LLM          | Available            | Alternative to OpenAI                |
+| Sentry           | Monitoring   | Partial              | Error tracking (partial integration) |
+| Telegram         | Bot Platform | Implemented          | Slash commands, notifications        |
+
+---
+
+## Known Limitations & Placeholders
+
+**Ready for Implementation:**
+
+- Email service (skeleton exists, needs provider integration)
+- 2FA complete setup (TOTP fields present, logic ready)
+- Notifications module (placeholder, ready for Telegram integration)
+- Banking module (placeholder, ready for Plaid/Tink integration)
+- Budgets module (placeholder, ready for logic implementation)
+
+**Out of Phase 1 Scope:**
+
+- Mobile native apps (Phase 2)
+- Multi-currency support (Phase 2)
+- Investment tracking (Phase 2)
+- Bill payment integration (Phase 3+)
+
+---
+
+## Implementation Timeline
+
+**Weeks 1-2**: Setup & Configuration
+**Weeks 3-6**: Authentication & Onboarding (Epic 1)
+**Weeks 7-10**: Bank Integration & Transaction Collection (Epic 2)
+**Weeks 9-14**: Money Management Core (Epic 3)
+**Weeks 15-19**: Telegram Bot System (Epic 6, parallel with Epic 4)
+**Weeks 17-20**: Dashboard & Reporting (Epic 4)
+**Weeks 1-26**: Infrastructure & DevOps (Epic 5, ongoing)
+
+**Total Stories**: ~127-132 user stories across 6 epics
+
+---
+
+## Acceptance Criteria (MVP Ready)
+
+- All 6 Phase 1 epics completed and tested
+- 95%+ AI categorization accuracy with cache hit rate >95%
+- Dashboard loads <2 seconds (p95)
+- All API endpoints respond <500ms (p95)
+- > 95% transaction sync success rate
+- Telegram bot fully functional with 7+ slash commands
+- Bilingual UI (English/Vietnamese) complete
+- Security audit passed (OWASP Top 10)
+- Monitoring and error tracking operational
+- CI/CD pipeline fully automated
+- Documentation complete and accurate
+
+---
+
+## Team Composition (Recommended)
+
+- 2x Senior Backend Engineers (NestJS, PostgreSQL)
+- 2x Senior Frontend Engineers (React, Next.js)
+- 1x DevOps/SRE Engineer
+- 1x Python/ML Engineer (Analytics, LLM)
+- 1x QA Engineer
+- 1x Product Manager
+
+---
+
+## Success Definition
+
+**Launch Readiness:**
+
+- All epics 95%+ complete
+- Zero critical/high severity bugs
+- Performance targets achieved (load time <2s, API <500ms)
+- > 60% user engagement in week 1
+- > 40% Telegram adoption within first 7 days
+
+**First 12 Months:**
+
+- 10,000 active users
+- > 60% 30-day retention
+- <$1/user/month infrastructure cost
+- > 99.9% system uptime
+- <$0.10/user/month LLM costs
+
+---
+
+## Dependencies & Assumptions
+
+**Technical Dependencies:**
+
+- PostgreSQL 17 with TimescaleDB extension
+- Redis 7 for caching/sessions
+- RabbitMQ 3.12 for background jobs
+- Node.js 20.10.0+, Python 3.12+
+
+**External Integrations:**
+
+- Plaid API access (US banks)
+- OpenAI or Anthropic API (LLM)
+- Telegram Bot API
+- Email service provider (SendGrid/SMTP)
+
+**Assumptions:**
+
+- Users have at least one bank account
+- Primary market is US (Phase 1)
+- Users comfortable with Telegram bot interface
+- LLM API costs scale linearly with users
+- Infrastructure can scale horizontally
+
+---
+
+## Risk Mitigation
+
+| Risk                      | Impact | Mitigation                               |
+| ------------------------- | ------ | ---------------------------------------- |
+| Plaid API delays          | High   | Have Tink/MoMo ready as fallback         |
+| LLM API cost overruns     | High   | 4-tier caching strategy, cost monitoring |
+| User adoption of Telegram | Medium | Web dashboard as primary fallback        |
+| Data sync reliability     | High   | Duplicate detection, transaction audits  |
+| Performance degradation   | High   | Caching strategy, read replicas, CDN     |
+
+---
+
+## Notes for Development
+
+- All authentication methods fully implemented in backend (OAuth, email/password, 2FA ready)
+- Frontend has comprehensive auth UI with 13+ components
+- Mock Service Worker (MSW) configured for testing without backend
+- TypeScript strict mode enforced across all services
+- Pre-commit hooks validate formatting and linting
+- Environment configuration supports multiple deployment contexts (dev/staging/prod)
+
+---
+
+**Related Documents:**
+
+- [docs/system-architecture.md](./system-architecture.md) - Detailed system design
+- [docs/codebase-summary.md](./codebase-summary.md) - Code organization
+- [docs/code-standards.md](./code-standards.md) - Development standards
+- [docs/prd.md](./prd.md) - Complete product requirements

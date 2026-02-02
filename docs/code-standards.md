@@ -1,1812 +1,944 @@
-# Code Standards
+# Code Standards & Guidelines
 
-**Version:** 1.2
-**Last Updated:** 2026-01-20
-**Status:** Active - Updated with Animation Best Practices (Motion Library)
+**Last Updated**: February 1, 2026 | **Version**: 1.0
 
 ---
 
 ## Overview
 
-This document defines coding standards, conventions, and best practices for M-Tracking development. All contributors must follow these guidelines to ensure code consistency, maintainability, and quality.
+This document establishes the coding standards and conventions for the M-Tracking project. All developers must follow these guidelines to maintain code quality, consistency, and maintainability across the monorepo.
 
-**Core Principles:**
-
-- **YAGNI** (You Aren't Gonna Need It) - Don't build features until needed
-- **KISS** (Keep It Simple, Stupid) - Favor simple solutions over complex ones
-- **DRY** (Don't Repeat Yourself) - Avoid code duplication
-
----
-
-## TypeScript Guidelines
-
-### Strict Mode
-
-**Always use TypeScript strict mode:**
-
-```json
-// tsconfig.json
-{
-  "compilerOptions": {
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true
-  }
-}
-```
-
-### Type Definitions
-
-**Explicit return types for functions:**
-
-```typescript
-// ✅ Good
-function getUserById(id: string): Promise<User> {
-  return this.repository.findOne({ where: { id } })
-}
-
-// ❌ Bad
-function getUserById(id: string) {
-  return this.repository.findOne({ where: { id } })
-}
-```
-
-**Interface over type for object shapes:**
-
-```typescript
-// ✅ Good - Use interface for objects
-interface User {
-  id: string
-  email: string
-  name: string
-}
-
-// ✅ Good - Use type for unions/intersections
-type UserRole = 'admin' | 'user' | 'guest'
-type UserWithRole = User & { role: UserRole }
-
-// ❌ Bad - Using type for simple objects
-type User = {
-  id: string
-  email: string
-}
-```
-
-**Enum for fixed sets of values:**
-
-```typescript
-// ✅ Good
-enum TransactionType {
-  INCOME = 'income',
-  EXPENSE = 'expense',
-}
-
-// ❌ Bad - Magic strings
-const type = 'income' // No type safety
-```
-
-### Type Import Standards (Updated 2026-01-18)
-
-**CRITICAL: Use centralized type definitions only**
-
-All type definitions must be imported from centralized locations. Feature-specific type definitions are NOT allowed.
-
-**Centralized Type Locations:**
-
-```typescript
-// API Types (requests, responses, DTOs)
-import type { LoginRequest, LoginResponse } from '@/types/api/auth'
-import type { User, Session } from '@/types/entities'
-
-// ❌ NEVER import from feature-specific types
-import type { LoginRequest } from '@/features/auth/types/auth-types' // WRONG!
-```
-
-**Type Organization:**
-
-```
-types/
-├── api/              # API-related types
-│   ├── auth.ts      # Authentication types (25+ types)
-│   ├── profile.ts   # Profile types
-│   ├── common.ts    # Shared API patterns
-│   └── index.ts     # Re-exports
-└── entities/         # Domain models
-    ├── user.ts      # User entity
-    ├── session.ts   # Session entity
-    └── index.ts     # Re-exports
-```
-
-**Import Patterns:**
-
-```typescript
-// ✅ CORRECT - Centralized imports
-import type {
-  LoginRequest,
-  LoginResponse,
-  RegisterRequest,
-  ForgotPasswordRequest,
-} from '@/types/api/auth'
-
-import type { User } from '@/types/entities'
-
-// ✅ CORRECT - Constants in feature directory
-import { OAUTH_CONFIGS } from '@/features/auth/constants/oauth-config'
-
-// ❌ WRONG - Feature-specific types
-import type { LoginRequest } from '../types/auth-types'
-import type { User } from './types/user'
-```
-
-**Benefits:**
-
-- ✅ Single source of truth for types
-- ✅ No type drift between features
-- ✅ Easier to find and update types
-- ✅ Better IDE autocomplete
-- ✅ Prevents duplicate definitions
-
-**Enforcement:**
-
-This pattern is enforced through:
-
-1. Code review
-2. TypeScript compilation (will fail if duplicate types exist)
-3. Future: ESLint rule to prevent feature-specific type files
-
----
-
-## Naming Conventions
-
-### Files
-
-**Use kebab-case with descriptive names:**
-
-```
-✅ Good:
-user-profile.service.ts
-transaction-categorization.service.ts
-bank-account.entity.ts
-create-transaction.dto.ts
-
-❌ Bad:
-UserProfile.ts
-transactionCategorization.ts
-ba.entity.ts
-dto.ts
-```
-
-**File naming patterns:**
-
-- Entities: `{entity-name}.entity.ts` (user.entity.ts)
-- Services: `{service-name}.service.ts` (auth.service.ts)
-- Controllers: `{controller-name}.controller.ts` (transaction.controller.ts)
-- DTOs: `{action}-{entity}.dto.ts` (create-user.dto.ts)
-- Guards: `{guard-name}.guard.ts` (jwt-auth.guard.ts)
-- Interceptors: `{interceptor-name}.interceptor.ts` (logging.interceptor.ts)
-- Middleware: `{middleware-name}.middleware.ts` (cors.middleware.ts)
-- Filters: `{filter-name}.filter.ts` (http-exception.filter.ts)
-
-### Classes
-
-**Use PascalCase:**
-
-```typescript
-// ✅ Good
-class UserProfileService {}
-class TransactionController {}
-class JwtAuthGuard {}
-
-// ❌ Bad
-class userProfileService {}
-class transaction_controller {}
-```
-
-### Functions and Variables
-
-**Use camelCase:**
-
-```typescript
-// ✅ Good
-const userId = '123'
-function getUserProfile() {}
-async function createTransaction() {}
-
-// ❌ Bad
-const UserId = '123'
-function GetUserProfile() {}
-```
-
-### Constants
-
-**Use SCREAMING_SNAKE_CASE:**
-
-```typescript
-// ✅ Good
-const MAX_RETRY_ATTEMPTS = 3
-const API_BASE_URL = 'https://api.example.com'
-const DEFAULT_PAGE_SIZE = 20
-
-// ❌ Bad
-const maxRetryAttempts = 3
-const apiBaseUrl = 'https://api.example.com'
-```
-
-### Boolean Variables
-
-**Use is/has/can prefix:**
-
-```typescript
-// ✅ Good
-const isActive = true
-const hasPermission = false
-const canEdit = true
-
-// ❌ Bad
-const active = true
-const permission = false
-const edit = true
-```
+**Core Principles:** YAGNI (You Aren't Gonna Need It) | KISS (Keep It Simple, Stupid) | DRY (Don't Repeat Yourself)
 
 ---
 
 ## File Organization
 
-### File Size Limit
+### File Naming
 
-**Keep files under 200 lines:**
+**Convention:** kebab-case for all file names
 
-- Split large files into smaller, focused modules
-- Extract utility functions into separate files
-- Use composition over inheritance
-
-```typescript
-// ✅ Good - Split into multiple files
-// user.service.ts (150 lines)
-// user-validation.service.ts (80 lines)
-// user-notification.service.ts (90 lines)
-
-// ❌ Bad - Single 500-line file
-// user.service.ts (500 lines)
+```
+src/features/auth/components/login-form.tsx      ✓ Correct
+src/features/auth/components/LoginForm.tsx       ✗ Wrong (PascalCase)
+src/features/auth/components/login_form.tsx      ✗ Wrong (snake_case)
 ```
 
-### One Class Per File
+**Guidelines:**
 
-**Each file should contain exactly one class:**
+- Descriptive names that convey purpose (avoid abbreviations)
+- Component files: match component name in lowercase
+- Utility files: describe what they do (e.g., format-currency.ts)
+- Test files: `{name}.test.ts` or `{name}.spec.ts`
+- API clients: `{feature}-api.ts`
+- Hooks: `use-{feature}.ts`
+- Services: `{service}.service.ts`
+- Constants: `constants.ts` or `{feature}.constants.ts`
+
+### File Size Limits
+
+**Target:** Keep all code files under 200 LOC for optimal context management
 
 ```typescript
-// ✅ Good
-// user.service.ts
-export class UserService {
-  // Implementation
+// Good: Small, focused component (60 LOC)
+export function LoginForm() {
+  const form = useForm({ resolver: zodResolver(loginSchema) })
+  return <Form {...form}><Input /></Form>
 }
 
-// ❌ Bad - Multiple classes in one file
-// services.ts
-export class UserService {}
-export class TransactionService {}
-export class BudgetService {}
+// Bad: Large component that should be split (250+ LOC)
+// - Extract helper components to separate files
+// - Extract validation logic to separate module
+// - Use composition over large single files
 ```
+
+**Splitting Strategy:**
+
+- Extract utilities into separate `utils/` folder
+- Break complex components into smaller focused ones
+- Move business logic to services/hooks
+- Create feature-specific modules for large features
 
 ### Directory Structure
 
-**Group related files in directories:**
+**Frontend Feature Module:**
 
 ```
-src/
-├── auth/
-│   ├── auth.controller.ts
-│   ├── auth.service.ts
-│   ├── auth.module.ts
-│   ├── dto/
-│   │   ├── login.dto.ts
-│   │   └── register.dto.ts
-│   ├── guards/
-│   │   └── jwt-auth.guard.ts
-│   └── strategies/
-│       └── jwt.strategy.ts
+src/features/{feature}/
+├── components/               # UI components (each <200 LOC)
+│   ├── {component}.tsx
+│   └── index.ts
+├── hooks/                    # Custom React hooks
+│   ├── use-{feature}.ts
+│   └── index.ts
+├── api/                      # API client
+│   └── {feature}-api.ts
+├── services/                 # Business logic
+│   └── {service}.ts
+├── store/                    # Zustand stores
+│   └── {feature}-store.ts
+├── validations/              # Zod schemas
+│   └── {feature}-schemas.ts
+├── types/                    # Feature-specific types
+│   └── index.ts
+└── index.ts                  # Public API
 ```
 
----
+**Backend Module:**
 
-## Error Handling
-
-### Custom Exception Classes
-
-**Use custom exceptions for domain errors:**
-
-```typescript
-// ✅ Good
-export class UserNotFoundException extends NotFoundException {
-  constructor(userId: string) {
-    super(`User with ID ${userId} not found`)
-  }
-}
-
-export class InsufficientBalanceException extends BadRequestException {
-  constructor(balance: number, required: number) {
-    super(`Insufficient balance. Available: ${balance}, Required: ${required}`)
-  }
-}
-
-// Usage
-throw new UserNotFoundException(userId)
 ```
-
-### Try-Catch Blocks
-
-**Always handle async errors:**
-
-```typescript
-// ✅ Good
-async function processTransaction(data: TransactionDto): Promise<Transaction> {
-  try {
-    const transaction = await this.repository.save(data)
-    await this.budgetService.updateSpending(transaction)
-    return transaction
-  } catch (error) {
-    this.logger.error('Failed to process transaction', {
-      error: error.message,
-      data,
-    })
-    throw new TransactionProcessingException(error.message)
-  }
-}
-
-// ❌ Bad - Unhandled errors
-async function processTransaction(data: TransactionDto) {
-  const transaction = await this.repository.save(data)
-  await this.budgetService.updateSpending(transaction)
-  return transaction
-}
-```
-
-**Type casting pattern for error handling (Phase 0 - Configuration Fixes):**
-
-```typescript
-// ✅ Good - Type guard for error objects
-async function fetchData() {
-  try {
-    return await externalApi.call()
-  } catch (error) {
-    // Always type-guard error as unknown first
-    if (error instanceof Error) {
-      this.logger.error('API call failed', {
-        message: error.message,
-        stack: error.stack,
-      })
-    } else {
-      this.logger.error('Unknown error occurred', { error })
-    }
-    throw new ApiException('Failed to fetch data')
-  }
-}
-
-// Type-safe error handling with custom errors
-try {
-  // operation
-} catch (error) {
-  const typedError = error as Error
-  // Now safe to access .message, .stack
-  throw new CustomException(typedError.message)
-}
-```
-
-### Logging Errors
-
-**Log all errors with context:**
-
-```typescript
-// ✅ Good
-this.logger.error('Failed to create user', {
-  error: error.message,
-  stack: error.stack,
-  email: dto.email,
-  timestamp: new Date().toISOString(),
-})
-
-// ❌ Bad
-console.error('Error:', error)
-```
-
-### Consistent Error Responses
-
-**Use standard error response format:**
-
-```typescript
-// Error response format
-{
-  "statusCode": 404,
-  "message": "User with ID 123 not found",
-  "error": "Not Found",
-  "timestamp": "2026-01-16T13:54:00.000Z",
-  "path": "/api/v1/users/123"
-}
+src/{module}/
+├── {module}.module.ts        # NestJS module definition
+├── {module}.controller.ts    # HTTP endpoints
+├── {module}.service.ts       # Business logic
+├── entities/                 # TypeORM entities
+│   └── {entity}.entity.ts
+├── dto/                      # Data transfer objects
+│   ├── create-{entity}.dto.ts
+│   ├── update-{entity}.dto.ts
+│   └── {entity}.dto.ts
+├── repositories/             # Data access (optional, use services)
+├── guards/                   # Authorization
+├── strategies/               # Auth strategies
+└── services/                 # Utility services
 ```
 
 ---
 
-## Code Quality
+## TypeScript Configuration
 
-### Comments
+### Compiler Settings
 
-**Write meaningful comments for complex logic:**
-
-```typescript
-// ✅ Good
-/**
- * Calculates remaining budget using 4-tier caching strategy:
- * 1. Redis cache (80% hit rate)
- * 2. In-memory user history (10% hit rate)
- * 3. Database query (10% usage)
- */
-async function calculateRemainingBudget(userId: string): Promise<number> {
-  // Implementation
-}
-
-// ❌ Bad - Obvious comment
-// Get user by ID
-async function getUserById(id: string) {}
-```
-
-**Use JSDoc for public APIs:**
-
-```typescript
-/**
- * Creates a new transaction and updates related budgets
- *
- * @param userId - The user's unique identifier
- * @param dto - Transaction creation data
- * @returns The created transaction
- * @throws {UserNotFoundException} If user doesn't exist
- * @throws {InsufficientBalanceException} If balance is insufficient
- */
-async createTransaction(
-  userId: string,
-  dto: CreateTransactionDto,
-): Promise<Transaction> {
-  // Implementation
-}
-```
-
-### Code Formatting
-
-**Use Prettier for automatic formatting:**
+**All projects use strict mode:**
 
 ```json
-// .prettierrc
 {
-  "semi": true,
-  "trailingComma": "all",
-  "singleQuote": true,
-  "printWidth": 100,
-  "tabWidth": 2
-}
-```
-
-### Linting
-
-**Use ESLint for code quality:**
-
-```json
-// .eslintrc.json
-{
-  "extends": [
-    "plugin:@typescript-eslint/recommended",
-    "plugin:prettier/recommended"
-  ],
-  "rules": {
-    "@typescript-eslint/explicit-function-return-type": "error",
-    "@typescript-eslint/no-explicit-any": "error",
-    "@typescript-eslint/no-unused-vars": "error"
+  "compilerOptions": {
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "incremental": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
   }
 }
 ```
 
-### Code Reviews
+### Type Safety Requirements
 
-**All code must be reviewed before merge:**
-
-- At least 1 approval required
-- All CI checks must pass
-- No merge conflicts
-- Follow PR template
-
----
-
-## API Pagination & Caching Patterns (Phase 01)
-
-### Pagination Implementation
-
-**All list endpoints must use pagination with safe limits:**
+**Rule 1: No `any` types**
 
 ```typescript
-// ✅ Good - Use PaginationDto
-import { PaginationDto } from './dto/pagination.dto'
+// Bad
+const value: any = getSomeValue()
 
-@Get('transactions')
-async findAll(
-  @Query() pagination: PaginationDto,
-  @Request() req: any,
-): Promise<PaginatedTransactionResponse> {
-  return this.service.findAllTransactions(req.user.id, {}, pagination)
+// Good - Use unknown and type guard
+const value: unknown = getSomeValue()
+if (typeof value === 'string') {
+  // value is narrowed to string
 }
 
-// ❌ Bad - No pagination limit
-@Get('transactions')
-async findAll(@Query() limit: number): Promise<Transaction[]> {
-  // User could request 1 million records!
-  return this.service.find({ take: limit })
+// Good - Use proper types
+const value: User = getUserData()
+```
+
+**Rule 2: Explicit return types**
+
+```typescript
+// Bad - Omit return type
+function calculate(a: number, b: number) {
+  return a + b
+}
+
+// Good - Explicit return type
+function calculate(a: number, b: number): number {
+  return a + b
+}
+
+// React component return type
+function LoginForm(): React.ReactElement {
+  return <form>...</form>
 }
 ```
 
-**PaginationDto Pattern:**
+**Rule 3: No non-null assertions except justified cases**
 
 ```typescript
-export class PaginationDto {
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  page?: number = 1
+// Bad - Unjustified ! operator
+const user = users.find(u => u.id === '123')!
 
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(100) // Hard limit prevents memory exhaustion
-  limit?: number = 20
+// Good - Use optional chaining + nullish coalescing
+const user = users.find(u => u.id === '123')
+const userName = user?.name ?? 'Unknown'
 
-  get skip(): number {
-    return ((this.page ?? 1) - 1) * (this.limit ?? 20)
-  }
+// Justified - DOM elements that must exist
+const input = document.getElementById('email') as HTMLInputElement
+```
+
+**Rule 4: Proper error handling with unknown type**
+
+```typescript
+// Bad
+catch (error) {
+  console.error(error.message) // error could be anything
+}
+
+// Good
+catch (error) {
+  const message = error instanceof Error ? error.message : String(error)
+  console.error(message)
 }
 ```
 
-**Response Format:**
+### Module System
+
+**ES Modules everywhere:**
 
 ```typescript
-export class PaginatedTransactionResponse {
-  transactions!: Transaction[];
-  total!: number;
-  page!: number;
-  limit!: number;
-  totalPages!: number;
-}
+// Correct
+import { create } from 'zustand'
+export function myFunction() {}
 
-// Usage in service
-async findAllTransactions(
-  userId: string,
-  query: SpendingQueryDto,
-  pagination: PaginationDto = new PaginationDto(),
-): Promise<PaginatedTransactionResponse> {
-  const [transactions, total] = await this.transactionRepository.findAndCount({
-    where: { userId, date: Between(startDate, endDate) },
-    relations: ['category'],
-    order: { date: 'DESC' },
-    skip: pagination.skip,
-    take: pagination.limit,
-  });
-
-  return {
-    transactions,
-    total,
-    page: pagination.page ?? 1,
-    limit: pagination.limit ?? 20,
-    totalPages: Math.ceil(total / (pagination.limit ?? 20)),
-  };
-}
+// Wrong
+const express = require('express')
+module.exports = MyClass
 ```
 
-**Benefits:**
-
-- Type-safe pagination with validation
-- Hard limit prevents DoS attacks
-- RDBMS handles offset efficiently
-- Predictable response size
-
-### Caching Strategy for Analytics Queries
-
-**Pattern: Generate cache key from query parameters**
+**Barrel exports for public APIs:**
 
 ```typescript
-// ✅ Good - Cache with unique key
-async getSpendingSummary(userId: string, query: SpendingQueryDto) {
-  const { startDate, endDate } = this.getDateRange(query)
-
-  // Generate cache key including all query parameters
-  const cacheKey = `spending-summary:${userId}:${query.period}:${startDate.toISOString()}:${endDate.toISOString()}`
-
-  // Try cache first
-  const cached = await this.cacheManager.get(cacheKey)
-  if (cached) return cached
-
-  // Expensive database query
-  const summary = await this.calculateSummary(userId, startDate, endDate)
-
-  // Cache for 5 minutes (300000ms)
-  await this.cacheManager.set(cacheKey, summary, 300000)
-
-  return summary
-}
-
-// ❌ Bad - No caching on expensive queries
-async getSpendingSummary(userId: string, query: SpendingQueryDto) {
-  // Recalculates every request - could be 5-10s each!
-  return this.calculateExpensiveSummary(userId, query)
-}
-```
-
-**Cache Invalidation on Mutations:**
-
-```typescript
-// ✅ Good - Invalidate cache on writes
-async createTransaction(userId: string, dto: CreateTransactionDto) {
-  const transaction = await this.transactionRepository.save(transaction)
-
-  // Invalidate related cache keys
-  await this.invalidateUserCache(userId)
-
-  return transaction
-}
-
-private async invalidateUserCache(userId: string): Promise<void> {
-  try {
-    // Invalidate all time period combinations
-    const periods = ['day', 'week', 'month', 'year', 'custom']
-    const ranges = [
-      { start: new Date(now.getFullYear(), now.getMonth(), now.getDate()), end: now },
-      // ... more ranges
-    ]
-
-    const deletePromises = []
-    for (const period of periods) {
-      for (const range of ranges) {
-        const cacheKey = `spending-summary:${userId}:${period}:${range.start.toISOString()}:${range.end.toISOString()}`
-        deletePromises.push(this.cacheManager.del(cacheKey))
-      }
-    }
-
-    await Promise.all(deletePromises)
-  } catch (error) {
-    // Log but don't throw - cache invalidation shouldn't break mutations
-    console.error('Cache invalidation error:', error)
-  }
-}
-
-// ❌ Bad - No cache invalidation
-async createTransaction(userId: string, dto: CreateTransactionDto) {
-  return this.transactionRepository.save(transaction)
-  // User might see stale data for 5+ minutes!
-}
-```
-
-**TTL Configuration:**
-
-- **Short-lived (1 minute):** Rate limit counters
-- **Medium (5 minutes):** Analytics summaries, report data
-- **Long (90 days):** LLM categorization cache (immutable)
-- **Session (7 days):** User sessions, auth tokens
-
-### Database Aggregation (No In-Memory Processing)
-
-**Pattern: Use QueryBuilder for aggregation**
-
-```typescript
-// ✅ Good - Database aggregation (instant for any dataset size)
-async getCategoryBreakdown(userId: string, startDate: Date, endDate: Date) {
-  const raw = await this.transactionRepository
-    .createQueryBuilder('t')
-    .select('c.id', 'categoryId')
-    .addSelect('SUM(t.amount)', 'total')
-    .addSelect('COUNT(t.id)', 'count')
-    .leftJoin('t.category', 'c')
-    .where('t.userId = :userId', { userId })
-    .andWhere('t.date BETWEEN :start AND :end', { start: startDate, end: endDate })
-    .groupBy('c.id')
-    .orderBy('SUM(t.amount)', 'DESC')
-    .getRawMany()
-
-  return raw.map((r) => ({
-    categoryId: r.categoryId,
-    total: Number(r.total),
-    count: Number(r.count),
-  }))
-}
-
-// ❌ Bad - In-memory aggregation (slow for large datasets)
-async getCategoryBreakdown(userId: string, startDate: Date, endDate: Date) {
-  const transactions = await this.transactionRepository.find({
-    where: { userId, date: Between(startDate, endDate) },
-    relations: ['category'],
-  })
-
-  // Manual aggregation - O(n) complexity, memory intensive
-  const breakdown: Map<string, any> = new Map()
-  for (const t of transactions) {
-    if (!breakdown.has(t.categoryId)) {
-      breakdown.set(t.categoryId, { total: 0, count: 0 })
-    }
-    const cat = breakdown.get(t.categoryId)
-    cat.total += t.amount
-    cat.count += 1
-  }
-
-  return Array.from(breakdown.values())
-}
-```
-
-## NestJS Patterns
-
-### Dependency Injection
-
-**Always use constructor injection:**
-
-```typescript
-// ✅ Good
-@Injectable()
-export class TransactionService {
-  constructor(
-    @InjectRepository(Transaction)
-    private readonly repository: Repository<Transaction>,
-    private readonly budgetService: BudgetService,
-    private readonly logger: LoggerService
-  ) {}
-}
-
-// ❌ Bad - Direct instantiation
-export class TransactionService {
-  private repository = new Repository()
-  private budgetService = new BudgetService()
-}
-```
-
-### DTOs with Validation
-
-**Use class-validator decorators:**
-
-```typescript
-// ✅ Good
-export class CreateTransactionDto {
-  @IsString()
-  @IsNotEmpty()
-  merchant: string
-
-  @IsNumber()
-  @Min(0)
-  amount: number
-
-  @IsEnum(TransactionType)
-  type: TransactionType
-
-  @IsDateString()
-  @IsOptional()
-  date?: string
-}
-
-// ❌ Bad - No validation
-export class CreateTransactionDto {
-  merchant: string
-  amount: number
-  type: string
-  date?: string
-}
-```
-
-### Service Layer
-
-**Keep controllers thin, services thick:**
-
-```typescript
-// ✅ Good
-@Controller('transactions')
-export class TransactionController {
-  constructor(private readonly service: TransactionService) {}
-
-  @Post()
-  async create(@Body() dto: CreateTransactionDto): Promise<Transaction> {
-    return this.service.create(dto)
-  }
-}
-
-// Service contains business logic
-export class TransactionService {
-  async create(dto: CreateTransactionDto): Promise<Transaction> {
-    // Validation
-    // Business logic
-    // Database operations
-    // Side effects (events, notifications)
-    return transaction
-  }
-}
+// src/features/auth/index.ts
+export * from './hooks/use-auth'
+export * from './components/login-form'
+export * from './api/auth-api'
+// Public API is now: import { useAuth, LoginForm, authApi } from '@/features/auth'
 ```
 
 ---
 
-## Database
+## ESLint Configuration
 
-### Entity Definitions
+### Setup
 
-**Use TypeORM decorators:**
+**Root Config:** `eslint.config.js` (flat config v9)
+**Shared Config:** `libs/shared/eslint.config.js` (extends root)
 
-```typescript
-@Entity('users')
-export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string
+### ESLint Rules
 
-  @Column({ unique: true })
-  email: string
+**Enforced:**
 
-  @Column()
-  name: string
+- `no-console`: Error (use logger instead)
+- `no-debugger`: Error
+- `no-var`: Error (use const/let)
+- `prefer-const`: Error
+- `eqeqeq`: Error (use === instead of ==)
+- `no-implicit-coercion`: Error
 
-  @Column({ select: false })
-  password: string
+**Frontend-Specific:**
 
-  @CreateDateColumn()
-  createdAt: Date
+- React hooks rules: Error
+- Import order: Warnings auto-fixed
 
-  @UpdateDateColumn()
-  updatedAt: Date
+**Backend-Specific:**
 
-  @OneToMany(() => Transaction, transaction => transaction.user)
-  transactions: Transaction[]
-}
-```
+- NestJS decorators: No warnings
 
-### Repository Pattern
+**Shared Library:**
 
-**Use repository methods:**
+- Static-only classes: Allowed
+- Non-null assertions: Warning level
 
-```typescript
-// ✅ Good
-async findByEmail(email: string): Promise<User | null> {
-  return this.repository.findOne({ where: { email } });
-}
-
-async findWithTransactions(userId: string): Promise<User | null> {
-  return this.repository.findOne({
-    where: { id: userId },
-    relations: ['transactions'],
-  });
-}
-
-// ❌ Bad - Raw queries everywhere
-async findByEmail(email: string) {
-  return this.repository.query(
-    'SELECT * FROM users WHERE email = $1',
-    [email]
-  );
-}
-```
-
-### Migrations
-
-**Always use migrations for schema changes:**
+### Running ESLint
 
 ```bash
-# Generate migration
-pnpm run migration:generate -- src/migrations/AddUserPhoneNumber
+# Lint all projects
+pnpm run lint
 
-# Run migrations
-pnpm run migration:run
+# Lint specific project
+pnpm run lint:frontend
+pnpm run lint:backend
 
-# Revert migration
-pnpm run migration:revert
+# Auto-fix issues
+pnpm run lint:fix
+pnpm run lint:frontend:fix
 ```
 
 ---
 
-## Testing Guidelines
+## Prettier Formatting
 
-### Unit Tests
+**Config:** `prettier.config.js`
 
-**Test services in isolation:**
+**Settings:**
 
-```typescript
-describe('TransactionService', () => {
-  let service: TransactionService
-  let repository: Repository<Transaction>
+- Print width: 80 characters
+- Tab width: 2 spaces
+- Semicolons: Required
+- Single quotes: Preferred
+- Trailing commas: ES5
+- Bracket spacing: true
 
-  beforeEach(async () => {
-    const module = await Test.createTestingModule({
-      providers: [
-        TransactionService,
-        {
-          provide: getRepositoryToken(Transaction),
-          useValue: {
-            save: jest.fn(),
-            findOne: jest.fn(),
-          },
-        },
-      ],
-    }).compile()
+### Formatting Workflow
 
-    service = module.get<TransactionService>(TransactionService)
-    repository = module.get(getRepositoryToken(Transaction))
-  })
+```bash
+# Check formatting
+pnpm run format:check
 
-  it('should create a transaction', async () => {
-    const dto = { merchant: 'Test', amount: 100 }
-    const expected = { id: '1', ...dto }
+# Auto-format
+pnpm run format
 
-    jest.spyOn(repository, 'save').mockResolvedValue(expected as Transaction)
-
-    const result = await service.create(dto)
-
-    expect(result).toEqual(expected)
-    expect(repository.save).toHaveBeenCalledWith(dto)
-  })
-})
-```
-
-### Integration Tests
-
-**Test API endpoints:**
-
-```typescript
-describe('TransactionController (e2e)', () => {
-  let app: INestApplication
-
-  beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile()
-
-    app = moduleRef.createNestApplication()
-    await app.init()
-  })
-
-  it('/transactions (POST)', () => {
-    return request(app.getHttpServer())
-      .post('/transactions')
-      .send({ merchant: 'Test', amount: 100 })
-      .expect(201)
-      .expect(res => {
-        expect(res.body.id).toBeDefined()
-        expect(res.body.merchant).toBe('Test')
-      })
-  })
-})
+# Pre-commit hook (automatic)
+# Files are auto-formatted before commit
 ```
 
 ---
 
-## Security Best Practices
+## Coding Conventions
 
-### Input Validation
+### Naming Conventions
 
-**Always validate and sanitize input:**
+**Variables & Functions:**
 
 ```typescript
-// ✅ Good - Use DTOs with validation
-@Post()
-async create(@Body() dto: CreateUserDto) {
-  return this.service.create(dto);
+// camelCase for variables and functions
+const userData = { name: 'John' }
+function calculateTotal(items: number[]): number {}
+
+// UPPER_SNAKE_CASE for constants
+const MAX_RETRIES = 3
+const API_BASE_URL = 'http://localhost:4000'
+const ERROR_CODES = { INVALID: 'INVALID_INPUT' }
+```
+
+**Classes & Types:**
+
+```typescript
+// PascalCase for classes
+class AuthService {}
+class UserRepository {}
+
+// PascalCase for interfaces/types
+interface IUser {}
+type User = { id: string; name: string }
+
+// Prefix interfaces with 'I' (legacy, acceptable in shared lib)
+// Prefer types over interfaces for consistency
+```
+
+**React Components:**
+
+```typescript
+// PascalCase for component names
+export function LoginForm() {}
+export const Dashboard = () => {}
+
+// Avoid FC/FunctionComponent type (verbose)
+// Preferred: function declaration or arrow returning JSX
+```
+
+### Variable Declaration
+
+```typescript
+// Prefer const (default)
+const user = getUser()
+
+// Use let only when reassignment is needed
+let count = 0
+count++
+
+// Never use var
+var old = true // ✗ Forbidden
+```
+
+### Function Declaration
+
+**Preference Order:**
+
+1. **Function declarations** (hoisting, clarity)
+2. **Arrow functions** (concise, lexical this)
+3. **Methods** (class/object context)
+
+```typescript
+// 1. Function declaration (preferred for top-level)
+function getUserById(id: string): User | null {
+  return users.find(u => u.id === id) ?? null
 }
 
-// ❌ Bad - Raw input
-@Post()
-async create(@Body() body: any) {
-  return this.service.create(body);
+// 2. Arrow function (preferred for callbacks)
+const calculateTotal = (items: number[]): number => {
+  return items.reduce((sum, item) => sum + item, 0)
+}
+
+// 3. Method in class
+class UserService {
+  getById(id: string): User | null {
+    return this.repository.find(id)
+  }
 }
 ```
 
-### SQL Injection Prevention
+### Destructuring
 
-**Use parameterized queries:**
+**Use destructuring for clarity:**
 
 ```typescript
-// ✅ Good
-await this.repository.findOne({
-  where: { email },
+// Good - Destructure props
+function UserCard({ name, email, avatar }: User) {
+  return <div>{name}</div>
+}
+
+// Good - Destructure from objects
+const { data, isLoading, error } = useQuery(...)
+
+// Good - Nested destructuring
+const { user: { profile: { name } } } = getUserData()
+
+// Avoid - Deep nesting (use intermediate variables)
+// Bad
+const { a: { b: { c: { d } } } } = deeply.nested.object
+// Good
+const { a } = deeply.nested
+const { b } = a
+const { c } = b
+const { d } = c
+```
+
+### Comments & Documentation
+
+**JSDoc for public APIs:**
+
+```typescript
+/**
+ * Calculates spending summary for a user in a date range.
+ * @param userId - The user's unique identifier
+ * @param startDate - Start of date range (inclusive)
+ * @param endDate - End of date range (inclusive)
+ * @returns Object with total expense, income, net cash flow
+ * @throws {NotFoundError} If user doesn't exist
+ */
+export function getSpendingSummary(
+  userId: string,
+  startDate: Date,
+  endDate: Date
+): SpendingSummary {}
+```
+
+**Inline comments for complex logic:**
+
+```typescript
+// Check if transaction is a duplicate by matching merchant + amount within 24h
+const isDuplicate = transactions.some(
+  t =>
+    t.merchant === merchant &&
+    t.amount === amount &&
+    Math.abs(daysBetween(t.date, date)) <= 1
+)
+
+// Event-driven approach: emit event instead of direct call
+// to avoid tight coupling between modules
+eventEmitter.emit('transaction.created', transaction)
+```
+
+**Avoid obvious comments:**
+
+```typescript
+// Bad - States the obvious
+// Get all users
+const users = await userRepository.findAll()
+
+// Bad - Can be expressed in code
+// Check if email is valid
+if (!email.includes('@')) {
+}
+
+// Good - Explains why
+// Fetch users in batches to avoid memory overload on large datasets
+const users = await userRepository.findAll({ batch: 100 })
+```
+
+---
+
+## Frontend Patterns
+
+### React Components
+
+**Functional components only (no class components):**
+
+```typescript
+// Good
+export function UserProfile() {
+  const [user, setUser] = useState<User | null>(null)
+  return <div>{user?.name}</div>
+}
+
+// Bad - Use functional component instead
+class UserProfile extends React.Component {
+  render() { return <div>...</div> }
+}
+```
+
+**Component Size & Composition:**
+
+```typescript
+// Keep components small (max 200 LOC)
+// Extract sub-components for clarity
+
+// LoginForm.tsx (~60 LOC - good)
+export function LoginForm() {
+  const form = useForm({ resolver: zodResolver(schema) })
+  return (
+    <form>
+      <EmailField {...form} />
+      <PasswordField {...form} />
+      <SubmitButton />
+    </form>
+  )
+}
+
+// EmailField.tsx (~40 LOC - extracted)
+export function EmailField({ control, errors }) {
+  return (
+    <FormField
+      control={control}
+      name="email"
+      render={({ field }) => (
+        <Input {...field} placeholder="Email" />
+      )}
+    />
+  )
+}
+```
+
+### Hooks
+
+**Custom hook naming & pattern:**
+
+```typescript
+// Always start with 'use'
+export function useAuth() {
+  const [user, setUser] = useState(null)
+  return { user, setUser }
+}
+
+// Export hooks from feature index
+// src/features/auth/hooks/index.ts
+export { useAuth } from './use-auth'
+export { useLogin } from './use-login'
+```
+
+**Dependency arrays:**
+
+```typescript
+// Exhaustive dependencies - use ESLint to enforce
+useEffect(() => {
+  // ...
+}, [userId, email]) // Include all dependencies
+
+// Empty array for mount-only
+useEffect(() => {
+  initialize()
+}, [])
+```
+
+### State Management
+
+**Zustand for global UI state:**
+
+```typescript
+// src/lib/store/ui-store.ts
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+
+export const useUiStore = create<UIState>()(
+  persist(
+    set => ({
+      theme: 'light',
+      setTheme: theme => set({ theme }),
+    }),
+    { name: 'ui-store' }
+  )
+)
+
+// Usage
+function App() {
+  const theme = useUiStore(state => state.theme)
+  const setTheme = useUiStore(state => state.setTheme)
+}
+```
+
+**React Query for server state:**
+
+```typescript
+// Use query keys from factory
+const { data: user } = useQuery({
+  queryKey: queryKeys.auth.user,
+  queryFn: () => authApi.getMe(),
 })
 
-// ❌ Bad - String concatenation
-await this.repository.query(`SELECT * FROM users WHERE email = '${email}'`)
-```
-
-### Password Hashing
-
-**Always hash passwords:**
-
-```typescript
-import * as bcrypt from 'bcrypt'
-
-// ✅ Good
-const hashedPassword = await bcrypt.hash(password, 10)
-
-// ❌ Bad - Plain text
-const password = dto.password
-```
-
-### JWT Security
-
-**Use secure JWT configuration:**
-
-```typescript
-JwtModule.register({
-  secret: process.env.JWT_SECRET,
-  signOptions: {
-    expiresIn: '15m', // Short-lived access tokens
-    algorithm: 'HS256',
+// Invalidate on mutation
+const { mutate: login } = useMutation({
+  mutationFn: authApi.login,
+  onSuccess: () => {
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.auth.all,
+    })
   },
 })
 ```
 
-### OAuth Token Encryption (Production Implementation ✅)
+### Forms
 
-**Always encrypt OAuth tokens at rest using AES-256-GCM:**
+**React Hook Form + Zod pattern:**
 
 ```typescript
-// ✅ Good - Encrypt sensitive tokens (AES-256-GCM)
-import { EncryptionUtil } from '../utils/encryption.util'
-
-const encrypted = EncryptionUtil.encrypt(oauthAccessToken)
-await this.oauthAccountRepository.save({
-  accessToken: encrypted, // Stored encrypted with authentication tag
+// Define schema
+const loginSchema = z.object({
+  email: z.string().email('Invalid email'),
+  password: z.string().min(8, 'Min 8 characters'),
 })
 
-// Decrypt when needed for API calls
-const plaintext = EncryptionUtil.decrypt(encrypted)
-await this.oauthProvider.makeAuthenticatedCall(plaintext)
-
-// ❌ Bad - Plaintext tokens in database
-const oauthAccount = new OAuthAccount()
-oauthAccount.accessToken = oauthAccessToken // Plain dangerous!
-```
-
-**OAuth Account Auto-Linking (Email Verification - Production ✅):**
-
-```typescript
-// ✅ Good - Only auto-link verified emails (prevents account takeover)
-if (profile.emailVerified) {
-  const user = await this.userRepository.findOne({
-    where: { email: profile.email },
-  })
-  if (user) return user // Safe to link
-}
-
-// Create new user if email not already linked
-const newUser = new User()
-newUser.email = profile.email
-newUser.emailVerified = profile.emailVerified
-newUser.name = profile.displayName
-
-// ❌ Bad - Auto-link unverified emails
-const user = await this.userRepository.findOne({
-  where: { email: profile.email }, // May not be user's email!
-})
-```
-
-**OAuth Account Unlinking (Prevent Lockout - Production ✅):**
-
-```typescript
-// ✅ Good - Ensure alternative auth exists (prevents account lockout)
-if (!user.password && user.oauthAccounts.length === 1) {
-  throw new ConflictException('Cannot unlink last authentication method')
-}
-
-// Safe to unlink
-await this.oauthAccountRepository.remove(oauthAccount)
-
-// ❌ Bad - Allow complete lockout
-await this.oauthAccountRepository.remove(oauthAccount) // User locked out!
-```
-
-### JWT Token Generation (Production Implementation ✅)
-
-**Use RS256 for access tokens, HS256 for refresh tokens:**
-
-```typescript
-// ✅ Good - Hybrid JWT strategy (asymmetric + symmetric)
-async generateTokens(user: User): Promise<{ accessToken: string; refreshToken: string }> {
-  // Access token: RS256 (asymmetric), 15 minutes
-  const accessToken = this.jwtService.sign(
-    {
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-    },
-    {
-      algorithm: 'RS256',
-      expiresIn: '15m',
-    }
-  );
-
-  // Refresh token: HS256 (symmetric), 7 days
-  const refreshToken = this.jwtService.sign(
-    {
-      sub: user.id,
-      type: 'refresh',
-    },
-    {
-      algorithm: 'HS256',
-      secret: process.env.JWT_REFRESH_SECRET,
-      expiresIn: '7d',
-    }
-  );
-
-  return { accessToken, refreshToken };
-}
-
-// ❌ Bad - Same algorithm for both tokens
-const token = this.jwtService.sign(payload, {
-  expiresIn: '7d', // Long expiry on short-lived token!
-})
-```
-
-### Token Validation with Blacklist Check (Production ✅)
-
-```typescript
-// ✅ Good - Validate and check Redis blacklist
-async validateToken(token: string): Promise<User | null> {
-  try {
-    // Check if token is blacklisted (from logout)
-    const isBlacklisted = await this.redis.get(`blacklist:${token}`);
-    if (isBlacklisted) {
-      throw new UnauthorizedException('Token has been revoked');
-    }
-
-    // Verify signature and decode
-    const payload = this.jwtService.verify(token);
-
-    // Fetch user to ensure still exists and active
-    const user = await this.userRepository.findOne(payload.sub);
-    if (!user) {
-      throw new UnauthorizedException('User not found');
-    }
-
-    return user;
-  } catch (error) {
-    if (error instanceof JsonWebTokenError) {
-      throw new UnauthorizedException('Invalid token');
-    }
-    throw error;
-  }
-}
-
-// ❌ Bad - No blacklist check on logout
-// User can still use token for 15 minutes after logout!
-```
-
-### Rate Limiting for Auth Endpoints (Production ✅)
-
-```typescript
-// ✅ Good - Strict rate limiting on sensitive endpoints
-@Post('login')
-@Throttle({ limit: 5, ttl: 60000 }) // 5 req/min
-async login(@Body() dto: LoginDto) {
-  // Protects against brute force attacks
-}
-
-@Post('register')
-@Throttle({ limit: 5, ttl: 60000 }) // 5 req/min
-async register(@Body() dto: RegisterDto) {
-  // Prevents account enumeration
-}
-
-@Post('forgot-password')
-@Throttle({ limit: 3, ttl: 60000 }) // 3 req/min
-async forgotPassword(@Body() dto: ForgotPasswordDto) {
-  // Prevents abuse of password reset
-}
-
-// ❌ Bad - Default limits on auth endpoints
-@Post('login')
-async login(@Body() dto: LoginDto) {
-  // 10 req/min default - too high for security-critical endpoint
-}
-```
-
----
-
-## Git Workflow
-
-### Branch Naming
-
-```
-feature/user-authentication
-fix/transaction-validation-bug
-refactor/budget-service
-docs/api-documentation
-```
-
-### Commit Messages
-
-**Use conventional commits:**
-
-```
-feat: add user authentication with JWT
-fix: resolve budget calculation bug
-refactor: simplify transaction service
-docs: update API documentation
-test: add transaction service tests
-chore: update dependencies
-```
-
-### Pull Request Template
-
-````markdown
-## Description
-
-Brief description of changes
-
-## Type of Change
-
-- [ ] Bug fix
-- [ ] New feature
-- [ ] Refactoring
-- [ ] Documentation
-
-## Testing
-
-- [ ] Unit tests pass
-- [ ] Integration tests pass
-- [ ] Manual testing completed
-
----
-
-## UI Component Standards (shadcn/ui)
-
-### Component Installation & Usage
-
-**All UI components must use shadcn/ui (Radix UI + Tailwind):**
-
-```tsx
-// ✅ Good - Using shadcn/ui component
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from '@/components/ui/dropdown-menu'
-
-export function MyComponent() {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline">Actions</Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuItem>Profile</DropdownMenuItem>
-        <DropdownMenuItem>Settings</DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-}
-
-// ❌ Bad - Custom dropdown implementation
-export function MyComponent() {
-  return <div className="relative">{/* Custom dropdown logic */}</div>
-}
-```
-````
-
-### Available Components
-
-Installed shadcn/ui components in `apps/frontend/src/components/ui/`:
-
-- **Button** - Reusable button component with variants
-- **Input** - Form input with validation styling
-- **Dropdown Menu** - Accessible dropdown menu (Radix UI)
-  - DropdownMenuTrigger
-  - DropdownMenuContent
-  - DropdownMenuItem
-  - DropdownMenuLabel
-  - DropdownMenuSeparator
-  - DropdownMenuCheckboxItem
-  - DropdownMenuRadioItem
-  - DropdownMenuSub (nested menus)
-- **Theme Toggle** - Dark mode toggle button (4 variants)
-
-### Dropdown Menu Patterns
-
-**Basic Menu:**
-
-```tsx
-<DropdownMenu>
-  <DropdownMenuTrigger asChild>
-    <Button variant="ghost" size="icon">
-      <MoreVertical />
-    </Button>
-  </DropdownMenuTrigger>
-  <DropdownMenuContent>
-    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-    <DropdownMenuSeparator />
-    <DropdownMenuItem>Edit</DropdownMenuItem>
-    <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-  </DropdownMenuContent>
-</DropdownMenu>
-```
-
-**Nested Submenu:**
-
-```tsx
-<DropdownMenu>
-  <DropdownMenuTrigger asChild>
-    <Button>Menu</Button>
-  </DropdownMenuTrigger>
-  <DropdownMenuContent>
-    <DropdownMenuSub>
-      <DropdownMenuSubTrigger>Export</DropdownMenuSubTrigger>
-      <DropdownMenuSubContent>
-        <DropdownMenuItem>PDF</DropdownMenuItem>
-        <DropdownMenuItem>CSV</DropdownMenuItem>
-      </DropdownMenuSubContent>
-    </DropdownMenuSub>
-  </DropdownMenuContent>
-</DropdownMenu>
-```
-
-**Checkbox Group:**
-
-```tsx
-<DropdownMenu>
-  <DropdownMenuTrigger>Filters</DropdownMenuTrigger>
-  <DropdownMenuContent>
-    <DropdownMenuCheckboxItem checked={showActive}>
-      Show Active
-    </DropdownMenuCheckboxItem>
-    <DropdownMenuCheckboxItem checked={showArchived}>
-      Show Archived
-    </DropdownMenuCheckboxItem>
-  </DropdownMenuContent>
-</DropdownMenu>
-```
-
-### Styling & Customization
-
-Dropdown components use Tailwind CSS utility classes. Customize via className prop:
-
-```tsx
-<DropdownMenuContent className="w-64">
-  {/* Custom width */}
-</DropdownMenuContent>
-
-<DropdownMenuItem className="text-red-600">
-  {/* Custom text color */}
-</DropdownMenuItem>
-```
-
-### Accessibility
-
-All shadcn/ui components include:
-
-- ✅ Keyboard navigation (Tab, Enter, Arrow keys, Esc)
-- ✅ ARIA labels and roles (aria-label, role="menuitem")
-- ✅ Focus management
-- ✅ Screen reader support
-- ✅ Mobile touch interactions
-
----
-
-## Theme Management Standards
-
-### Theme Provider Pattern
-
-**Use the theme system for consistent dark mode support:**
-
-```tsx
-// ✅ Good - Using theme system
-import { useTheme } from '@/hooks/use-theme'
-
-export function MyComponent() {
-  const { theme, resolvedTheme, setTheme, isDark } = useTheme()
-
-  return (
-    <div>
-      <p>Current theme: {resolvedTheme}</p>
-      <button onClick={() => setTheme('dark')}>Dark</button>
-      <button onClick={() => setTheme('system')}>System</button>
-    </div>
-  )
-}
-```
-
-### Zustand Theme Store
-
-**Access theme state from UIStore:**
-
-```typescript
-// ✅ Good - Using Zustand selectors
-import { useUIStore } from '@/lib/store/ui-store'
-
-export function ThemeToggle() {
-  const theme = useUIStore((s) => s.theme)
-  const setTheme = useUIStore((s) => s.setTheme)
-
-  return <button onClick={() => setTheme('dark')}>Toggle</button>
-}
-```
-
-### localStorage Quota Handling
-
-**Theme system handles quota exceeded gracefully:**
-
-```typescript
-// ✅ Automatic - safeLocalStorage wrapper handles errors
-// When localStorage quota is exceeded:
-// 1. Try-catch wraps all localStorage operations
-// 2. Log warning (not error) on quota exceeded
-// 3. Clear old data and retry
-// 4. Fall back to system preference if all fails
-
-// No manual error handling needed - it's built in!
-```
-
-### FOUC Prevention
-
-**Theme is applied before React loads via inline script:**
-
-```tsx
-// ✅ Automatic - theme script injected in <head>
-// In app/layout.tsx:
-// <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-//
-// This prevents flash of unstyled content (FOUC)
-// Theme class is applied immediately as HTML loads
-```
-
-### System Preference Detection
-
-**Theme system detects OS dark mode:**
-
-```typescript
-// ✅ Good - System preference respected
-const { resolvedTheme } = useTheme()
-// If theme === 'system':
-//   resolvedTheme = 'dark' (if OS is dark mode)
-//   resolvedTheme = 'light' (if OS is light mode)
-```
-
----
-
-## Animation Best Practices (Motion Library)
-
-### Motion Library Standards
-
-**Always use Motion (Framer Motion) for animations in React components:**
-
-```tsx
-// ✅ Good - Motion library
-import { motion } from 'motion/react'
-
+// Use in component
 export function LoginForm() {
+  const form = useForm({
+    resolver: zodResolver(loginSchema),
+    mode: 'onChange',
+  })
+
   return (
-    <motion.form
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-    >
-      {/* Form content */}
-    </motion.form>
+    <form onSubmit={form.handleSubmit(onSubmit)}>
+      <Controller
+        control={form.control}
+        name="email"
+        render={({ field, fieldState: { error } }) => (
+          <Input
+            {...field}
+            placeholder="Email"
+            error={error?.message}
+          />
+        )}
+      />
+    </form>
   )
-}
-```
-
-### Performance Guidelines
-
-**Only animate transform and opacity (GPU-accelerated):**
-
-```tsx
-// ✅ Good - GPU-accelerated
-<motion.button
-  whileHover={{ scale: 1.02 }}
-  whileTap={{ scale: 0.98 }}
-/>
-
-// ❌ Bad - Layout thrashing
-<motion.button
-  whileHover={{ width: "110%" }}
-/>
-```
-
-### Accessibility: Respect prefers-reduced-motion
-
-```tsx
-// ✅ Good - Check user preference
-const prefersReducedMotion = window.matchMedia(
-  '(prefers-reduced-motion: reduce)'
-).matches
-
-const duration = prefersReducedMotion ? 0 : 400
-```
-
-### Bundle Optimization
-
-**Use LazyMotion to minimize bundle size (4.6KB vs 34KB):**
-
-```tsx
-import { LazyMotion, domAnimation } from 'motion/react'
-
-export function MotionProvider({ children }) {
-  return <LazyMotion features={domAnimation}>{children}</LazyMotion>
 }
 ```
 
 ---
 
-## Frontend Bundle Analysis & Performance (Phase 01+)
+## Backend Patterns
 
-### Bundle Monitoring
+### NestJS Architecture
 
-**Establish baseline and track changes:**
-
-```bash
-# Primary analyzer (Turbopack-based, recommended)
-pnpm run analyze:turbopack
-# Output: http://localhost:4000 (interactive visualization)
-
-# Alternative analyzer (Webpack-based)
-pnpm run analyze
-# Output: .next/analyze/ (client.html, server.html, edge.html reports)
-```
-
-### Code-Splitting Guidelines (Phase 02 Complete)
-
-**Defer heavy components with dynamic imports:**
+**Module structure:**
 
 ```typescript
-// ❌ Bad - Eager loading blocks initial render
-import { SpendingChart } from '@/features/spending/components/spending-chart'
+// auth.module.ts
+@Module({
+  imports: [TypeOrmModule.forFeature([User, Session])],
+  controllers: [AuthController],
+  providers: [AuthService, PasswordService, TokenService],
+  exports: [AuthService], // Make available to other modules
+})
+export class AuthModule {}
+```
 
-export default function Dashboard() {
-  return <SpendingChart data={data} />
-}
+**Service pattern:**
 
-// ✅ Good - Dynamic import (150KB deferred)
-import dynamic from 'next/dynamic'
-import { ChartSkeleton } from '@/components/ui/chart-skeleton'
+```typescript
+@Injectable()
+export class UserService {
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private readonly logger: LoggerService
+  ) {}
 
-const SpendingChart = dynamic(
-  () => import('@/features/spending/components/spending-chart'),
-  {
-    loading: () => <ChartSkeleton height={300} />,
-    ssr: false // Charts don't benefit from SSR
+  async findById(id: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { id } })
   }
-)
-
-export default function Dashboard() {
-  const [showCharts, setShowCharts] = useState(false)
-
-  return (
-    <div>
-      <button onClick={() => setShowCharts(!showCharts)}>
-        Toggle Charts
-      </button>
-      {showCharts && <SpendingChart data={data} />}
-    </div>
-  )
 }
 ```
 
-**Dynamic Component Export Pattern:**
+**Controller pattern:**
 
 ```typescript
-// ✅ Good - Named export + default export for dynamic imports
-// src/features/spending/components/spending-chart.tsx
-export function SpendingChart({ data }: Props) {
-  return <ResponsiveChart data={data} />
-}
+@Controller('auth')
+@UseFilters(HttpExceptionFilter)
+export class AuthController {
+  constructor(private readonly authService: AuthService) {}
 
-export default SpendingChart // For dynamic imports
+  @Post('login')
+  @UseGuards(AuthGuard('local'))
+  async login(@Body() dto: LoginDto): Promise<ApiResponse<LoginResponse>> {
+    return this.authService.login(dto.email, dto.password)
+  }
+}
 ```
 
-**Loading Skeleton Component:**
+### Error Handling
+
+**Use typed exceptions:**
 
 ```typescript
-// ✅ Implementation pattern from Phase 02
-// src/components/ui/chart-skeleton.tsx
-export function ChartSkeleton({ height = 300 }: { height?: number }) {
-  return (
-    <div className="w-full animate-pulse rounded-lg bg-muted" style={{ height }}>
-      <Skeleton className="h-full w-full" />
-    </div>
-  )
+// Define custom exceptions
+export class UserNotFoundException extends HttpException {
+  constructor(userId: string) {
+    super(`User ${userId} not found`, HttpStatus.NOT_FOUND)
+  }
+}
+
+// Use in service
+async getUser(id: string): Promise<User> {
+  const user = await this.userRepository.findOne({ where: { id } })
+  if (!user) throw new UserNotFoundException(id)
+  return user
+}
+
+// Handled globally by HttpExceptionFilter
+```
+
+**Error response format:**
+
+```typescript
+// Global interceptor wraps responses
+{
+  success: false,
+  error: {
+    code: 'USER_NOT_FOUND',
+    message: 'User not found',
+    details: { userId: '123' }
+  },
+  timestamp: '2026-02-01T10:00:00Z'
 }
 ```
 
-**Key Benefits (Verified Phase 02):**
+### Validation
 
-- Initial bundle: 500KB → ~350KB (70% on Recharts)
-- jsPDF removed: -200KB (zombie dependency)
-- Recharts deferred to lazy chunk: -150KB
-- Charts load <2s after toggle
-- Skeleton prevents layout shift during loading
-- Users see loading state immediately
+**DTOs with class-validator:**
 
-### Zombie Dependency Prevention
+```typescript
+import { IsEmail, MinLength, IsString } from 'class-validator'
 
-**Verify all imported libraries are actually used:**
+export class RegisterDto {
+  @IsEmail()
+  email: string
+
+  @IsString()
+  @MinLength(12)
+  password: string
+
+  @IsString()
+  name: string
+}
+
+// Auto-validated by global ValidationPipe
+```
+
+---
+
+## Testing Standards
+
+### Unit Tests (Vitest)
+
+**File naming:** `{file}.test.ts` or `{file}.spec.ts`
+
+**Structure:**
+
+```typescript
+import { describe, it, expect, beforeEach } from 'vitest'
+
+describe('AuthService', () => {
+  let service: AuthService
+  let repository: Repository<User>
+
+  beforeEach(() => {
+    repository = createMockRepository()
+    service = new AuthService(repository)
+  })
+
+  it('should hash password with bcrypt', async () => {
+    const password = 'SecurePassword123!'
+    const hash = await service.hashPassword(password)
+    expect(hash).not.toBe(password)
+  })
+})
+```
+
+**Coverage targets:**
+
+- Unit tests: 80%+ coverage
+- Critical paths: 100% coverage
+- Error scenarios: Covered
+
+### E2E Tests (Playwright)
+
+**File structure:** `tests/e2e/*.spec.ts`
+
+```typescript
+import { test, expect } from '@playwright/test'
+
+test.describe('Login flow', () => {
+  test('should login with valid credentials', async ({ page }) => {
+    await page.goto('http://localhost:3000/auth/login')
+    await page.fill('[name="email"]', 'user@example.com')
+    await page.fill('[name="password"]', 'password123')
+    await page.click('[type="submit"]')
+    await expect(page).toHaveURL('/dashboard')
+  })
+})
+```
+
+---
+
+## Git Commit Conventions
+
+**Format:** `type(scope): description`
+
+**Types:**
+
+- `feat`: New feature
+- `fix`: Bug fix
+- `refactor`: Code restructuring (no behavior change)
+- `perf`: Performance improvement
+- `test`: Test addition/modification
+- `docs`: Documentation
+- `style`: Formatting (no functional change)
+- `chore`: Maintenance (deps, build, config)
+
+**Examples:**
 
 ```bash
-# Check for unused imports before adding new dependencies
-grep -r "import.*jspdf" apps/frontend/src/
-# Should return matches. If empty = zombie dependency
-
-# Add to package.json only when confirmed needed
-# Example: jsPDF was imported nowhere but listed in dependencies
+feat(auth): add 2FA TOTP setup flow
+fix(transactions): correct duplicate detection logic
+refactor(api-client): simplify error handling
+perf(query): add caching for spending summaries
+test(auth): add login mutation tests
+docs(README): update quick start section
 ```
 
-### Bundle Size Targets
+**Rules:**
 
-**Current Phase 01 Baseline (2026-01-21):**
+- Use imperative mood ("add" not "added")
+- Don't capitalize first letter
+- No period at end
+- Keep under 72 characters when possible
+- Include issue number if applicable: `fix(auth): resolve #123`
 
-- Total: ~500KB
-- Target: ~80-120KB (70% reduction)
+---
 
-**Per-Phase Targets:**
+## Pre-commit & Pre-push Hooks
 
-1. Phase 02: Remove jsPDF (-200KB) → 300KB
-2. Phase 03: Code-split Recharts (-150KB) → 150KB
-3. Phase 04: Server Components (-80KB) → 70KB
-4. Phase 05: Provider optimization (-20KB) → 50KB
+**Husky + lint-staged configured:**
 
-### Dependency Guidelines
+**Pre-commit (automatic):**
 
-**Before adding new dependencies, evaluate impact:**
+- ESLint --fix on staged files
+- Prettier formatting
+- Prevents commits with lint errors
+
+**Pre-push (recommended):**
+
+- Full test suite must pass
+- Type checking must pass
+- No console.logs in code
+
+```bash
+# Bypass hooks (discouraged)
+git commit --no-verify
+git push --no-verify
+```
+
+---
+
+## Code Review Checklist
+
+Before submitting PR, verify:
+
+- [ ] Code follows naming conventions (kebab-case files, camelCase vars)
+- [ ] Files under 200 LOC (split if needed)
+- [ ] No `any` types (use unknown or proper types)
+- [ ] All functions have explicit return types
+- [ ] No non-null assertions (!) unless justified
+- [ ] Proper error handling with try-catch
+- [ ] Comments only for complex logic
+- [ ] Tests added for new functionality
+- [ ] ESLint passes (pnpm run lint)
+- [ ] Prettier formatted (pnpm run format)
+- [ ] No console.logs in production code
+- [ ] Commit messages follow conventions
+- [ ] No secrets or credentials in code
+
+---
+
+## Performance Guidelines
+
+### Frontend
+
+- Keep components under 200 LOC
+- Use React.memo for expensive components
+- Lazy load routes with Next.js dynamic imports
+- Optimize images with next/image
+- Use query caching (5-min default)
+- Avoid unnecessary re-renders (useCallback, useMemo)
+
+### Backend
+
+- Use database indexes on hot paths
+- Implement caching (Redis) for frequent queries
+- Paginate large result sets
+- Use raw SQL for complex aggregations
+- Connection pooling for databases
+- Rate limiting on public endpoints
+
+---
+
+## Documentation Requirements
+
+**Every public export needs documentation:**
 
 ```typescript
-// Check import size
-import { parse } from 'some-library'
-
-// ✅ Good - Tree-shakeable, minimal overhead
-import { Icon } from 'lucide-react' // ~80KB total, but tree-shaken
-import { create } from 'zustand' // ~10KB, lightweight
-
-// ⚠️ Caution - Heavy dependencies (verify necessity)
-import Recharts from 'recharts' // ~150KB, defer with dynamic()
-import jsPDF from 'jspdf' // ~200KB, remove if unused
-
-// ❌ Avoid - Monolithic, non-tree-shakeable
-import _ from 'lodash' // ~70KB, use individual functions instead
-import moment from 'moment' // ~65KB, use date-fns instead
+/**
+ * Formats a currency amount according to locale and currency code.
+ * @param amount - The amount to format (in cents)
+ * @param currency - Currency code (e.g., 'USD', 'VND')
+ * @returns Formatted string (e.g., '$12.34', '123,400 ₫')
+ */
+export function formatCurrency(amount: number, currency = 'USD'): string {}
 ```
 
-### Client vs Server Components
+**README in feature directories:**
 
-**Minimize client-side rendering (Phase 03 target):**
+```markdown
+# Auth Feature
 
-```typescript
-// ❌ Current (100% CSR)
-'use client'
+Brief description of what this feature does.
 
-export function Page() {
-  const [data, setData] = useState([])
-  useEffect(() => {
-    fetchData().then(setData)
-  }, [])
-  return <div>{data}</div>
-}
+## Structure
 
-// ✅ Target (Server Component by default)
-// Remove 'use client' unless needed for interactivity
-export async function Page() {
-  const data = await fetchData() // Runs on server, no JS sent
-  return <div>{data}</div>
-}
+- `components/` - UI components
+- `hooks/` - Custom hooks
+- `api/` - API client
 
-// ✅ Hybrid (Only interactive parts client-side)
-export default function Page() {
-  return (
-    <main>
-      {/* Server-rendered content */}
-      <AsyncContent />
-      {/* Client-side interactivity only where needed */}
-      <ClientInteractiveSection />
-    </main>
-  )
-}
-```
+## Usage
 
-### Provider Architecture
+Basic usage example
 
-**Current Issue: 7 nested providers causing reconciliation overhead (Phase 04 target):**
+## API Reference
 
-```typescript
-// ❌ Current - Deep nesting
-export function Providers({ children }) {
-  return (
-    <NextIntlClientProvider>
-      <QueryClientProvider>
-        <MSWProvider>
-          <ThemeErrorBoundary>
-            <ThemeProvider>
-              <AuthInitializer>
-                <ReactQueryDevtools>
-                  {children}
-                </ReactQueryDevtools>
-              </AuthInitializer>
-            </ThemeProvider>
-          </ThemeErrorBoundary>
-        </MSWProvider>
-      </QueryClientProvider>
-    </NextIntlClientProvider>
-  )
-}
-
-// ✅ Target - Memoized/flattened providers
-const memoizedProviders = {
-  intl: NextIntlClientProvider,
-  query: QueryClientProvider,
-  theme: ThemeProvider,
-  auth: AuthInitializer,
-}
-
-export function Providers({ children }) {
-  return (
-    <memoizedProviders.intl>
-      <memoizedProviders.query>
-        <memoizedProviders.theme>
-          <memoizedProviders.auth>
-            {children}
-          </memoizedProviders.auth>
-        </memoizedProviders.theme>
-      </memoizedProviders.query>
-    </memoizedProviders.intl>
-  )
-}
-```
-
-### Performance Monitoring
-
-**Use bundle analyzer output for decision-making:**
-
-```
-Current bundle breakdown (Phase 01 baseline):
-├── react + next.js: 50-80KB ✅ (framework minimum)
-├── lucide-react: 80KB ✅ (tree-shakeable icons)
-├── zustand: 10KB ✅ (minimal state)
-├── tanstack/query: 40KB ✅ (data fetching)
-├── recharts: 150KB ⚠️ (defer with dynamic())
-├── jspdf: 200KB 🔴 (UNUSED - remove immediately)
-└── other: 100KB ⚠️ (audit each)
+Key exported functions/components
 ```
 
 ---
 
-## Checklist
+## Related Documents
 
-- [ ] Code follows style guidelines
-- [ ] Self-review completed
-- [ ] Documentation updated
-- [ ] No breaking changes
-
-```
-
----
-
-## Pre-commit Checklist
-
-Before committing code, ensure:
-
-- [ ] Code compiles without errors (`pnpm run build`)
-- [ ] Linting passes (`pnpm run lint`)
-- [ ] Formatting is correct (`pnpm run format`)
-- [ ] All tests- **Command**: `pnpm run test:unit`)
-- [ ] No console.log statements
-- [ ] No commented-out code
-- [ ] Documentation updated
-- [ ] No sensitive data (API keys, passwords)
-
----
-
-## Resources
-
-- [NestJS Documentation](https://docs.nestjs.com/)
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
-- [TypeORM Documentation](https://typeorm.io/)
-- [Clean Code JavaScript](https://github.com/ryanmcdermott/clean-code-javascript)
-
----
-
-**Last Updated:** 2026-01-21 14:47
-**Maintained By:** Development Team
-**Recent Updates:** Added Phase 02 Code-Splitting guidelines with dynamic import patterns, ChartSkeleton implementation, and verified bundle metrics
-```
+- [docs/project-overview-pdr.md](./project-overview-pdr.md) - Product overview
+- [docs/codebase-summary.md](./codebase-summary.md) - Project structure
+- [docs/system-architecture.md](./system-architecture.md) - System design
+- [docs/project-roadmap.md](./project-roadmap.md) - Implementation status

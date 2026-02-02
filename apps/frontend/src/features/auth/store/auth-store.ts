@@ -1,19 +1,9 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
+import type { User } from '@m-tracking/shared'
 
-/**
- * User model interface
- * Represents authenticated user data
- */
-export interface User {
-  id: string
-  email: string
-  name: string
-  avatar?: string
-  emailVerified: boolean
-  twoFactorEnabled: boolean
-  roles: string[]
-}
+// Re-export User type for backwards compatibility
+export type { User } from '@m-tracking/shared'
 
 /**
  * Auth state interface

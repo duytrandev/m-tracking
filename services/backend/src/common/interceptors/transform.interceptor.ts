@@ -6,16 +6,10 @@ import {
 } from '@nestjs/common'
 import { Observable } from 'rxjs'
 import { map } from 'rxjs/operators'
+import type { ApiResponse } from '@m-tracking/shared'
 
-/**
- * Standard API response format
- */
-export interface ApiResponse<T> {
-  success: boolean
-  data: T
-  message?: string
-  timestamp: string
-}
+// Re-export for backwards compatibility
+export type { ApiResponse } from '@m-tracking/shared'
 
 /**
  * Transform interceptor

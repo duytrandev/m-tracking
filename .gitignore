@@ -48,6 +48,7 @@ pnpm-debug.log*
 .nx/cache
 .nx/workspace-data
 .nx/tmp
+graph.json
 
 # OS files
 .DS_Store

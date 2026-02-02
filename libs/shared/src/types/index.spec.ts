@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import type { User, Transaction, Budget } from './index'
+import type { Transaction, Budget } from './index'
+import type { User } from '../interfaces/user.interface'
 
 describe('Types', () => {
   describe('User type', () => {
@@ -7,8 +8,12 @@ describe('Types', () => {
       const user: User = {
         id: '1',
         email: 'test@example.com',
-        firstName: 'John',
-        lastName: 'Doe',
+        name: 'John Doe',
+        emailVerified: false,
+        twoFactorEnabled: false,
+        roles: [],
+        timezone: 'UTC',
+        currency: 'USD',
         createdAt: new Date(),
         updatedAt: new Date(),
       }

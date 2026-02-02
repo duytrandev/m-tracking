@@ -2,243 +2,175 @@
 
 AI-powered personal finance management platform with automatic transaction aggregation, intelligent spending insights through LLM technology, and hybrid Telegram bot + web dashboard experience.
 
-**Version**: 1.0.0 | **Status**: Active Development | **Last Updated**: January 19, 2026
+**Version**: 1.0.0 | **Status**: Active Development | **Last Updated**: February 1, 2026
 
 ---
 
-## 📋 Overview
+## Overview
 
 M-Tracking eliminates manual transaction tracking by integrating directly with banking APIs (Plaid, Tink, momo.vn, Stripe), while also supporting manual entry for cash/untracked accounts via Telegram chat, enabling users to achieve real-time financial awareness and better control over their spending.
 
 ### Key Features
 
-- 🔗 **Automatic Transaction Aggregation** - Direct banking API integrations
-- 🤖 **Telegram Bot Interface** - Natural language transaction entry
-- 📊 **AI-Powered Insights** - LLM-driven spending analysis
-- 🌐 **Web Dashboard** - Next.js 16 with modern UI
-- 💰 **Budget Management** - Smart budget tracking and alerts
-- 📱 **Multi-language Support** - English and Vietnamese
-
-### Architecture
-
-Hybrid modular monolith architecture:
-
-- **NestJS Monolith** (Port 4000) - All core modules (Auth, Transactions, Banking, Budgets, Notifications)
-- **Analytics Service** (FastAPI/Python, Port 5000) - Standalone AI/ML service
-- **Frontend** (Next.js 16, Port 3000) - Web dashboard
-- **Infrastructure** - PostgreSQL 17 + Redis 7 + RabbitMQ 3.12
-
-For detailed architecture, see [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md).
+- **Automatic Transaction Aggregation** - Direct banking API integrations
+- **Telegram Bot Interface** - Natural language transaction entry
+- **AI-Powered Insights** - LLM-driven spending analysis
+- **Web Dashboard** - Next.js 16 with modern UI
+- **Budget Management** - Smart budget tracking and alerts
+- **Multi-language Support** - English and Vietnamese
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
-- **Node.js**: >= 20.10.0 (recommend 24.13.0 LTS)
-- **pnpm**: >= 10.28.0 (enforced)
-- **Python**: >= 3.12 (with uv)
-- **Docker**: Latest version
+- Node.js >= 20.10.0
+- pnpm >= 10.28.0
+- Python >= 3.12 (with uv)
+- Docker & Docker Compose
 
 ### Installation
 
 ```bash
-# 1. Clone repository
-git clone <repository-url>
-cd m-tracking
-
-# 2. Install dependencies
+# 1. Clone and install
+git clone <repository-url> && cd m-tracking
 pnpm install
 
-# 3. Install Python dependencies (Analytics)
-cd services/analytics
-uv sync
-cd ../..
-
-# 4. Start infrastructure (PostgreSQL, Redis, RabbitMQ)
+# 2. Start infrastructure
 pnpm run docker:up
 
-# 5. Configure environment variables
+# 3. Configure environment
 cp apps/frontend/.env.example apps/frontend/.env
 cp services/backend/.env.example services/backend/.env
 cp services/analytics/.env.example services/analytics/.env
 
-# 6. Start all services
+# 4. Start all services
 pnpm run dev
 ```
 
-Your application will be available at:
+Services available at:
 
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:4000
-- **Analytics API**: http://localhost:5000
-- **RabbitMQ UI**: http://localhost:15672
-
----
-
-## 📦 Essential Commands
-
-### Development
-
-```bash
-# Start all services
-pnpm nx run dev
-
-# Start individual services
-pnpm nx run dev:frontend    # Next.js (port 3000)
-pnpm nx run frontend:serve
-pnpm nx run dev:backend     # NestJS (port 4000)
-pnpm nx run dev:analytics   # FastAPI (port 5000)
-```
-
-### Testing & Quality
-
-```bash
-pnpm nx run test           # Run all tests
-pnpm nx run lint           # Lint all projects
-pnpm nx run format         # Format code with Prettier
-pnpm nx run format:check   # Check code formatting
-```
-
-### Building
-
-```bash
-pnpm nx run build              # Build all projects
-pnpm nx run build:frontend     # Build frontend only
-pnpm nx run build:backend      # Build backend only
-```
-
-### Infrastructure
-
-```bash
-pnpm nx run docker:up      # Start Docker containers
-pnpm nx run docker:down    # Stop Docker containers
-pnpm nx run docker:logs    # View container logs
-```
-
-For complete command reference and advanced usage, see [docs/development-guide.md](./docs/development-guide.md).
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:4000
+- Analytics API: http://localhost:5000
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
-### Backend
-
-- **NestJS** 11.1.12 (TypeScript)
-- **FastAPI** (Python 3.13+)
-- **PostgreSQL** 17.7 + TimescaleDB
-- **Redis** 7
-- **RabbitMQ** 3.12
-
-### Frontend
-
-- **Next.js** 16.1
-- **React** 19.2
-- **TypeScript** 5.9
-- **TailwindCSS** 4.1.18
-- **shadcn/ui**
-- **Zustand** + **React Query**
-
-### Tools
-
-- **Nx** 22.3.3 (Monorepo)
-- **pnpm** 10.28.0
-- **Docker** + Docker Compose
-- **ESLint** + **Prettier**
-- **Husky** (Git hooks)
-
-For detailed technology stack and versions, see [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md).
+| Layer         | Technology                                                            |
+| ------------- | --------------------------------------------------------------------- |
+| **Frontend**  | Next.js 16.1, React 19.2, TypeScript 5.9, TailwindCSS 4.1, shadcn/ui  |
+| **Backend**   | NestJS 11.1.12, TypeScript 5.9, PostgreSQL 17, Redis 7, RabbitMQ 3.12 |
+| **Analytics** | FastAPI, Python 3.13+, AsyncPG, Redis                                 |
+| **Monorepo**  | Nx 22.3.3, pnpm 10.28.0                                               |
 
 ---
 
-## 📁 Project Structure
+## Essential Commands
+
+```bash
+# Development
+pnpm run dev              # Start all services
+pnpm run dev:frontend     # Start frontend only
+pnpm run dev:backend      # Start backend only
+pnpm run dev:analytics    # Start analytics only
+
+# Quality
+pnpm run test             # Run all tests
+pnpm run lint             # Lint all projects
+pnpm run format           # Format with Prettier
+
+# Build
+pnpm run build            # Build all projects
+
+# Infrastructure
+pnpm run docker:up        # Start containers
+pnpm run docker:down      # Stop containers
+```
+
+---
+
+## Project Structure
 
 ```
 m-tracking/
-├── apps/
-│   └── frontend/              # Next.js 16 web application
+├── apps/frontend/           # Next.js 16 web application
 ├── services/
-│   ├── backend/              # NestJS modular monolith
-│   └── analytics/            # FastAPI analytics service
-├── libs/
-│   ├── common/               # Shared utilities & types
-│   ├── constants/            # Shared constants
-│   └── types/                # TypeScript definitions
-├── docs/                     # Documentation
-├── plans/                    # Project plans & reports
-├── docker-compose.yml        # Local infrastructure
-└── package.json              # Root package.json
+│   ├── backend/            # NestJS modular monolith
+│   └── analytics/          # FastAPI analytics service
+├── libs/shared/            # Shared types & utilities
+├── docs/                   # Documentation
+└── docker-compose.yml      # Local infrastructure
 ```
 
-For complete folder structure and organization, see [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md).
+**Codebase Stats:**
+
+- Frontend: 13,473 LOC (98 files)
+- Backend: 8,774 LOC (106 files)
+- Analytics: 88 LOC (7 files)
+- Shared: 700 LOC (10 files)
 
 ---
 
-## 🗄️ Database Access
+## Documentation
 
-### PostgreSQL
+| Document                                                       | Purpose                            |
+| -------------------------------------------------------------- | ---------------------------------- |
+| [docs/project-overview-pdr.md](./docs/project-overview-pdr.md) | Product overview & requirements    |
+| [docs/codebase-summary.md](./docs/codebase-summary.md)         | Directory structure & organization |
+| [docs/code-standards.md](./docs/code-standards.md)             | Coding standards & conventions     |
+| [docs/system-architecture.md](./docs/system-architecture.md)   | System design & components         |
+| [docs/project-roadmap.md](./docs/project-roadmap.md)           | Implementation status & timeline   |
+| [docs/prd.md](./docs/prd.md)                                   | Complete product requirements      |
+
+---
+
+## Database Access
 
 ```bash
-docker exec -it mtracking-postgres psql -U mtracking -d mtracking
-```
+# PostgreSQL (user: postgres, password: postgres)
+docker exec -it mtracking-postgres psql -U postgres -d m_tracking
 
-### Redis
-
-```bash
+# Redis
 docker exec -it mtracking-redis redis-cli
+
+# RabbitMQ Management UI
+# http://localhost:15672 (user: mtracking, password: mtracking_dev_password)
 ```
 
-### RabbitMQ Management
+---
 
-Open http://localhost:15672
+## Architecture Overview
 
-- Username: `mtracking`
-- Password: `mtracking_dev_password`
+**Hybrid Modular Monolith:**
+
+- NestJS backend with domain-driven design (Auth, Transactions, Banking, Budgets, Notifications)
+- Standalone FastAPI analytics service for AI/LLM operations
+- Next.js frontend with modern React patterns
+- PostgreSQL + TimescaleDB for transactions, Redis for caching/sessions, RabbitMQ for jobs
+
+See [docs/system-architecture.md](./docs/system-architecture.md) for detailed architecture.
 
 ---
 
-## 📚 Documentation
+## Development Guidelines
 
-| Document                                                     | Description                                          |
-| ------------------------------------------------------------ | ---------------------------------------------------- |
-| [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md)               | Complete technical architecture and folder structure |
-| [CONTRIBUTING.md](./CONTRIBUTING.md)                         | Development workflow and contribution guidelines     |
-| [docs/prd.md](./docs/prd.md)                                 | Product Requirements Document                        |
-| [docs/system-architecture.md](./docs/system-architecture.md) | System architecture and design decisions             |
-| [docs/api-documentation.md](./docs/api-documentation.md)     | API endpoints and specifications                     |
-| [docs/code-standards.md](./docs/code-standards.md)           | Coding standards and conventions                     |
-| [docs/development-guide.md](./docs/development-guide.md)     | Detailed development guide                           |
-| [docs/deployment.md](./docs/deployment.md)                   | Deployment guide and procedures                      |
-| [docs/troubleshooting.md](./docs/troubleshooting.md)         | Common issues and solutions                          |
-| [docs/testing.md](./docs/testing.md)                         | Testing strategies and guidelines                    |
+- **File Size**: Keep files under 200 LOC
+- **Naming**: Use kebab-case for file names
+- **Principles**: YAGNI, KISS, DRY
+- **Commits**: Conventional format `type(scope): description`
+- **Code Quality**: TypeScript strict mode, ESLint, Prettier formatting
+- **Testing**: Write tests for all new features
+
+See [docs/code-standards.md](./docs/code-standards.md) for complete standards.
 
 ---
 
-## 👥 Contributing
+## Troubleshooting
 
-We welcome contributions! Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for:
-
-- Development workflow
-- Branch strategy
-- Commit conventions
-- Pull request process
-- Testing requirements
-- Code standards
-
-**Quick Guidelines:**
-
-- Use **kebab-case** for file names
-- Follow **YAGNI, KISS, DRY** principles
-- Maximum **200 lines per file**
-- Write tests for all new features
-- Commit format: `type(scope): description`
-
----
-
-## 🐛 Troubleshooting
-
-### Docker containers won't start
+**Docker issues:**
 
 ```bash
 pnpm run docker:down
@@ -246,11 +178,7 @@ docker-compose down -v
 pnpm run docker:up
 ```
 
-### Port conflicts
-
-Create a `docker-compose.override.yml` file (see `docker-compose.override.yml.example`).
-
-### pnpm install fails
+**Dependencies:**
 
 ```bash
 pnpm store prune
@@ -258,36 +186,39 @@ rm -rf node_modules pnpm-lock.yaml
 pnpm install
 ```
 
-For more solutions, see [docs/troubleshooting.md](./docs/troubleshooting.md).
+See [docs/project-roadmap.md](./docs/project-roadmap.md) for more help.
 
 ---
 
-## 🔒 Security
+## Contributing
 
-- **Passwords**: bcrypt with cost factor 12
-- **JWT**: 15-minute access tokens, 7-day refresh tokens
-- **CORS**: Configured for frontend origin only
-- **Rate Limiting**: Enabled on API Gateway
-- **Helmet**: Security headers enabled
+Follow development guidelines in [docs/code-standards.md](./docs/code-standards.md) including:
 
-For security concerns, see [SECURITY.md](./SECURITY.md).
-
----
-
-## 📄 License
-
-_(To be determined)_
+- TypeScript strict mode enforcement
+- ESLint flat config (v9)
+- Pre-commit hooks for formatting
+- Test coverage requirements
 
 ---
 
-## 📞 Support
+## Security
 
-- **Documentation**: [docs/](./docs/)
-- **Issues**: Create a GitHub issue
-- **Architecture Questions**: See [docs/system-architecture.md](./docs/system-architecture.md)
+- Passwords: bcrypt (cost 12)
+- JWT: RS256 with 15m access, 7d refresh tokens
+- CORS: Configured for frontend origin
+- Rate limiting: Global + endpoint-specific (auth: 5/min)
+- Session tracking: Device info + IP address
 
 ---
 
-**Built with ❤️ for better financial awareness**
+## Support
 
-_Last Updated: January 19, 2026_
+- Documentation: [docs/](./docs/)
+- Architecture: [docs/system-architecture.md](./docs/system-architecture.md)
+- Issues: Create GitHub issue
+
+---
+
+Built with focus on financial awareness and intelligent spending insights.
+
+_Last Updated: February 1, 2026_
