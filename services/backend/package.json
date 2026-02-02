@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "M-Tracking NestJS Backend Monolith",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "nest start --watch",
     "build": "nest build",
