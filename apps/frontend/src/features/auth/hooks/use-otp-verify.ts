@@ -3,14 +3,20 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { authApi } from '../api/auth-api'
 import { useAuthStore } from '../store/auth-store'
-import { isApiError } from '@/lib/api-client'
+import { isApiError, getApiErrorCode } from '@/lib/api-client'
 import type { AuthResponse } from '@/types/api/auth'
+import {
+  type AuthFailureInfo,
+  createAuthFailure,
+  GENERIC_ERROR_MESSAGE,
+} from '@m-tracking/shared'
 
 interface UseOtpVerifyReturn {
   verifyOtp: (code: string) => void
   isLoading: boolean
-  error: string | null
+  error: AuthFailureInfo | null
   attemptsRemaining: number | null
+  clearError: () => void
 }
 
 export function useOtpVerify(phone: string): UseOtpVerifyReturn {
@@ -40,13 +46,20 @@ export function useOtpVerify(phone: string): UseOtpVerifyReturn {
     },
   })
 
-  let error: string | null = null
+  let error: AuthFailureInfo | null = null
+
   if (mutation.error) {
+    let errorCode: string | null = null
+    let errorMessage = GENERIC_ERROR_MESSAGE
+
     if (isApiError(mutation.error)) {
-      error = mutation.error.response?.data?.message || 'Invalid code'
-    } else {
-      error = 'An unexpected error occurred'
+      errorCode = getApiErrorCode(mutation.error) || null
+      errorMessage = mutation.error.response?.data?.message || 'Invalid code'
+    } else if (mutation.error instanceof Error) {
+      errorMessage = mutation.error.message || GENERIC_ERROR_MESSAGE
     }
+
+    error = createAuthFailure(errorCode, errorMessage)
   }
 
   return {
@@ -54,5 +67,6 @@ export function useOtpVerify(phone: string): UseOtpVerifyReturn {
     isLoading: mutation.isPending,
     error,
     attemptsRemaining,
+    clearError: mutation.reset,
   }
 }

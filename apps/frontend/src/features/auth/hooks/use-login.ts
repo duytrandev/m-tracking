@@ -3,13 +3,19 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { authApi } from '../api/auth-api'
 import { useAuthStore } from '../store/auth-store'
 import type { LoginRequest, AuthResponse } from '@/types/api/auth'
-import { isApiError } from '@/lib/api-client'
+import { isApiError, getApiErrorCode } from '@/lib/api-client'
 import { getRedirectUrl } from '@/lib/redirect-utils'
+import {
+  type AuthFailureInfo,
+  createAuthFailure,
+  GENERIC_ERROR_MESSAGE,
+} from '@m-tracking/shared'
 
 interface UseLoginReturn {
   login: (data: LoginRequest) => void
   isLoading: boolean
-  error: string | null
+  error: AuthFailureInfo | null
+  clearError: () => void
 }
 
 export function useLogin(): UseLoginReturn {
@@ -38,18 +44,26 @@ export function useLogin(): UseLoginReturn {
     },
   })
 
-  let error: string | null = null
+  let error: AuthFailureInfo | null = null
+
   if (mutation.error) {
+    let errorCode: string | null = null
+    let errorMessage = GENERIC_ERROR_MESSAGE
+
     if (isApiError(mutation.error)) {
-      error = mutation.error.response?.data?.message || 'Login failed'
-    } else {
-      error = 'An unexpected error occurred'
+      errorCode = getApiErrorCode(mutation.error) || null
+      errorMessage = mutation.error.response?.data?.message || 'Login failed'
+    } else if (mutation.error instanceof Error) {
+      errorMessage = mutation.error.message || GENERIC_ERROR_MESSAGE
     }
+
+    error = createAuthFailure(errorCode, errorMessage)
   }
 
   return {
     login: mutation.mutate,
     isLoading: mutation.isPending,
     error,
+    clearError: mutation.reset,
   }
 }

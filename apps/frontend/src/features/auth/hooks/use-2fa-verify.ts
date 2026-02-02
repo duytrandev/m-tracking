@@ -2,14 +2,20 @@ import { useMutation } from '@tanstack/react-query'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { authApi } from '../api/auth-api'
 import { useAuthStore } from '../store/auth-store'
-import { isApiError } from '@/lib/api-client'
+import { isApiError, getApiErrorCode } from '@/lib/api-client'
 import { getRedirectUrl } from '@/lib/redirect-utils'
+import {
+  type AuthFailureInfo,
+  createAuthFailure,
+  GENERIC_ERROR_MESSAGE,
+} from '@m-tracking/shared'
 
 interface Use2FAVerifyReturn {
   verify: (code: string) => void
   isLoading: boolean
-  error: string | null
+  error: AuthFailureInfo | null
   attemptsRemaining: number | null
+  clearError: () => void
 }
 
 interface ErrorResponse {
@@ -41,11 +47,22 @@ export function use2FAVerify(): Use2FAVerifyReturn {
     },
   })
 
-  const error = mutation.error
-    ? isApiError(mutation.error)
-      ? (mutation.error.response?.data?.message ?? 'Invalid verification code')
-      : 'An unexpected error occurred'
-    : null
+  let error: AuthFailureInfo | null = null
+
+  if (mutation.error) {
+    let errorCode: string | null = null
+    let errorMessage = GENERIC_ERROR_MESSAGE
+
+    if (isApiError(mutation.error)) {
+      errorCode = getApiErrorCode(mutation.error) || null
+      errorMessage =
+        mutation.error.response?.data?.message ?? 'Invalid verification code'
+    } else if (mutation.error instanceof Error) {
+      errorMessage = mutation.error.message || GENERIC_ERROR_MESSAGE
+    }
+
+    error = createAuthFailure(errorCode, errorMessage)
+  }
 
   // Extract attempts remaining from error response
   const attemptsRemaining =
@@ -59,5 +76,6 @@ export function use2FAVerify(): Use2FAVerifyReturn {
     isLoading: mutation.isPending,
     error,
     attemptsRemaining,
+    clearError: mutation.reset,
   }
 }

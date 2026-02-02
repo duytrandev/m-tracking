@@ -6,8 +6,9 @@ import {
   ManyToOne,
   JoinColumn,
   Index,
+  type Relation,
 } from 'typeorm'
-import { User } from './user.entity'
+import type { User } from './user.entity'
 
 @Entity('email_verification_tokens')
 @Index(['tokenHash'])
@@ -31,9 +32,7 @@ export class EmailVerificationToken {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date
 
-  @ManyToOne(() => User, user => user.emailVerificationTokens, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne('User', 'emailVerificationTokens', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-  user!: User
+  user!: Relation<User>
 }

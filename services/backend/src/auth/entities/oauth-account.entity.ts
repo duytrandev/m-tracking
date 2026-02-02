@@ -8,8 +8,9 @@ import {
   JoinColumn,
   Index,
   Unique,
+  type Relation,
 } from 'typeorm'
-import { User } from './user.entity'
+import type { User } from './user.entity'
 
 @Entity('oauth_accounts')
 @Index(['userId'])
@@ -43,7 +44,7 @@ export class OAuthAccount {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt!: Date
 
-  @ManyToOne(() => User, user => user.oauthAccounts, { onDelete: 'CASCADE' })
+  @ManyToOne('User', 'oauthAccounts', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-  user!: User
+  user!: Relation<User>
 }

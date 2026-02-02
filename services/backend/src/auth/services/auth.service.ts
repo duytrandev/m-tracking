@@ -1,10 +1,5 @@
-import {
-  ConflictException,
-  Injectable,
-  Logger,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
+import { AuthExceptions } from '../../common/exceptions'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { RegisterDto } from '../dto/register.dto'
@@ -50,7 +45,7 @@ export class AuthService {
 
     if (existingUser) {
       this.logger.warn(`Registration failed: Email ${dto.email} already exists`)
-      throw new ConflictException('Email already registered')
+      throw AuthExceptions.emailAlreadyRegistered()
     }
 
     // Hash password
@@ -126,12 +121,12 @@ export class AuthService {
 
     if (!verificationToken) {
       this.logger.warn('Email verification failed: Invalid token')
-      throw new NotFoundException('Invalid or expired verification token')
+      throw AuthExceptions.invalidToken()
     }
 
     if (verificationToken.expiresAt < new Date()) {
       this.logger.warn('Email verification failed: Token expired')
-      throw new UnauthorizedException('Verification token expired')
+      throw AuthExceptions.tokenExpired()
     }
 
     // Mark user as verified
@@ -181,7 +176,7 @@ export class AuthService {
 
     if (!user.emailVerified) {
       this.logger.warn(`Login failed: Email not verified - ${email}`)
-      throw new UnauthorizedException('Please verify your email first')
+      throw AuthExceptions.emailNotVerified()
     }
 
     this.logger.log(`Login successful for user: ${user.id}`)
@@ -258,12 +253,12 @@ export class AuthService {
 
     if (!resetToken) {
       this.logger.warn('Password reset failed: Invalid token')
-      throw new NotFoundException('Invalid or expired reset token')
+      throw AuthExceptions.invalidToken()
     }
 
     if (resetToken.expiresAt < new Date()) {
       this.logger.warn('Password reset failed: Token expired')
-      throw new UnauthorizedException('Reset token expired')
+      throw AuthExceptions.tokenExpired()
     }
 
     // Hash new password
@@ -373,21 +368,21 @@ export class AuthService {
     const session = await this.sessionService.findByRefreshToken(refreshToken)
     if (!session) {
       this.logger.warn('Refresh failed: Session not found')
-      throw new UnauthorizedException('Invalid session')
+      throw AuthExceptions.sessionInvalid()
     }
 
     // Check session expiration
     if (session.expiresAt < new Date()) {
       this.logger.warn('Refresh failed: Session expired')
       await this.sessionService.revokeSession(session.id)
-      throw new UnauthorizedException('Session expired')
+      throw AuthExceptions.sessionExpired()
     }
 
     // Get user
     const user = await this.findById(decoded.sub)
     if (!user) {
       this.logger.warn('Refresh failed: User not found')
-      throw new UnauthorizedException('User not found')
+      throw AuthExceptions.userNotFound()
     }
 
     // Blacklist old refresh token

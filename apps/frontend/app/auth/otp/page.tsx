@@ -104,7 +104,7 @@ export default function OtpLoginPage(): React.ReactElement {
               className="rounded-md bg-destructive/10 p-3 text-sm text-destructive"
               role="alert"
             >
-              {requestError}
+              {requestError.message}
             </div>
           )}
 
@@ -167,7 +167,7 @@ export default function OtpLoginPage(): React.ReactElement {
           >
             <AlertCircle className="h-4 w-4 shrink-0" />
             <div>
-              {verifyError}
+              {verifyError.message}
               {attemptsRemaining !== null && (
                 <span className="block text-xs mt-1">
                   {attemptsRemaining}{' '}

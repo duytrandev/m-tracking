@@ -8,12 +8,13 @@ import {
   ManyToMany,
   JoinTable,
   Index,
+  type Relation,
 } from 'typeorm'
 import { Role } from './role.entity'
-import { Session } from './session.entity'
-import { OAuthAccount } from './oauth-account.entity'
-import { PasswordResetToken } from './password-reset-token.entity'
-import { EmailVerificationToken } from './email-verification-token.entity'
+import type { Session } from './session.entity'
+import type { OAuthAccount } from './oauth-account.entity'
+import type { PasswordResetToken } from './password-reset-token.entity'
+import type { EmailVerificationToken } from './email-verification-token.entity'
 import { DEFAULT_USER_PREFERENCES } from '../interfaces/user-preferences.interface'
 import type { UserPreferences } from '../interfaces/user-preferences.interface'
 
@@ -76,15 +77,15 @@ export class User {
   })
   roles!: Role[]
 
-  @OneToMany(() => Session, session => session.user)
-  sessions!: Session[]
+  @OneToMany('Session', 'user')
+  sessions!: Relation<Session[]>
 
-  @OneToMany(() => OAuthAccount, account => account.user)
-  oauthAccounts!: OAuthAccount[]
+  @OneToMany('OAuthAccount', 'user')
+  oauthAccounts!: Relation<OAuthAccount[]>
 
-  @OneToMany(() => PasswordResetToken, token => token.user)
-  passwordResetTokens!: PasswordResetToken[]
+  @OneToMany('PasswordResetToken', 'user')
+  passwordResetTokens!: Relation<PasswordResetToken[]>
 
-  @OneToMany(() => EmailVerificationToken, token => token.user)
-  emailVerificationTokens!: EmailVerificationToken[]
+  @OneToMany('EmailVerificationToken', 'user')
+  emailVerificationTokens!: Relation<EmailVerificationToken[]>
 }

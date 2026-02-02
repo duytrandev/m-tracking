@@ -46,11 +46,17 @@ export function PasswordChangeForm(): React.ReactElement {
       reset()
     },
     onError: error => {
+      let errorMessage = 'An error occurred'
+
+      if (isApiError(error)) {
+        errorMessage = error.response?.data?.message || 'Password change failed'
+      } else if (error instanceof Error) {
+        errorMessage = error.message
+      }
+
       toast({
         title: 'Password change failed',
-        description: isApiError(error)
-          ? error.response?.data?.message
-          : 'An error occurred',
+        description: errorMessage,
         variant: 'destructive',
       })
     },

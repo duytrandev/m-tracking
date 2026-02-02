@@ -15,6 +15,11 @@ export default defineConfig({
           decoratorMetadata: true,
         },
         target: 'es2022',
+        baseUrl: path.resolve(__dirname, '../../'),
+        paths: {
+          '@m-tracking/shared': ['libs/shared/src/index.ts'],
+          '@m-tracking/shared/*': ['libs/shared/src/*'],
+        },
       },
       module: {
         type: 'es6',

@@ -1,3 +1,6 @@
+// Auth
+export * from './auth/index'
+
 // Interfaces
 export * from './interfaces/api-response.interface'
 export * from './interfaces/user.interface'

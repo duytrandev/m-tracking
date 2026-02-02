@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
-import { AlertCircle, Check } from 'lucide-react'
+import { AlertCircle, Check, ArrowRight } from 'lucide-react'
 import { m, AnimatePresence } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -22,7 +22,7 @@ type FormState = 'idle' | 'submitting' | 'success' | 'error'
 
 export function LoginForm() {
   const [formState, setFormState] = useState<FormState>('idle')
-  const { login, isLoading, error } = useLogin()
+  const { login, isLoading, error, clearError } = useLogin()
   const prefersReducedMotion = useReducedMotion()
 
   const {
@@ -48,11 +48,17 @@ export function LoginForm() {
   useEffect(() => {
     if (error && formState === 'submitting') {
       setFormState('error')
-      const timer = setTimeout(() => setFormState('idle'), 3000)
-      return () => clearTimeout(timer)
+      // Don't auto-dismiss - let user clear by editing fields
     }
-    return undefined
   }, [error, formState])
+
+  // Clear error when user starts typing
+  const handleFieldChange = useCallback(() => {
+    if (error) {
+      clearError()
+      setFormState('idle')
+    }
+  }, [error, clearError])
 
   const onSubmit = (data: LoginInput): void => {
     setFormState('submitting')
@@ -88,20 +94,25 @@ export function LoginForm() {
     )
   }
 
+  // Determine field-level error states
+  const emailFieldHint = error?.fieldHints?.email
+  const passwordFieldHint = error?.fieldHints?.password
+  const hasApiError = !!error
+
   return (
     <AnimatedFormWrapper>
       <m.form
         onSubmit={handleSubmit(onSubmit)}
-        animate={error ? { x: [-4, 4, -4, 4, 0] } : {}}
+        animate={hasApiError ? { x: [-4, 4, -4, 4, 0] } : {}}
         transition={{
           duration: prefersReducedMotion ? 0 : 0.4,
           ease: 'easeInOut',
         }}
         className="space-y-6"
       >
-        {/* Global Error Banner */}
+        {/* Compact Error Summary - Only for non-field errors */}
         <AnimatePresence mode="wait">
-          {error && (
+          {error && !error.fieldHints?.email && !error.fieldHints?.password && (
             <m.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
@@ -109,54 +120,98 @@ export function LoginForm() {
               transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
             >
               <div
-                className="flex items-center gap-2 rounded-md bg-red-500/10 p-3 text-sm text-red-400 border border-red-500/20"
+                className="rounded-lg border border-red-500/30 bg-red-500/10 p-3"
                 role="alert"
                 aria-live="assertive"
               >
-                <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                {error}
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 flex-shrink-0 text-red-500" />
+                  <p className="text-sm font-medium text-red-700">
+                    {error.message}
+                  </p>
+                </div>
               </div>
             </m.div>
           )}
         </AnimatePresence>
 
-        {/* Email Field */}
+        {/* Email Field - With inline error hint */}
         <FormField
           label="Email"
           htmlFor="email"
           error={errors.email?.message}
-          success={dirtyFields.email && !errors.email}
+          hint={emailFieldHint}
+          hintType={emailFieldHint ? 'warning' : undefined}
+          success={dirtyFields.email && !errors.email && !emailFieldHint}
         >
           <AnimatedInput
             id="email"
             type="email"
             placeholder="your.email@example.com"
             autoComplete="email"
-            error={!!errors.email}
-            aria-describedby={errors.email ? 'email-error' : undefined}
-            aria-invalid={!!errors.email}
+            error={!!errors.email || !!emailFieldHint}
+            aria-describedby={
+              errors.email
+                ? 'email-error'
+                : emailFieldHint
+                  ? 'email-hint'
+                  : undefined
+            }
+            aria-invalid={!!errors.email || !!emailFieldHint}
             className="transition-form"
-            {...register('email')}
+            {...register('email', {
+              onChange: handleFieldChange,
+            })}
           />
         </FormField>
 
-        {/* Password Field */}
+        {/* Password Field - With inline error hint */}
         <FormField
           label="Password"
           htmlFor="password"
           error={errors.password?.message}
+          hint={passwordFieldHint}
+          hintType={passwordFieldHint ? 'warning' : undefined}
         >
           <AnimatedPasswordInput
             id="password"
             placeholder="Enter your password"
             autoComplete="current-password"
-            error={!!errors.password}
-            aria-describedby={errors.password ? 'password-error' : undefined}
-            aria-invalid={!!errors.password}
+            error={!!errors.password || !!passwordFieldHint}
+            aria-describedby={
+              errors.password
+                ? 'password-error'
+                : passwordFieldHint
+                  ? 'password-hint'
+                  : undefined
+            }
+            aria-invalid={!!errors.password || !!passwordFieldHint}
             className="transition-form"
-            {...register('password')}
+            {...register('password', {
+              onChange: handleFieldChange,
+            })}
           />
         </FormField>
+
+        {/* Recovery Action - Contextual based on error */}
+        <AnimatePresence mode="wait">
+          {error?.recoveryAction && (
+            <m.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
+            >
+              <Link
+                href={error.recoveryAction.href}
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5046E5] hover:text-[#4338CA] hover:underline transition-colors"
+              >
+                {error.recoveryAction.label}
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </m.div>
+          )}
+        </AnimatePresence>
 
         {/* Remember Me & Forgot Password */}
         <div className="flex items-center justify-between">

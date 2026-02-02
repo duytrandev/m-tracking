@@ -104,7 +104,7 @@ export function TwoFactorSetupModal({
         {error && (
           <div className="flex items-center gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive mb-4">
             <AlertCircle className="h-4 w-4" />
-            {error}
+            {error.message}
           </div>
         )}
 

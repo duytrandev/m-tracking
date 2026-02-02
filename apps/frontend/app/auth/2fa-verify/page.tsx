@@ -52,7 +52,7 @@ export default function TwoFactorVerifyPage(): React.ReactElement {
           <div className="flex items-center gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
             <AlertCircle className="h-4 w-4 flex-shrink-0" />
             <div>
-              {error}
+              {error.message}
               {attemptsRemaining !== null && (
                 <span className="block text-xs mt-1">
                   {attemptsRemaining}{' '}

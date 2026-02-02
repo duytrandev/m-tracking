@@ -4,13 +4,13 @@ import {
   Body,
   HttpCode,
   HttpStatus,
-  UnauthorizedException,
   ValidationPipe,
   UsePipes,
   Req,
   Res,
   UseGuards,
 } from '@nestjs/common'
+import { AuthExceptions } from '../../common/exceptions'
 import { Throttle } from '@nestjs/throttler'
 import type { Request, Response } from 'express'
 import { AuthService } from '../services/auth.service'
@@ -77,7 +77,7 @@ export class AuthController {
     const user = await this.authService.validateUser(dto.email, dto.password)
 
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials')
+      throw AuthExceptions.invalidCredentials()
     }
 
     const deviceInfo = {
@@ -89,11 +89,16 @@ export class AuthController {
     const tokens = await this.authService.login(user, deviceInfo, ipAddress)
 
     // Set refresh token in httpOnly cookie
+    // If rememberMe is true, extend the cookie expiration to 30 days, otherwise use 7 days
+    const cookieMaxAge = dto.rememberMe
+      ? 30 * 24 * 60 * 60 * 1000 // 30 days
+      : 7 * 24 * 60 * 60 * 1000 // 7 days
+
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: cookieMaxAge,
     })
 
     return {
@@ -119,7 +124,7 @@ export class AuthController {
       ?.refreshToken
 
     if (!refreshToken) {
-      throw new UnauthorizedException('Refresh token not found')
+      throw AuthExceptions.refreshTokenMissing()
     }
 
     const tokens = await this.authService.refresh(refreshToken)

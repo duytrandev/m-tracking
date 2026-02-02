@@ -2,7 +2,12 @@ import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { authApi } from '../api/auth-api'
 import { useAuthStore } from '../store/auth-store'
-import { isApiError } from '@/lib/api-client'
+import { isApiError, getApiErrorCode } from '@/lib/api-client'
+import {
+  type AuthFailureInfo,
+  createAuthFailure,
+  GENERIC_ERROR_MESSAGE,
+} from '@m-tracking/shared'
 
 export type SetupStep = 'qr' | 'verify' | 'backup'
 
@@ -13,7 +18,7 @@ interface Use2FASetupReturn {
   secret: string | null
   backupCodes: string[]
   isLoading: boolean
-  error: string | null
+  error: AuthFailureInfo | null
 
   // Actions
   startSetup: () => void
@@ -22,6 +27,7 @@ interface Use2FASetupReturn {
   goBack: () => void
   reset: () => void
   setStep: (step: SetupStep) => void
+  clearError: () => void
 }
 
 export function use2FASetup(): Use2FASetupReturn {
@@ -81,23 +87,31 @@ export function use2FASetup(): Use2FASetupReturn {
 
   const isLoading = enrollMutation.isPending || verifyMutation.isPending
 
-  interface ErrorResponse {
-    message?: string
-  }
+  // Compute error from either mutation
+  let error: AuthFailureInfo | null = null
+  const activeError = enrollMutation.error ?? verifyMutation.error
 
-  const getErrorMessage = (): string | null => {
-    const mutationError = enrollMutation.error ?? verifyMutation.error
-    if (!mutationError) return null
-    if (isApiError(mutationError)) {
-      return (
-        (mutationError.response?.data as ErrorResponse | undefined)?.message ??
-        'An error occurred'
-      )
+  if (activeError) {
+    let errorCode: string | null = null
+    let errorMessage = GENERIC_ERROR_MESSAGE
+
+    if (isApiError(activeError)) {
+      errorCode = getApiErrorCode(activeError) || null
+      const data = activeError.response?.data as
+        | { message?: string }
+        | undefined
+      errorMessage = data?.message ?? 'An error occurred'
+    } else if (activeError instanceof Error) {
+      errorMessage = activeError.message || GENERIC_ERROR_MESSAGE
     }
-    return 'An unexpected error occurred'
+
+    error = createAuthFailure(errorCode, errorMessage)
   }
 
-  const error = getErrorMessage()
+  const clearError = (): void => {
+    enrollMutation.reset()
+    verifyMutation.reset()
+  }
 
   return {
     step,
@@ -112,5 +126,6 @@ export function use2FASetup(): Use2FASetupReturn {
     goBack,
     reset,
     setStep,
+    clearError,
   }
 }

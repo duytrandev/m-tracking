@@ -1,14 +1,20 @@
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { authApi } from '../api/auth-api'
-import { isApiError } from '@/lib/api-client'
+import { isApiError, getApiErrorCode } from '@/lib/api-client'
+import {
+  type AuthFailureInfo,
+  createAuthFailure,
+  GENERIC_ERROR_MESSAGE,
+} from '@m-tracking/shared'
 
 interface UseOtpRequestReturn {
   requestOtp: (phone: string) => void
   isLoading: boolean
   isSuccess: boolean
-  error: string | null
+  error: AuthFailureInfo | null
   phone: string | null
+  clearError: () => void
 }
 
 export function useOtpRequest(): UseOtpRequestReturn {
@@ -21,13 +27,21 @@ export function useOtpRequest(): UseOtpRequestReturn {
     },
   })
 
-  let error: string | null = null
+  let error: AuthFailureInfo | null = null
+
   if (mutation.error) {
+    let errorCode: string | null = null
+    let errorMessage = GENERIC_ERROR_MESSAGE
+
     if (isApiError(mutation.error)) {
-      error = mutation.error.response?.data?.message || 'Failed to send OTP'
-    } else {
-      error = 'An unexpected error occurred'
+      errorCode = getApiErrorCode(mutation.error) || null
+      errorMessage =
+        mutation.error.response?.data?.message || 'Failed to send OTP'
+    } else if (mutation.error instanceof Error) {
+      errorMessage = mutation.error.message || GENERIC_ERROR_MESSAGE
     }
+
+    error = createAuthFailure(errorCode, errorMessage)
   }
 
   return {
@@ -36,5 +50,6 @@ export function useOtpRequest(): UseOtpRequestReturn {
     isSuccess: mutation.isSuccess,
     error,
     phone,
+    clearError: mutation.reset,
   }
 }

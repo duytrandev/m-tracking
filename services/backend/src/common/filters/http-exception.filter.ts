@@ -37,6 +37,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     interface HttpExceptionResponse {
       message: string
       error?: string
+      code?: string
     }
 
     const getErrorMessage = (msg: string | object): string => {
@@ -54,10 +55,18 @@ export class HttpExceptionFilter implements ExceptionFilter {
       return undefined
     }
 
+    const getErrorCode = (msg: string | object): string | undefined => {
+      if (typeof msg === 'object' && msg && 'code' in msg) {
+        return String((msg as HttpExceptionResponse).code)
+      }
+      return undefined
+    }
+
     const errorResponse = {
       statusCode: status,
       message: getErrorMessage(message),
       error: getErrorType(message),
+      code: getErrorCode(message),
       timestamp: new Date().toISOString(),
       path: request.url,
     }

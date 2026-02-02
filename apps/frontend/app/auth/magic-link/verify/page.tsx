@@ -53,7 +53,7 @@ export default function MagicLinkVerifyPage(): React.ReactElement {
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
             <AlertCircle className="h-8 w-8 text-destructive" />
           </div>
-          <p className="text-center text-muted-foreground">{error}</p>
+          <p className="text-center text-muted-foreground">{error.message}</p>
           <div className="flex gap-3">
             <Button variant="outline" asChild>
               <Link href="/auth/login">Back to Login</Link>

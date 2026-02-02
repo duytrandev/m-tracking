@@ -108,15 +108,15 @@ apiClient.interceptors.response.use(
       _retry?: boolean
     }
 
-    // Skip refresh for auth endpoints to prevent loops
-    // const isAuthEndpoint = originalRequest.url?.startsWith('/auth/')
-    const isRefreshEndpoint = originalRequest.url === '/auth/refresh'
+    // Skip refresh for auth endpoints to prevent loops and preserve error codes
+    // Auth endpoints (login, register, etc.) should pass through errors directly
+    const isAuthEndpoint = originalRequest.url?.startsWith('/auth/')
 
-    // If 401 and not already retrying and not a refresh request
+    // If 401 and not already retrying and not an auth endpoint
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      !isRefreshEndpoint
+      !isAuthEndpoint
     ) {
       if (isRefreshing) {
         // Queue the request while refreshing
@@ -203,6 +203,7 @@ export interface ApiError {
   message: string
   statusCode: number
   error?: string
+  code?: string
 }
 
 /**
@@ -210,4 +211,14 @@ export interface ApiError {
  */
 export function isApiError(error: unknown): error is AxiosError<ApiError> {
   return axios.isAxiosError(error)
+}
+
+/**
+ * Extract error code from API error response
+ */
+export function getApiErrorCode(error: unknown): string | undefined {
+  if (isApiError(error)) {
+    return error.response?.data?.code
+  }
+  return undefined
 }

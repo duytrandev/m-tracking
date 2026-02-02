@@ -6,8 +6,9 @@ import {
   ManyToOne,
   JoinColumn,
   Index,
+  type Relation,
 } from 'typeorm'
-import { User } from './user.entity'
+import type { User } from './user.entity'
 
 @Entity('sessions')
 @Index(['userId'])
@@ -42,7 +43,7 @@ export class Session {
   })
   lastActiveAt!: Date
 
-  @ManyToOne(() => User, user => user.sessions, { onDelete: 'CASCADE' })
+  @ManyToOne('User', 'sessions', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-  user!: User
+  user!: Relation<User>
 }

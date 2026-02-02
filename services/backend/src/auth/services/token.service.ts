@@ -1,4 +1,5 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
+import { AuthExceptions } from '../../common/exceptions'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
 import { RedisService } from '../../shared/redis/redis.service'
@@ -84,6 +85,7 @@ export class TokenService {
     const secret = this.configService.get<string>('JWT_REFRESH_SECRET')
     const token = this.jwtService.sign(payload, {
       secret,
+      algorithm: 'HS256',
       expiresIn: '7d',
     })
 
@@ -108,7 +110,7 @@ export class TokenService {
 
       if (isBlacklisted) {
         this.logger.warn('Access token is blacklisted')
-        throw new UnauthorizedException('Token has been revoked')
+        throw AuthExceptions.tokenRevoked()
       }
 
       return decoded
@@ -116,7 +118,7 @@ export class TokenService {
       this.logger.error(
         `Access token verification failed: ${(error as Error).message}`
       )
-      throw new UnauthorizedException('Invalid or expired token')
+      throw AuthExceptions.invalidToken()
     }
   }
 
@@ -128,6 +130,7 @@ export class TokenService {
       const secret = this.configService.get<string>('JWT_REFRESH_SECRET')
       const decoded = this.jwtService.verify<RefreshTokenPayload>(token, {
         secret,
+        algorithms: ['HS256'],
       })
 
       // Check if token is blacklisted
@@ -137,7 +140,7 @@ export class TokenService {
 
       if (isBlacklisted) {
         this.logger.warn('Refresh token is blacklisted')
-        throw new UnauthorizedException('Token has been revoked')
+        throw AuthExceptions.tokenRevoked()
       }
 
       return decoded
@@ -145,7 +148,7 @@ export class TokenService {
       this.logger.error(
         `Refresh token verification failed: ${(error as Error).message}`
       )
-      throw new UnauthorizedException('Invalid or expired refresh token')
+      throw AuthExceptions.invalidToken()
     }
   }
 

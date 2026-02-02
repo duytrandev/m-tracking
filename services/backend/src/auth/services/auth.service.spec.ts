@@ -1,12 +1,9 @@
-import {
-  ConflictException,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
 import { Repository, UpdateResult } from 'typeorm'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { AuthErrorCode } from '@m-tracking/shared'
+import { AuthException } from '../../common/exceptions/auth.exception'
 import { RegisterDto } from '../dto/register.dto'
 import { EmailVerificationToken } from '../entities/email-verification-token.entity'
 import { PasswordResetToken } from '../entities/password-reset-token.entity'
@@ -194,7 +191,7 @@ describe('AuthService', () => {
       expect(emailService.sendVerificationEmail).toHaveBeenCalled()
     })
 
-    it('should throw ConflictException if email already exists', async () => {
+    it('should throw AuthException if email already exists', async () => {
       const dto: RegisterDto = {
         email: 'existing@example.com',
         password: 'password',
@@ -203,7 +200,12 @@ describe('AuthService', () => {
 
       vi.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser)
 
-      await expect(service.register(dto)).rejects.toThrow(ConflictException)
+      await expect(service.register(dto)).rejects.toThrow(AuthException)
+      await expect(service.register(dto)).rejects.toMatchObject({
+        response: expect.objectContaining({
+          code: AuthErrorCode.EMAIL_ALREADY_REGISTERED,
+        }),
+      })
     })
   })
 
@@ -242,7 +244,7 @@ describe('AuthService', () => {
       expect(result).toBeNull()
     })
 
-    it('should throw UnauthorizedException if email not verified', async () => {
+    it('should throw AuthException if email not verified', async () => {
       const unverifiedUser = { ...mockUser, emailVerified: false }
       vi.spyOn(userRepository, 'findOne').mockResolvedValue(
         unverifiedUser as User
@@ -251,7 +253,14 @@ describe('AuthService', () => {
 
       await expect(
         service.validateUser('test@example.com', 'password')
-      ).rejects.toThrow(UnauthorizedException)
+      ).rejects.toThrow(AuthException)
+      await expect(
+        service.validateUser('test@example.com', 'password')
+      ).rejects.toMatchObject({
+        response: expect.objectContaining({
+          code: AuthErrorCode.EMAIL_NOT_VERIFIED,
+        }),
+      })
     })
   })
 
@@ -326,7 +335,7 @@ describe('AuthService', () => {
       )
     })
 
-    it('should throw UnauthorizedException if session expired', async () => {
+    it('should throw AuthException if session expired', async () => {
       const expiredSession = {
         id: 'session-123',
         expiresAt: new Date(Date.now() - 1000),
@@ -346,8 +355,13 @@ describe('AuthService', () => {
       vi.spyOn(sessionService, 'revokeSession').mockResolvedValue(undefined)
 
       await expect(service.refresh('refresh-token')).rejects.toThrow(
-        UnauthorizedException
+        AuthException
       )
+      await expect(service.refresh('refresh-token')).rejects.toMatchObject({
+        response: expect.objectContaining({
+          code: AuthErrorCode.SESSION_EXPIRED,
+        }),
+      })
       expect(sessionService.revokeSession).toHaveBeenCalledWith('session-123')
     })
   })
@@ -413,13 +427,18 @@ describe('AuthService', () => {
       })
     })
 
-    it('should throw NotFoundException for invalid token', async () => {
+    it('should throw AuthException for invalid token', async () => {
       vi.spyOn(passwordService, 'hashToken').mockReturnValue('hash')
       vi.spyOn(verificationTokenRepository, 'findOne').mockResolvedValue(null)
 
       await expect(service.verifyEmail('invalid-token')).rejects.toThrow(
-        NotFoundException
+        AuthException
       )
+      await expect(service.verifyEmail('invalid-token')).rejects.toMatchObject({
+        response: expect.objectContaining({
+          code: AuthErrorCode.INVALID_TOKEN,
+        }),
+      })
     })
   })
 
@@ -483,13 +502,20 @@ describe('AuthService', () => {
       })
     })
 
-    it('should throw NotFoundException for invalid token', async () => {
+    it('should throw AuthException for invalid token', async () => {
       vi.spyOn(passwordService, 'hashToken').mockReturnValue('hash')
       vi.spyOn(resetTokenRepository, 'findOne').mockResolvedValue(null)
 
       await expect(
         service.resetPassword('invalid-token', 'newpass')
-      ).rejects.toThrow(NotFoundException)
+      ).rejects.toThrow(AuthException)
+      await expect(
+        service.resetPassword('invalid-token', 'newpass')
+      ).rejects.toMatchObject({
+        response: expect.objectContaining({
+          code: AuthErrorCode.INVALID_TOKEN,
+        }),
+      })
     })
   })
 })

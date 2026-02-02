@@ -6,8 +6,9 @@ import {
   ManyToOne,
   JoinColumn,
   Index,
+  type Relation,
 } from 'typeorm'
-import { User } from './user.entity'
+import type { User } from './user.entity'
 
 @Entity('password_reset_tokens')
 @Index(['tokenHash'])
@@ -31,9 +32,7 @@ export class PasswordResetToken {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date
 
-  @ManyToOne(() => User, user => user.passwordResetTokens, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne('User', 'passwordResetTokens', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-  user!: User
+  user!: Relation<User>
 }
