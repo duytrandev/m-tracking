@@ -74,6 +74,7 @@ describe('AuthService', () => {
             create: vi.fn(),
             save: vi.fn(),
             update: vi.fn(),
+            createQueryBuilder: vi.fn(),
           },
         },
         {
@@ -511,6 +512,14 @@ describe('AuthService', () => {
   })
 
   describe('requestPasswordSetup', () => {
+    // Helper to create mock QueryBuilder for pessimistic read lock
+    const createMockQueryBuilder = (user: Partial<User> | null) => ({
+      setLock: vi.fn().mockReturnThis(),
+      where: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      getOne: vi.fn().mockResolvedValue(user),
+    })
+
     it('should send setup email for OAuth user without password', async () => {
       const userId = 'oauth-user-id'
       const oauthUser = {
@@ -519,9 +528,10 @@ describe('AuthService', () => {
         password: '', // OAuth user has no password
       }
 
-      vi.spyOn(userRepository, 'findOne').mockResolvedValue(
-        oauthUser as Partial<User> as User
+      vi.spyOn(userRepository, 'createQueryBuilder').mockReturnValue(
+        createMockQueryBuilder(oauthUser as Partial<User> as User) as never
       )
+      vi.spyOn(resetTokenRepository, 'findOne').mockResolvedValue(null) // No existing token
       vi.spyOn(passwordService, 'generateToken').mockReturnValue('setup-token')
       vi.spyOn(passwordService, 'hashToken').mockReturnValue('hashed-token')
       vi.spyOn(resetTokenRepository, 'create').mockReturnValue(
@@ -552,8 +562,10 @@ describe('AuthService', () => {
         password: 'hashedPassword', // User already has password
       }
 
-      vi.spyOn(userRepository, 'findOne').mockResolvedValue(
-        userWithPassword as Partial<User> as User
+      vi.spyOn(userRepository, 'createQueryBuilder').mockReturnValue(
+        createMockQueryBuilder(
+          userWithPassword as Partial<User> as User
+        ) as never
       )
 
       await expect(service.requestPasswordSetup(userId)).rejects.toThrow(
@@ -567,7 +579,9 @@ describe('AuthService', () => {
     })
 
     it('should throw AuthException if user not found', async () => {
-      vi.spyOn(userRepository, 'findOne').mockResolvedValue(null)
+      vi.spyOn(userRepository, 'createQueryBuilder').mockReturnValue(
+        createMockQueryBuilder(null) as never
+      )
 
       await expect(service.requestPasswordSetup('invalid-id')).rejects.toThrow(
         AuthException

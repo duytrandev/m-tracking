@@ -236,6 +236,7 @@ export class TokenService {
 
   /**
    * Check if token was issued before user's token invalidation time
+   * Includes 2-second clock skew buffer for distributed system timing
    */
   async isTokenInvalidated(
     userId: string,
@@ -246,6 +247,8 @@ export class TokenService {
     if (!invalidationTime) return false
     // Token is invalid if issued before invalidation time
     // tokenIssuedAt is in seconds (JWT iat), invalidationTime is in milliseconds
-    return tokenIssuedAt * 1000 < invalidationTime
+    // Add 2-second clock skew buffer for distributed systems
+    const CLOCK_SKEW_MS = 2000
+    return tokenIssuedAt * 1000 < invalidationTime - CLOCK_SKEW_MS
   }
 }

@@ -14,6 +14,43 @@ export class SessionService {
   ) {}
 
   /**
+   * Sanitize device info to prevent XSS and enforce length limits
+   */
+  private sanitizeDeviceInfo(
+    deviceInfo:
+      | string
+      | Record<string, string | string[] | number | boolean | null | undefined>
+  ): Record<string, string | undefined> {
+    const MAX_USER_AGENT_LENGTH = 512
+    const MAX_PLATFORM_LENGTH = 64
+
+    const deviceInfoObj =
+      typeof deviceInfo === 'string' ? { userAgent: deviceInfo } : deviceInfo
+
+    // Sanitize and truncate values - only accepts string primitives
+    const sanitize = (
+      value: string | string[] | number | boolean | null | undefined,
+      maxLength: number
+    ): string | undefined => {
+      if (value === null || value === undefined) return undefined
+      // Only stringify primitives, reject arrays/objects
+      if (Array.isArray(value)) {
+        return value[0]
+          ? String(value[0]).slice(0, maxLength).replace(/[<>]/g, '')
+          : undefined
+      }
+      if (typeof value === 'object') return undefined
+      const str = String(value).slice(0, maxLength).replace(/[<>]/g, '') // Basic XSS prevention
+      return str || undefined
+    }
+
+    return {
+      userAgent: sanitize(deviceInfoObj.userAgent, MAX_USER_AGENT_LENGTH),
+      platform: sanitize(deviceInfoObj.platform, MAX_PLATFORM_LENGTH),
+    }
+  }
+
+  /**
    * Create new session
    */
   async createSession(
@@ -26,12 +63,11 @@ export class SessionService {
   ): Promise<Session> {
     const tokenHash = this.hashToken(refreshToken)
 
-    const deviceInfoObj =
-      typeof deviceInfo === 'string' ? { userAgent: deviceInfo } : deviceInfo
+    const sanitizedDeviceInfo = this.sanitizeDeviceInfo(deviceInfo)
     const session = this.sessionRepository.create({
       userId,
       refreshTokenHash: tokenHash,
-      deviceInfo: deviceInfoObj,
+      deviceInfo: sanitizedDeviceInfo,
       ipAddress,
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
       lastActiveAt: new Date(),

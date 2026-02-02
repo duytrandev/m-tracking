@@ -23,6 +23,8 @@ export interface IUser {
   currency: string
   createdAt: Date | string
   updatedAt: Date | string
+  /** Indicates if user has password set (OAuth-only users don't) - returned from /auth/me */
+  hasPassword?: boolean
 }
 
 /**

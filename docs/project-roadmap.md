@@ -645,9 +645,14 @@ M-Tracking is in active Phase 1 MVP development with a 26-week timeline. Core in
 
 ### February 3, 2026
 
-- **Register Flow Refactor (Phase 1)**: Completed backend OAuth password setup endpoint
-  - Added `POST /auth/add-password/request` endpoint with rate limiting
-  - Implemented PASSWORD_ALREADY_SET error handling
-  - Created requestPasswordSetup() service method with audit logging
-  - All 32 unit tests passing
-  - Next: Phase 2 frontend dual-mode register page support
+- **Register Flow Refactor (Phase 2)**: Completed frontend dual-mode register support
+  - Added `hasPassword` to `/auth/me` endpoint (backend)
+  - Updated IUser interface in shared library
+  - Created `FlexibleAuthRoute` component (allows guests & OAuth users)
+  - Implemented `use-add-password` hook for OAuth password setup
+  - Added `requestAddPassword()` to auth API client
+  - Updated RegisterForm with OAuth user mode (simplified form)
+  - Created `OAuthPasswordSetupForm` component
+  - All 79 backend tests + 139 frontend tests passing
+  - Fixed 6 code review issues (security, performance)
+  - Next: Phase 3 testing & integration validation

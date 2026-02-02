@@ -174,6 +174,7 @@ export class AuthController {
   /**
    * Get current user profile
    * GET /auth/me
+   * Returns hasPassword flag to detect OAuth-only users
    */
   @Get('me')
   @UseGuards(JwtAuthGuard)
@@ -182,6 +183,10 @@ export class AuthController {
     if (!user) {
       throw AuthExceptions.userNotFound()
     }
+
+    // Check password status separately (password not included in default select)
+    const hasPassword = await this.authService.userHasPassword(userId)
+
     return {
       id: user.id,
       email: user.email,
@@ -191,6 +196,7 @@ export class AuthController {
       emailVerified: user.emailVerified,
       twoFactorEnabled: user.twoFactorEnabled,
       createdAt: user.createdAt,
+      hasPassword,
     }
   }
 

@@ -20,25 +20,43 @@ import {
   type SetPasswordInput,
 } from '../validations/auth-schemas'
 import { useRegister } from '../hooks/use-register'
+import { useAddPassword } from '../hooks/use-add-password'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
-import { AuthErrorCode } from '@m-tracking/shared'
+import { AuthErrorCode, AUTH_EXPIRY } from '@m-tracking/shared'
 
 type FormState = 'idle' | 'submitting' | 'success' | 'error'
 
 interface RegisterFormProps {
-  /** When true, shows simplified UI for OAuth users setting a password */
+  /** When true, shows simplified UI for OAuth users setting a password via URL param */
   isSetPasswordMode?: boolean
+  /** When true, authenticated OAuth user is adding password (detected by FlexibleAuthRoute) */
+  isOAuthUserAddingPassword?: boolean
 }
 
-export function RegisterForm({ isSetPasswordMode = false }: RegisterFormProps) {
+export function RegisterForm({
+  isSetPasswordMode = false,
+  isOAuthUserAddingPassword = false,
+}: RegisterFormProps) {
   const [formState, setFormState] = useState<FormState>('idle')
   const {
     register: registerUser,
-    isLoading,
-    error,
+    isLoading: isRegisterLoading,
+    error: registerError,
     passwordSetupEmailSent,
   } = useRegister()
+  const {
+    requestAddPassword,
+    isLoading: isAddPasswordLoading,
+    error: addPasswordError,
+    emailSent: addPasswordEmailSent,
+  } = useAddPassword()
   const prefersReducedMotion = useReducedMotion()
+
+  // Determine which flow to use
+  const isOAuthFlow = isOAuthUserAddingPassword
+  const isLoading = isOAuthFlow ? isAddPasswordLoading : isRegisterLoading
+  const error = isOAuthFlow ? addPasswordError : registerError
+  const emailSent = isOAuthFlow ? addPasswordEmailSent : passwordSetupEmailSent
 
   // Use different schema based on mode
   type FormInput = typeof isSetPasswordMode extends true
@@ -80,8 +98,8 @@ export function RegisterForm({ isSetPasswordMode = false }: RegisterFormProps) {
     registerUser(data)
   }
 
-  // Password setup email sent state (OAuth user trying to register)
-  if (passwordSetupEmailSent) {
+  // Password setup email sent state (OAuth user flow or existing user via register)
+  if (emailSent) {
     return (
       <m.div
         key="password-setup-sent"
@@ -106,14 +124,14 @@ export function RegisterForm({ isSetPasswordMode = false }: RegisterFormProps) {
             your password and enable email/password login.
           </p>
           <p className="text-xs text-gray-500 mt-2">
-            The link expires in 1 hour.
+            The link expires in {AUTH_EXPIRY.PASSWORD_SETUP_HOURS} hour.
           </p>
         </div>
         <Link
-          href="/auth/login"
+          href={isOAuthFlow ? '/dashboard' : '/auth/login'}
           className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
         >
-          Back to Login
+          {isOAuthFlow ? 'Back to Dashboard' : 'Back to Login'}
         </Link>
       </m.div>
     )
@@ -159,6 +177,74 @@ export function RegisterForm({ isSetPasswordMode = false }: RegisterFormProps) {
           </Link>
         )}
       </m.div>
+    )
+  }
+
+  // OAuth user adding password - simplified form (no email/password fields)
+  if (isOAuthUserAddingPassword) {
+    return (
+      <AnimatedFormWrapper>
+        <div className="space-y-6">
+          {/* Info banner */}
+          <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 p-4">
+            <p className="text-sm text-blue-700">
+              You signed in with a social account. Click below to receive an
+              email link that lets you set a password for email/password login.
+            </p>
+          </div>
+
+          {/* Error Banner */}
+          <AnimatePresence mode="wait">
+            {error && (
+              <m.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
+              >
+                <div
+                  className="rounded-lg border border-red-500/30 bg-red-500/10 p-4"
+                  role="alert"
+                  aria-live="assertive"
+                >
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 flex-shrink-0 text-red-500 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="font-medium text-red-700">Request Failed</p>
+                      <p className="text-sm text-red-600 mt-1">
+                        {error.message}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </m.div>
+            )}
+          </AnimatePresence>
+
+          {/* Request Button */}
+          <Button
+            type="button"
+            className="w-full h-12 text-base"
+            isLoading={isLoading}
+            loadingText="Sending email..."
+            disabled={isLoading}
+            onClick={() => requestAddPassword()}
+          >
+            Request Password Setup
+          </Button>
+
+          {/* Back link */}
+          <p className="text-center text-sm text-gray-600">
+            Changed your mind?{' '}
+            <Link
+              href="/dashboard"
+              className="font-semibold text-[#5046E5] hover:text-[#4338CA] hover:underline transition-colors"
+            >
+              Back to Dashboard
+            </Link>
+          </p>
+        </div>
+      </AnimatedFormWrapper>
     )
   }
 

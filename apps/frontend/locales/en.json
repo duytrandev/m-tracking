@@ -14,6 +14,18 @@
       "termsLink": "Terms of Service",
       "and": "and",
       "privacyLink": "Privacy Policy",
+      "addPassword": {
+        "title": "Add Password",
+        "subtitle": "Set a password to also login with email",
+        "requestButton": "Request Password Setup",
+        "info": "You signed up with a social account. Add a password to also login with email.",
+        "emailSent": {
+          "title": "Check your email",
+          "message": "We sent a password setup link to your email.",
+          "instructions": "Click the link to set your password. The link expires in 1 hour.",
+          "backToLogin": "Back to Login"
+        }
+      },
       "errors": {
         "emailRequired": "Please enter your email address",
         "emailInvalid": "Please enter a valid email address",

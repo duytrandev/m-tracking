@@ -367,6 +367,19 @@ export class AuthService {
   }
 
   /**
+   * Check if user has password set
+   * @param userId User ID
+   * @returns boolean indicating if user has password
+   */
+  async userHasPassword(userId: string): Promise<boolean> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      select: ['id', 'password'],
+    })
+    return !!user?.password
+  }
+
+  /**
    * Login user and generate JWT tokens
    */
   async login(
@@ -513,6 +526,7 @@ export class AuthService {
   /**
    * Request password setup for OAuth-only user
    * Sends verification email with setup link
+   * Uses optimistic locking to prevent race conditions
    * @param userId Authenticated user ID
    * @param ipAddress Request IP address for audit logging
    * @param deviceInfo Request device info for audit logging
@@ -528,10 +542,13 @@ export class AuthService {
       `Password setup request: userId=${userId}, ip=${ipAddress || 'unknown'}, userAgent=${deviceInfo?.userAgent || 'unknown'}`
     )
 
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-      select: ['id', 'email', 'password'],
-    })
+    // Use pessimistic read lock to prevent race condition with concurrent requests
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .setLock('pessimistic_read')
+      .where('user.id = :userId', { userId })
+      .select(['user.id', 'user.email', 'user.password'])
+      .getOne()
 
     if (!user) {
       this.logger.warn(
@@ -546,6 +563,33 @@ export class AuthService {
         `Password setup failed: Password already set - userId=${userId}, ip=${ipAddress || 'unknown'}`
       )
       throw AuthExceptions.passwordAlreadySet()
+    }
+
+    // Check for existing unused token to prevent duplicate emails
+    const existingToken = await this.resetTokenRepository.findOne({
+      where: {
+        userId: user.id,
+        used: false,
+      },
+      order: { createdAt: 'DESC' },
+    })
+
+    // If valid token exists and was created in last 5 minutes, don't create new one
+    if (existingToken) {
+      const TOKEN_COOLDOWN_MS = 5 * 60 * 1000 // 5 minutes
+      const tokenAge = Date.now() - existingToken.createdAt.getTime()
+      if (
+        tokenAge < TOKEN_COOLDOWN_MS &&
+        existingToken.expiresAt > new Date()
+      ) {
+        this.logger.log(
+          `Password setup throttled: Recent token exists - userId=${userId}`
+        )
+        return {
+          message: 'Password setup email sent. Check your inbox.',
+          code: 'PASSWORD_SETUP_EMAIL_SENT',
+        }
+      }
     }
 
     // Generate reset token (reuse infrastructure)

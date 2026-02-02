@@ -220,6 +220,14 @@ export const authApi = {
     }
     return response.data
   },
+
+  // Password setup for OAuth users
+  requestAddPassword: async (): Promise<MessageResponse> => {
+    const response = await apiClient.post<MessageResponse>(
+      '/auth/add-password/request'
+    )
+    return response.data
+  },
 }
 
 // Set up refresh callback for automatic token refresh

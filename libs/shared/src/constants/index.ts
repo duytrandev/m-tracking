@@ -98,3 +98,11 @@ export const REGEX_PATTERNS = {
   UUID: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
   PHONE: /^\+?[1-9]\d{9,14}$/,
 } as const
+
+// Auth token expiry constants (in milliseconds)
+export const AUTH_EXPIRY = {
+  PASSWORD_SETUP_MS: 60 * 60 * 1000, // 1 hour
+  PASSWORD_SETUP_HOURS: 1,
+  EMAIL_VERIFICATION_MS: 24 * 60 * 60 * 1000, // 24 hours
+  EMAIL_VERIFICATION_HOURS: 24,
+} as const

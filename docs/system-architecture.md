@@ -535,10 +535,11 @@ async deleteUser() {}
    → Create refresh token
    → Return to frontend
 
-7. Optional: User sets password later
-   → Call POST /auth/add-password/request (authenticated)
+7. Optional: User sets password later (Phase 2 enhancement)
+   → Call POST /auth/add-password/request (authenticated, with request locking)
    → Backend sends setup email (1-hour token)
    → User completes password setup via reset flow
+   → FlexibleAuthRoute handles seamless transition in register flow
 ```
 
 ---

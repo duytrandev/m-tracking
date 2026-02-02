@@ -135,10 +135,11 @@ M-Tracking implements a comprehensive authentication system with multiple login 
 ### Token Lifetime & Rotation
 
 - **Access Token TTL**: 15 minutes (short-lived for security)
-- **Refresh Token TTL**: 7 days (extends session duration)
+- **Refresh Token TTL**: 7 days (extends session duration, 30 days if rememberMe=true)
 - **Refresh Rotation**: New refresh token issued on each refresh
-- **Automatic Refresh**: Frontend refreshes 60 seconds before expiry
+- **Automatic Refresh**: Frontend refreshes 60 seconds before expiry (with clock skew buffer)
 - **Token Blacklisting**: Logout blacklists both tokens via Redis (7-day TTL)
+- **Clock Skew Buffer**: ±5 seconds tolerance during token validation to handle clock sync issues
 
 ### Key Management
 
@@ -188,12 +189,21 @@ M-Tracking implements a comprehensive authentication system with multiple login 
 
 **Scenario**: User signs up via OAuth (Google, GitHub, Facebook) but later wants to set a password for email/password login.
 
-1. OAuth user requests setup via `POST /auth/add-password/request` (authenticated)
+**Flow Overview:**
+
+1. OAuth user requests setup via `POST /auth/add-password/request` (authenticated, locked to prevent spam)
 2. Backend generates 1-hour TTL password setup token (reuses password reset infrastructure)
 3. Email sent with setup link: `{frontendUrl}/set-password?token={token}`
 4. User submits new password to `/auth/reset-password` with token
 5. Password is hashed and stored on user account
 6. User can now login via email/password or OAuth
+
+**Backend Implementation Details:**
+
+- Uses **request locking** to prevent duplicate emails when user spam-clicks button
+- Only one active request per user at a time (subsequent requests fail gracefully)
+- Lock expires after 10 seconds if no response received
+- Improves UX by preventing confusion from multiple setup emails
 
 **Request:**
 
@@ -214,8 +224,17 @@ Authorization: Bearer <token>
 **Error Codes:**
 
 - `PASSWORD_ALREADY_SET` (409): User already has password
+- `PASSWORD_SETUP_LOCKED` (429): User already has pending setup request (try again in 10s)
 - `INVALID_TOKEN` (401): User not authenticated
-- Rate limited to 3 requests/minute per user
+- Rate limited to 3 requests/minute per user (backend throttle)
+
+**Frontend Cooldown:**
+
+Client-side cooldown synced with backend throttle (5 minutes) via `useAddPassword()` hook:
+
+- Shows countdown timer to user
+- Prevents button clicks during cooldown
+- Resets on error for retry capability
 
 ---
 
@@ -446,6 +465,19 @@ interface AuthState {
 }
 ```
 
+**User Object (from /auth/me):**
+
+```typescript
+// Now includes password status (Phase 2 enhancement)
+{
+  id: string
+  email: string
+  name: string
+  // ... other fields
+  hasPassword: boolean // NEW: True if user has password, false for OAuth-only users
+}
+```
+
 **Storage Policy:**
 
 - **User data**: Stored in sessionStorage (cleared on tab close)
@@ -507,6 +539,15 @@ tokenService.setRefreshCallback(async () => {
 }
 ```
 
+**Registration with Password Setup (OAuth users):**
+
+New mode in RegisterForm component:
+
+- Shows registration form to unauthenticated users
+- Shows password setup form to OAuth-only users (auto-fills email)
+- Detects OAuth user via `user.hasPassword === false` check
+- Single registration form handles both flows seamlessly
+
 ### Authentication Hooks
 
 **useAuth()** - Primary hook for accessing auth state
@@ -548,6 +589,20 @@ const { data: qrCode, mutate: setupTwoFA } = use2FASetup()
 const handleGoogleClick = useOAuth('google')
 ```
 
+**useAddPassword()** (NEW) - Request password setup for OAuth-only users
+
+```typescript
+const {
+  requestAddPassword, // Trigger password setup request
+  isLoading, // Request in progress
+  error, // Error details (if any)
+  emailSent, // Email successfully sent
+  cooldownSeconds, // Seconds until cooldown expires
+  isOnCooldown, // True if request throttled
+  reset, // Clear state for retry
+} = useAddPassword()
+```
+
 Additional hooks for magic links, OTP, password recovery (see `/apps/frontend/src/features/auth/hooks/`)
 
 ### Protected Routes
@@ -571,6 +626,21 @@ Redirects unauthenticated users to login. Optional role-based access control.
 ```
 
 Redirects authenticated users away from auth pages (login, register).
+
+**FlexibleAuthRoute** Component (NEW):
+
+```typescript
+<FlexibleAuthRoute>
+  <RegisterPage />
+</FlexibleAuthRoute>
+```
+
+Enhanced route wrapper for register/auth flows:
+
+- Allows both unauthenticated users (normal registration) and OAuth-only users
+- OAuth users see additional password setup UI without page redirect
+- Prevents breaking user flow when transitioning from OAuth to password login
+- Maintains seamless experience for both registration paths
 
 ### OAuth Callback Handling
 
@@ -605,6 +675,7 @@ The `/auth/oauth/callback` page:
 | PASSWORD_NOT_SET          | 400    | OAuth user must set password first                     |
 | PASSWORD_SETUP_EMAIL_SENT | 200    | Email sent to set password for OAuth account           |
 | PASSWORD_ALREADY_SET      | 409    | User already has password (cannot request setup again) |
+| PASSWORD_SETUP_LOCKED     | 429    | Request already pending, try again in 10 seconds       |
 | USER_NOT_FOUND            | 404    | User ID/email not found                                |
 | REFRESH_TOKEN_MISSING     | 400    | Refresh token cookie not present                       |
 
@@ -710,9 +781,14 @@ res.cookie('refreshToken', token, {
 
 - **Login/Register**: 5 requests/minute per IP
 - **Password Reset**: 3 requests/minute per IP
-- **Password Setup (OAuth users)**: 3 requests/minute per user (JWT-based)
+- **Password Setup (OAuth users)**: 3 requests/minute per user (JWT-based, with backend locking)
 - **Email Verification**: No limit (encourage retry)
 - **Refresh**: No limit (legitimate use)
+
+**Additional Protections:**
+
+- **Request Locking**: Password setup requests locked for 10 seconds (prevents duplicate emails during network delays)
+- **Client-side Cooldown**: Frontend shows 5-minute countdown after successful request
 
 **Rationale**: Prevent brute force (login), email enumeration (password reset), abuse (password setup)
 
@@ -867,6 +943,16 @@ createdAt (TIMESTAMP)
 
 - 2FA (TOTP backend ready, UI pending)
 - Permission enforcement (RBAC structure ready, endpoint guards not yet implemented)
+
+### Phase 2 Enhancements (Completed)
+
+- OAuth user password setup flow with request locking
+- Enhanced /auth/me endpoint with hasPassword status
+- FlexibleAuthRoute for seamless OAuth → password transition
+- Client-side cooldown in useAddPassword hook
+- Improved error handling for password setup edge cases
+- Session header sanitization for security
+- Token validation with clock skew buffer
 
 ### Planned
 
