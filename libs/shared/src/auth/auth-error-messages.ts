@@ -192,6 +192,46 @@ export const AUTH_ERROR_MESSAGES: Record<AuthErrorCodeType, AuthErrorMessage> =
         },
       },
     },
+
+    [AuthErrorCode.PASSWORD_NOT_SET]: {
+      backend: 'No password set. This account was created with OAuth.',
+      frontend: {
+        title: 'No password set',
+        hints: {
+          password:
+            'You signed up with Google. To use email/password login, set a password first.',
+        },
+        recovery: {
+          label: 'Set Password',
+          href: '/auth/register?mode=set-password',
+        },
+      },
+    },
+
+    [AuthErrorCode.PASSWORD_SETUP_EMAIL_SENT]: {
+      backend: 'Password setup email sent',
+      frontend: {
+        title: 'Check your email',
+        hints: {
+          email: 'We sent a password setup link to your email address.',
+        },
+        recovery: undefined,
+      },
+    },
+
+    [AuthErrorCode.PASSWORD_ALREADY_SET]: {
+      backend: 'Password already set for this account',
+      frontend: {
+        title: 'Password already set',
+        hints: {
+          password: 'You already have a password set for this account.',
+        },
+        recovery: {
+          label: 'Log in with your password',
+          href: '/auth/login',
+        },
+      },
+    },
   }
 
 /**

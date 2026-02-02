@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { AuthExceptions } from '../../common/exceptions'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
+import { PASSWORD_SETUP_EXPIRY_MS } from '../constants'
 import { RegisterDto } from '../dto/register.dto'
 import { EmailVerificationToken } from '../entities/email-verification-token.entity'
 import { PasswordResetToken } from '../entities/password-reset-token.entity'
@@ -33,10 +34,13 @@ export class AuthService {
 
   /**
    * Register new user with email/password
+   * For OAuth-only users, sends password setup email (1-hour expiry)
    * @param dto Registration data
-   * @returns Success message
+   * @returns Success message with optional code
    */
-  async register(dto: RegisterDto): Promise<{ message: string }> {
+  async register(
+    dto: RegisterDto
+  ): Promise<{ message: string; code?: string }> {
     this.logger.log(`Registration attempt for email: ${dto.email}`)
     // Check if user already exists
     const existingUser = await this.userRepository.findOne({
@@ -44,6 +48,40 @@ export class AuthService {
     })
 
     if (existingUser) {
+      // If user exists but has no password (OAuth-only user), send password setup email
+      if (!existingUser.password) {
+        this.logger.log(
+          `OAuth user ${dto.email} - sending password setup email`
+        )
+
+        // Generate reset token (reuse password reset infrastructure)
+        const token = this.passwordService.generateToken()
+        const tokenHash = this.passwordService.hashToken(token)
+
+        const resetToken = this.resetTokenRepository.create({
+          userId: existingUser.id,
+          tokenHash,
+          expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
+          used: false,
+        })
+
+        await this.resetTokenRepository.save(resetToken)
+
+        // Send password setup email
+        try {
+          await this.emailService.sendPasswordSetupEmail(dto.email, token)
+        } catch (error) {
+          this.logger.error(
+            `Failed to send password setup email: ${dto.email}`,
+            error
+          )
+        }
+
+        return {
+          message: 'Password setup email sent. Please check your inbox.',
+          code: 'PASSWORD_SETUP_EMAIL_SENT',
+        }
+      }
       this.logger.warn(`Registration failed: Email ${dto.email} already exists`)
       throw AuthExceptions.emailAlreadyRegistered()
     }
@@ -146,22 +184,47 @@ export class AuthService {
 
   /**
    * Validate user credentials for login
-   * @param email User email
+   * @param identifier User email or username
    * @param password User password
    * @returns User if valid, null otherwise
    */
-  async validateUser(email: string, password: string): Promise<User | null> {
-    this.logger.log(`Login attempt for email: ${email}`)
+  async validateUser(
+    identifier: string,
+    password: string
+  ): Promise<User | null> {
+    this.logger.log(`Login attempt for: ${identifier}`)
 
+    // Check if identifier looks like email
+    const isEmail = identifier.includes('@')
+
+    // Find user by email or username
     const user = await this.userRepository.findOne({
-      where: { email },
-      select: ['id', 'email', 'password', 'name', 'emailVerified', 'avatar'],
+      where: isEmail
+        ? { email: identifier }
+        : [{ email: identifier }, { username: identifier }],
+      select: [
+        'id',
+        'email',
+        'username',
+        'password',
+        'name',
+        'emailVerified',
+        'avatar',
+      ],
       relations: ['roles'],
     })
 
     if (!user) {
-      this.logger.warn(`Login failed: User not found - ${email}`)
+      this.logger.warn(`Login failed: User not found - ${identifier}`)
       return null
+    }
+
+    // Check if user has a password set (OAuth-only users don't)
+    if (!user.password) {
+      this.logger.warn(
+        `Login failed: OAuth user without password - ${identifier}`
+      )
+      throw AuthExceptions.passwordNotSet()
     }
 
     const isPasswordValid = await this.passwordService.compare(
@@ -170,12 +233,12 @@ export class AuthService {
     )
 
     if (!isPasswordValid) {
-      this.logger.warn(`Login failed: Invalid password - ${email}`)
+      this.logger.warn(`Login failed: Invalid password - ${identifier}`)
       return null
     }
 
     if (!user.emailVerified) {
-      this.logger.warn(`Login failed: Email not verified - ${email}`)
+      this.logger.warn(`Login failed: Email not verified - ${identifier}`)
       throw AuthExceptions.emailNotVerified()
     }
 
@@ -412,42 +475,110 @@ export class AuthService {
   }
 
   /**
-   * Logout user and revoke tokens
+   * Logout user and revoke ALL tokens across all devices
+   * This ensures user must re-login on any device
    */
   async logout(
     userId: string,
-    refreshToken?: string,
-    accessToken?: string
+    _refreshToken?: string,
+    _accessToken?: string
   ): Promise<void> {
     this.logger.log(`Logout attempt for user: ${userId}`)
 
-    // Blacklist access token if provided
-    if (accessToken) {
-      await this.tokenService.blacklistAccessToken(accessToken, userId)
-    }
+    // Invalidate all tokens by setting invalidation timestamp in Redis
+    // Any token issued before this time will be rejected
+    await this.tokenService.invalidateAllUserTokens(userId)
 
-    // Blacklist refresh token and revoke session if provided
-    if (refreshToken) {
-      await this.tokenService.blacklistRefreshToken(refreshToken, userId)
+    // Revoke all sessions from database
+    await this.sessionService.revokeAllUserSessions(userId)
 
-      const session = await this.sessionService.findByRefreshToken(refreshToken)
-      if (session) {
-        await this.sessionService.revokeSession(session.id)
-      }
-    }
-
-    this.logger.log(`Logout successful for user: ${userId}`)
+    this.logger.log(
+      `Logout successful - all sessions revoked for user: ${userId}`
+    )
   }
 
   /**
-   * Logout from all devices
+   * Logout from all devices (alias for logout, kept for API compatibility)
    */
   async logoutAllDevices(userId: string): Promise<void> {
     this.logger.log(`Logout all devices for user: ${userId}`)
 
-    // Revoke all sessions
+    // Invalidate all tokens and revoke all sessions
+    await this.tokenService.invalidateAllUserTokens(userId)
     await this.sessionService.revokeAllUserSessions(userId)
 
     this.logger.log(`All devices logged out for user: ${userId}`)
+  }
+
+  /**
+   * Request password setup for OAuth-only user
+   * Sends verification email with setup link
+   * @param userId Authenticated user ID
+   * @param ipAddress Request IP address for audit logging
+   * @param deviceInfo Request device info for audit logging
+   * @returns Success message with code
+   */
+  async requestPasswordSetup(
+    userId: string,
+    ipAddress?: string,
+    deviceInfo?: Record<string, string | undefined>
+  ): Promise<{ message: string; code: string }> {
+    // Audit log: Password setup request initiated
+    this.logger.log(
+      `Password setup request: userId=${userId}, ip=${ipAddress || 'unknown'}, userAgent=${deviceInfo?.userAgent || 'unknown'}`
+    )
+
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      select: ['id', 'email', 'password'],
+    })
+
+    if (!user) {
+      this.logger.warn(
+        `Password setup failed: User not found - userId=${userId}, ip=${ipAddress || 'unknown'}`
+      )
+      throw AuthExceptions.userNotFound()
+    }
+
+    // Check if user already has password
+    if (user.password) {
+      this.logger.warn(
+        `Password setup failed: Password already set - userId=${userId}, ip=${ipAddress || 'unknown'}`
+      )
+      throw AuthExceptions.passwordAlreadySet()
+    }
+
+    // Generate reset token (reuse infrastructure)
+    const token = this.passwordService.generateToken()
+    const tokenHash = this.passwordService.hashToken(token)
+
+    const resetToken = this.resetTokenRepository.create({
+      userId: user.id,
+      tokenHash,
+      expiresAt: new Date(Date.now() + PASSWORD_SETUP_EXPIRY_MS),
+      used: false,
+    })
+
+    await this.resetTokenRepository.save(resetToken)
+
+    // Send setup email
+    try {
+      await this.emailService.sendPasswordSetupEmail(user.email, token)
+    } catch (error) {
+      this.logger.error(
+        `Failed to send password setup email: userId=${userId}, ip=${ipAddress || 'unknown'}`,
+        error
+      )
+    }
+
+    // Audit log: Password setup email sent successfully
+    this.logger.log(
+      `Password setup email sent: userId=${userId}, email=${user.email}, ip=${ipAddress || 'unknown'}`
+    )
+
+    return {
+      message: 'Password setup email sent. Check your inbox.',
+      code: 'PASSWORD_SETUP_EMAIL_SENT',
+    }
   }
 }

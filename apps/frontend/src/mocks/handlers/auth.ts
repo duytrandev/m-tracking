@@ -132,10 +132,10 @@ export const authHandlers = [
     }
 
     // Simulate validation errors
-    if (!body.email || !body.password) {
+    if (!body.identifier || !body.password) {
       return HttpResponse.json(
         {
-          message: 'Email and password are required',
+          message: 'Email/username and password are required',
           statusCode: 400,
           error: 'VALIDATION_ERROR',
         },
@@ -143,8 +143,8 @@ export const authHandlers = [
       )
     }
 
-    // Check credentials
-    const userRecord = mockUsers.get(body.email)
+    // Check credentials (identifier can be email or username)
+    const userRecord = mockUsers.get(body.identifier)
 
     if (!userRecord || userRecord.password !== body.password) {
       // Simulate rate limiting after failed attempts

@@ -60,6 +60,8 @@ describe('AuthController', () => {
             verifyEmail: vi.fn(),
             forgotPassword: vi.fn(),
             resetPassword: vi.fn(),
+            findById: vi.fn(),
+            requestPasswordSetup: vi.fn(),
           },
         },
         {
@@ -127,7 +129,7 @@ describe('AuthController', () => {
   describe('POST /auth/login', () => {
     it('should login with valid credentials', async () => {
       const dto = {
-        email: 'test@example.com',
+        identifier: 'test@example.com',
         password: 'password123',
       }
 
@@ -157,7 +159,7 @@ describe('AuthController', () => {
 
     it('should reject invalid credentials', async () => {
       const dto = {
-        email: 'test@example.com',
+        identifier: 'test@example.com',
         password: 'wrongpassword',
       }
 
@@ -258,6 +260,42 @@ describe('AuthController', () => {
         'valid-reset-token',
         'NewSecurePassword123!'
       )
+    })
+  })
+
+  describe('POST /auth/add-password/request', () => {
+    it('should send password setup email for OAuth user', async () => {
+      const userId = 'oauth-user-123'
+
+      vi.spyOn(authService, 'requestPasswordSetup').mockResolvedValue({
+        message: 'Password setup email sent. Check your inbox.',
+        code: 'PASSWORD_SETUP_EMAIL_SENT',
+      })
+
+      const result = await controller.requestAddPassword(userId, mockRequest)
+
+      expect(result.code).toBe('PASSWORD_SETUP_EMAIL_SENT')
+      expect(result.message).toContain('Password setup email sent')
+      expect(authService.requestPasswordSetup).toHaveBeenCalledWith(
+        userId,
+        '127.0.0.1',
+        expect.objectContaining({ userAgent: 'Test Browser' })
+      )
+    })
+
+    it('should reject if user already has password', async () => {
+      const userId = 'user-with-password'
+
+      vi.spyOn(authService, 'requestPasswordSetup').mockRejectedValue(
+        new AuthException(
+          'Password already set for this account',
+          'PASSWORD_ALREADY_SET' as never
+        )
+      )
+
+      await expect(
+        controller.requestAddPassword(userId, mockRequest)
+      ).rejects.toThrow(AuthException)
     })
   })
 })

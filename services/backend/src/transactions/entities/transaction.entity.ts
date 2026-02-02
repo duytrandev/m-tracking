@@ -41,13 +41,13 @@ export class Transaction {
   })
   type!: TransactionType
 
-  @Column({ length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   description!: string
 
   @Column({ type: 'date' })
   date!: Date
 
-  @Column({ length: 3, default: 'USD' })
+  @Column({ type: 'varchar', length: 3, default: 'USD' })
   currency!: string
 
   @Column({ type: 'text', nullable: true })

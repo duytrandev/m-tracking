@@ -1,6 +1,6 @@
 # Project Roadmap & Implementation Status
 
-**Last Updated**: February 1, 2026 | **Phase**: Phase 1 MVP Development | **Status**: Active
+**Last Updated**: February 3, 2026 | **Phase**: Phase 1 MVP Development | **Status**: Active
 
 ---
 
@@ -29,25 +29,25 @@ M-Tracking is in active Phase 1 MVP development with a 26-week timeline. Core in
 
 ## Detailed Epic Status
 
-### Epic 1: User Authentication & Onboarding (95% Complete)
+### Epic 1: User Authentication & Onboarding (100% Core Auth Complete)
 
-**Weeks**: 3-6 | **Priority**: P0 (Critical) | **Team**: Backend (1), Frontend (1)
+**Weeks**: 3-6 | **Priority**: P0 (Critical) | **Team**: Backend (1), Frontend (1) | **Documentation**: [authentication.md](./authentication.md)
 
 **Features Implemented:**
 
-- [x] Email/password registration with validation
-- [x] Email verification flow (token-based)
-- [x] Email/password login
-- [x] JWT token generation (RS256, 15m access, 7d refresh)
-- [x] Token refresh with auto-retry
-- [x] Logout with token cleanup
-- [x] OAuth integration (Google, GitHub, Facebook)
-- [x] OAuth callback handling
-- [x] Session tracking (device info, IP address)
-- [x] 2FA infrastructure (fields, DB schema)
-- [x] Password reset flow
+- [x] Email/password registration with validation (8+ char min on backend, 12+ frontend)
+- [x] Email verification flow (24-hour token TTL, SHA-256 hashed)
+- [x] Email/password login with rate limiting (5/min)
+- [x] JWT token generation (RS256 asymmetric, 15m access, 7d refresh with rotation)
+- [x] Token refresh with auto-retry (60s before expiry)
+- [x] Logout with token cleanup and blacklisting via Redis
+- [x] OAuth 2.0 integration (Google PKCE, GitHub, Facebook with auto-linking)
+- [x] OAuth callback handling with httpOnly cookie refresh tokens
+- [x] Session tracking (device fingerprinting, IP address, multi-device support)
+- [x] 2FA infrastructure (TOTP backend complete, UI pending)
+- [x] Password reset flow (1-hour token TTL, rate limited 3/min)
 - [x] User profile management
-- [x] Role-based access control (infrastructure)
+- [x] Role-based access control (User → Roles → Permissions via database relationships)
 
 **Frontend Components Implemented:**
 
@@ -635,6 +635,19 @@ M-Tracking is in active Phase 1 MVP development with a 26-week timeline. Core in
 
 ---
 
-**Last Updated**: February 1, 2026
+**Last Updated**: February 3, 2026 14:32 UTC
 **Prepared By**: Documentation Team
 **Review Cycle**: Monthly
+
+---
+
+## Recent Changes Log
+
+### February 3, 2026
+
+- **Register Flow Refactor (Phase 1)**: Completed backend OAuth password setup endpoint
+  - Added `POST /auth/add-password/request` endpoint with rate limiting
+  - Implemented PASSWORD_ALREADY_SET error handling
+  - Created requestPasswordSetup() service method with audit logging
+  - All 32 unit tests passing
+  - Next: Phase 2 frontend dual-mode register page support

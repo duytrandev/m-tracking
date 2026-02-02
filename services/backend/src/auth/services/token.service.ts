@@ -98,10 +98,13 @@ export class TokenService {
    */
   async verifyAccessToken(token: string): Promise<TokenPayload> {
     try {
-      const decoded = this.jwtService.verify<TokenPayload>(token, {
-        publicKey: this.publicKey,
-        algorithms: ['RS256'],
-      })
+      const decoded = this.jwtService.verify<TokenPayload & { iat?: number }>(
+        token,
+        {
+          publicKey: this.publicKey,
+          algorithms: ['RS256'],
+        }
+      )
 
       // Check if token is blacklisted
       const isBlacklisted = await this.redisService.isTokenBlacklisted(
@@ -113,8 +116,26 @@ export class TokenService {
         throw AuthExceptions.tokenRevoked()
       }
 
+      // Check if all user tokens have been invalidated (logout from all devices)
+      if (decoded.iat) {
+        const isInvalidated = await this.isTokenInvalidated(
+          decoded.sub,
+          decoded.iat
+        )
+        if (isInvalidated) {
+          this.logger.warn(`Token invalidated for user: ${decoded.sub}`)
+          throw AuthExceptions.tokenRevoked()
+        }
+      }
+
       return decoded
     } catch (error) {
+      if (
+        (error as { name?: string }).name === 'TokenRevokedException' ||
+        (error as { message?: string }).message?.includes('revoked')
+      ) {
+        throw error
+      }
       this.logger.error(
         `Access token verification failed: ${(error as Error).message}`
       )
@@ -128,7 +149,9 @@ export class TokenService {
   async verifyRefreshToken(token: string): Promise<RefreshTokenPayload> {
     try {
       const secret = this.configService.get<string>('JWT_REFRESH_SECRET')
-      const decoded = this.jwtService.verify<RefreshTokenPayload>(token, {
+      const decoded = this.jwtService.verify<
+        RefreshTokenPayload & { iat?: number }
+      >(token, {
         secret,
         algorithms: ['HS256'],
       })
@@ -143,8 +166,26 @@ export class TokenService {
         throw AuthExceptions.tokenRevoked()
       }
 
+      // Check if all user tokens have been invalidated (logout from all devices)
+      if (decoded.iat) {
+        const isInvalidated = await this.isTokenInvalidated(
+          decoded.sub,
+          decoded.iat
+        )
+        if (isInvalidated) {
+          this.logger.warn(`Refresh token invalidated for user: ${decoded.sub}`)
+          throw AuthExceptions.tokenRevoked()
+        }
+      }
+
       return decoded
     } catch (error) {
+      if (
+        (error as { name?: string }).name === 'TokenRevokedException' ||
+        (error as { message?: string }).message?.includes('revoked')
+      ) {
+        throw error
+      }
       this.logger.error(
         `Refresh token verification failed: ${(error as Error).message}`
       )
@@ -182,5 +223,29 @@ export class TokenService {
    */
   decodeToken(token: string): Record<string, unknown> | null {
     return this.jwtService.decode(token)
+  }
+
+  /**
+   * Invalidate all tokens for a user by setting invalidation timestamp
+   * Any token issued before this timestamp will be rejected
+   */
+  async invalidateAllUserTokens(userId: string): Promise<void> {
+    await this.redisService.setTokenInvalidationTime(userId)
+    this.logger.log(`All tokens invalidated for user: ${userId}`)
+  }
+
+  /**
+   * Check if token was issued before user's token invalidation time
+   */
+  async isTokenInvalidated(
+    userId: string,
+    tokenIssuedAt: number
+  ): Promise<boolean> {
+    const invalidationTime =
+      await this.redisService.getTokenInvalidationTime(userId)
+    if (!invalidationTime) return false
+    // Token is invalid if issued before invalidation time
+    // tokenIssuedAt is in seconds (JWT iat), invalidationTime is in milliseconds
+    return tokenIssuedAt * 1000 < invalidationTime
   }
 }

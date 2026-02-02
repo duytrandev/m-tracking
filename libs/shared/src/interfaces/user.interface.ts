@@ -13,6 +13,7 @@ export enum UserRole {
 export interface IUser {
   id: string
   email: string
+  username?: string
   name: string
   avatar?: string
   emailVerified: boolean

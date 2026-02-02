@@ -114,6 +114,7 @@ describe('AuthService', () => {
           useValue: {
             sendVerificationEmail: vi.fn(),
             sendPasswordResetEmail: vi.fn(),
+            sendPasswordSetupEmail: vi.fn(),
           },
         },
         {
@@ -124,6 +125,8 @@ describe('AuthService', () => {
             verifyRefreshToken: vi.fn(),
             blacklistAccessToken: vi.fn(),
             blacklistRefreshToken: vi.fn(),
+            invalidateAllUserTokens: vi.fn(),
+            isTokenInvalidated: vi.fn(),
           },
         },
         {
@@ -371,30 +374,18 @@ describe('AuthService', () => {
       const userId = 'user-123'
       const refreshToken = 'refresh-token'
       const accessToken = 'access-token'
-      const mockSession = { id: 'session-123' }
 
-      vi.spyOn(tokenService, 'blacklistAccessToken').mockResolvedValue(
+      vi.spyOn(tokenService, 'invalidateAllUserTokens').mockResolvedValue(
         undefined
       )
-      vi.spyOn(tokenService, 'blacklistRefreshToken').mockResolvedValue(
+      vi.spyOn(sessionService, 'revokeAllUserSessions').mockResolvedValue(
         undefined
       )
-      vi.spyOn(sessionService, 'findByRefreshToken').mockResolvedValue(
-        mockSession as Partial<Session> as Session
-      )
-      vi.spyOn(sessionService, 'revokeSession').mockResolvedValue(undefined)
 
       await service.logout(userId, refreshToken, accessToken)
 
-      expect(tokenService.blacklistAccessToken).toHaveBeenCalledWith(
-        accessToken,
-        userId
-      )
-      expect(tokenService.blacklistRefreshToken).toHaveBeenCalledWith(
-        refreshToken,
-        userId
-      )
-      expect(sessionService.revokeSession).toHaveBeenCalledWith('session-123')
+      expect(tokenService.invalidateAllUserTokens).toHaveBeenCalledWith(userId)
+      expect(sessionService.revokeAllUserSessions).toHaveBeenCalledWith(userId)
     })
   })
 
@@ -514,6 +505,78 @@ describe('AuthService', () => {
       ).rejects.toMatchObject({
         response: expect.objectContaining({
           code: AuthErrorCode.INVALID_TOKEN,
+        }),
+      })
+    })
+  })
+
+  describe('requestPasswordSetup', () => {
+    it('should send setup email for OAuth user without password', async () => {
+      const userId = 'oauth-user-id'
+      const oauthUser = {
+        id: userId,
+        email: 'oauth@example.com',
+        password: '', // OAuth user has no password
+      }
+
+      vi.spyOn(userRepository, 'findOne').mockResolvedValue(
+        oauthUser as Partial<User> as User
+      )
+      vi.spyOn(passwordService, 'generateToken').mockReturnValue('setup-token')
+      vi.spyOn(passwordService, 'hashToken').mockReturnValue('hashed-token')
+      vi.spyOn(resetTokenRepository, 'create').mockReturnValue(
+        {} as PasswordResetToken
+      )
+      vi.spyOn(resetTokenRepository, 'save').mockResolvedValue(
+        {} as PasswordResetToken
+      )
+      vi.spyOn(emailService, 'sendPasswordSetupEmail').mockResolvedValue(
+        undefined
+      )
+
+      const result = await service.requestPasswordSetup(userId)
+
+      expect(result.code).toBe('PASSWORD_SETUP_EMAIL_SENT')
+      expect(result.message).toContain('Password setup email sent')
+      expect(emailService.sendPasswordSetupEmail).toHaveBeenCalledWith(
+        'oauth@example.com',
+        'setup-token'
+      )
+    })
+
+    it('should throw AuthException if user already has password', async () => {
+      const userId = 'user-with-password'
+      const userWithPassword = {
+        id: userId,
+        email: 'test@example.com',
+        password: 'hashedPassword', // User already has password
+      }
+
+      vi.spyOn(userRepository, 'findOne').mockResolvedValue(
+        userWithPassword as Partial<User> as User
+      )
+
+      await expect(service.requestPasswordSetup(userId)).rejects.toThrow(
+        AuthException
+      )
+      await expect(service.requestPasswordSetup(userId)).rejects.toMatchObject({
+        response: expect.objectContaining({
+          code: AuthErrorCode.PASSWORD_ALREADY_SET,
+        }),
+      })
+    })
+
+    it('should throw AuthException if user not found', async () => {
+      vi.spyOn(userRepository, 'findOne').mockResolvedValue(null)
+
+      await expect(service.requestPasswordSetup('invalid-id')).rejects.toThrow(
+        AuthException
+      )
+      await expect(
+        service.requestPasswordSetup('invalid-id')
+      ).rejects.toMatchObject({
+        response: expect.objectContaining({
+          code: AuthErrorCode.USER_NOT_FOUND,
         }),
       })
     })

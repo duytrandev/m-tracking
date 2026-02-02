@@ -28,15 +28,29 @@ export const registerSchema = z.object({
     .max(100, 'Name is too long'),
 })
 
+// Schema for OAuth users setting password (name not required)
+export const setPasswordSchema = z.object({
+  email: z
+    .string()
+    .min(1, 'Email is required')
+    .email('Please enter a valid email address')
+    .max(254, 'Email is too long'),
+  password: z
+    .string()
+    .min(12, 'Password must be at least 12 characters')
+    .regex(/[a-z]/, 'Password must contain a lowercase letter')
+    .regex(/[A-Z]/, 'Password must contain an uppercase letter')
+    .regex(/[0-9]/, 'Password must contain a number')
+    .regex(/[^a-zA-Z0-9]/, 'Password must contain a special character'),
+  name: z.string().optional(), // Optional for OAuth users
+})
+
 // ============================================================================
 // Login Schema
 // ============================================================================
 
 export const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, 'Enter your email address')
-    .email('Enter a valid email like name@example.com'),
+  identifier: z.string().min(1, 'Enter your email or username'),
   password: z.string().min(1, 'Enter your password to continue'),
   rememberMe: z.boolean().optional().default(true),
 })
@@ -126,6 +140,7 @@ export const changePasswordSchema = z
 // ============================================================================
 
 export type RegisterInput = z.infer<typeof registerSchema>
+export type SetPasswordInput = z.infer<typeof setPasswordSchema>
 export type LoginInput = z.infer<typeof loginSchema>
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>

@@ -23,13 +23,18 @@ export class OAuthAccount {
   @Column({ name: 'user_id', type: 'uuid' })
   userId!: string
 
-  @Column({ length: 50 })
+  @Column({ type: 'varchar', length: 50 })
   provider!: string
 
-  @Column({ name: 'provider_id', length: 255 })
+  @Column({ name: 'provider_id', type: 'varchar', length: 255 })
   providerId!: string
 
-  @Column({ name: 'provider_email', length: 255, nullable: true })
+  @Column({
+    name: 'provider_email',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
   providerEmail!: string
 
   @Column({ name: 'access_token', type: 'text', nullable: true })

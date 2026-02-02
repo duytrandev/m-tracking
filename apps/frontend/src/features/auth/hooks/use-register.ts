@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { authApi } from '../api/auth-api'
@@ -7,6 +8,7 @@ import {
   type AuthFailureInfo,
   createAuthFailure,
   GENERIC_ERROR_MESSAGE,
+  AuthErrorCode,
 } from '@m-tracking/shared'
 
 interface UseRegisterReturn {
@@ -14,14 +16,22 @@ interface UseRegisterReturn {
   isLoading: boolean
   error: AuthFailureInfo | null
   clearError: () => void
+  passwordSetupEmailSent: boolean
 }
 
 export function useRegister(): UseRegisterReturn {
   const router = useRouter()
+  const [passwordSetupEmailSent, setPasswordSetupEmailSent] = useState(false)
 
   const mutation = useMutation({
     mutationFn: authApi.register,
-    onSuccess: (_, variables) => {
+    onSuccess: (response, variables) => {
+      // Check if this is OAuth user needing password setup
+      if (response.code === AuthErrorCode.PASSWORD_SETUP_EMAIL_SENT) {
+        setPasswordSetupEmailSent(true)
+        return
+      }
+
       // Navigate to verify email page with email in query
       router.push(
         `/auth/verify-email?email=${encodeURIComponent(variables.email)}`
@@ -51,5 +61,6 @@ export function useRegister(): UseRegisterReturn {
     isLoading: mutation.isPending,
     error,
     clearError: mutation.reset,
+    passwordSetupEmailSent,
   }
 }

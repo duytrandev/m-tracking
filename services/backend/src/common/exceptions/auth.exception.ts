@@ -122,6 +122,20 @@ export const AuthExceptions = {
       AuthErrorCode.OAUTH_EMAIL_CONFLICT,
       HttpStatus.CONFLICT
     ),
+
+  passwordNotSet: () =>
+    new AuthException(
+      getBackendErrorMessage(AuthErrorCode.PASSWORD_NOT_SET),
+      AuthErrorCode.PASSWORD_NOT_SET,
+      HttpStatus.UNAUTHORIZED
+    ),
+
+  passwordAlreadySet: () =>
+    new AuthException(
+      getBackendErrorMessage(AuthErrorCode.PASSWORD_ALREADY_SET),
+      AuthErrorCode.PASSWORD_ALREADY_SET,
+      HttpStatus.CONFLICT
+    ),
 }
 
 // Re-export the standard NestJS exceptions for non-auth errors

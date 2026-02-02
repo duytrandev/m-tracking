@@ -1,9 +1,11 @@
 /* eslint-disable no-console */
+import 'reflect-metadata'
 import { NestFactory } from '@nestjs/core'
 import { ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { AppModule } from './app.module'
 import cookieParser from 'cookie-parser'
+import session from 'express-session'
 // import * as Sentry from '@sentry/node'
 
 // Global filters, interceptors, pipes
@@ -31,6 +33,19 @@ async function bootstrap() {
 
   // Cookie parser middleware
   app.use(cookieParser())
+
+  // Session middleware for OAuth PKCE state management
+  app.use(
+    session({
+      secret: configService.get<string>('JWT_SECRET') || 'oauth-session-secret',
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        secure: configService.get<string>('app.nodeEnv') === 'production',
+        maxAge: 10 * 60 * 1000, // 10 minutes - only needed during OAuth flow
+      },
+    })
+  )
 
   // Global exception filter - Catch all exceptions
   app.useGlobalFilters(new HttpExceptionFilter())

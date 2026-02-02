@@ -18,13 +18,13 @@ export class Category {
   @Column({ name: 'user_id', type: 'uuid' })
   userId!: string
 
-  @Column({ length: 100 })
+  @Column({ type: 'varchar', length: 100 })
   name!: string
 
-  @Column({ length: 7 })
+  @Column({ type: 'varchar', length: 7 })
   color!: string
 
-  @Column({ length: 50 })
+  @Column({ type: 'varchar', length: 50 })
   icon!: string
 
   @Column({ type: 'text', nullable: true })

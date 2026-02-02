@@ -9,7 +9,7 @@ interface OAuthButtonsProps {
 }
 
 export function OAuthButtons({
-  providers = ['google', 'apple'],
+  providers = ['google'], // Only Google implemented for now
   disabled = false,
 }: OAuthButtonsProps): React.ReactElement {
   const { initiateOAuth, isLoading } = useOAuth()
@@ -21,8 +21,11 @@ export function OAuthButtons({
     return <></>
   }
 
+  // Use responsive grid: 1 col for single provider, 2 cols for multiple
+  const gridCols = providers.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
+
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className={`grid ${gridCols} gap-3`}>
       {providers.map(provider => (
         <OAuthButton
           key={provider}

@@ -22,6 +22,9 @@ export const AuthErrorCode = {
   // OAuth errors
   OAUTH_ACCOUNT_NOT_FOUND: 'OAUTH_ACCOUNT_NOT_FOUND',
   OAUTH_EMAIL_CONFLICT: 'OAUTH_EMAIL_CONFLICT',
+  PASSWORD_NOT_SET: 'PASSWORD_NOT_SET', // OAuth user trying to login with password
+  PASSWORD_SETUP_EMAIL_SENT: 'PASSWORD_SETUP_EMAIL_SENT', // OAuth user needs to check email
+  PASSWORD_ALREADY_SET: 'PASSWORD_ALREADY_SET', // User already has password set
 
   // General
   USER_NOT_FOUND: 'USER_NOT_FOUND',

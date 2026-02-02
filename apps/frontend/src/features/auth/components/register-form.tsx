@@ -13,25 +13,47 @@ import { PasswordStrengthIndicator } from './password-strength'
 import { OAuthButtons } from './oauth-buttons'
 import { FormField } from './form-field'
 import { AnimatedFormWrapper } from './animated-form-wrapper'
-import { registerSchema, type RegisterInput } from '../validations/auth-schemas'
+import {
+  registerSchema,
+  setPasswordSchema,
+  type RegisterInput,
+  type SetPasswordInput,
+} from '../validations/auth-schemas'
 import { useRegister } from '../hooks/use-register'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
 import { AuthErrorCode } from '@m-tracking/shared'
 
 type FormState = 'idle' | 'submitting' | 'success' | 'error'
 
-export function RegisterForm() {
+interface RegisterFormProps {
+  /** When true, shows simplified UI for OAuth users setting a password */
+  isSetPasswordMode?: boolean
+}
+
+export function RegisterForm({ isSetPasswordMode = false }: RegisterFormProps) {
   const [formState, setFormState] = useState<FormState>('idle')
-  const { register: registerUser, isLoading, error } = useRegister()
+  const {
+    register: registerUser,
+    isLoading,
+    error,
+    passwordSetupEmailSent,
+  } = useRegister()
   const prefersReducedMotion = useReducedMotion()
+
+  // Use different schema based on mode
+  type FormInput = typeof isSetPasswordMode extends true
+    ? SetPasswordInput
+    : RegisterInput
 
   const {
     register,
     handleSubmit,
     formState: { errors, dirtyFields },
     watch,
-  } = useForm<RegisterInput>({
-    resolver: zodResolver(registerSchema),
+  } = useForm<FormInput>({
+    resolver: zodResolver(
+      isSetPasswordMode ? setPasswordSchema : registerSchema
+    ),
     mode: 'onBlur',
     reValidateMode: 'onChange',
     defaultValues: {
@@ -58,6 +80,45 @@ export function RegisterForm() {
     registerUser(data)
   }
 
+  // Password setup email sent state (OAuth user trying to register)
+  if (passwordSetupEmailSent) {
+    return (
+      <m.div
+        key="password-setup-sent"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="text-center py-8 space-y-4"
+      >
+        <m.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', stiffness: 200, delay: 0.1 }}
+          className="inline-block"
+        >
+          <div className="rounded-full bg-blue-100 p-4">
+            <Mail className="h-12 w-12 text-blue-600" />
+          </div>
+        </m.div>
+        <div>
+          <p className="text-lg font-medium text-gray-900">Check your email</p>
+          <p className="text-sm text-gray-600 mt-1">
+            We sent a password setup link to your email. Click the link to set
+            your password and enable email/password login.
+          </p>
+          <p className="text-xs text-gray-500 mt-2">
+            The link expires in 1 hour.
+          </p>
+        </div>
+        <Link
+          href="/auth/login"
+          className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+        >
+          Back to Login
+        </Link>
+      </m.div>
+    )
+  }
+
   // Success state UI
   if (formState === 'success') {
     return (
@@ -79,12 +140,24 @@ export function RegisterForm() {
         </m.div>
         <div>
           <p className="text-lg font-medium text-gray-900">
-            Account created successfully!
+            {isSetPasswordMode
+              ? 'Password set successfully!'
+              : 'Account created successfully!'}
           </p>
           <p className="text-sm text-gray-600 mt-1">
-            Check your email to verify your account.
+            {isSetPasswordMode
+              ? 'You can now login with your email and password.'
+              : 'Check your email to verify your account.'}
           </p>
         </div>
+        {isSetPasswordMode && (
+          <Link
+            href="/auth/login"
+            className="inline-flex items-center gap-2 rounded-md bg-[#5046E5] px-6 py-2 text-sm font-medium text-white hover:bg-[#4338CA] transition-colors"
+          >
+            Go to Login
+          </Link>
+        )}
       </m.div>
     )
   }
@@ -100,20 +173,33 @@ export function RegisterForm() {
         }}
         className="space-y-6"
       >
-        {/* OAuth Buttons First */}
-        <OAuthButtons />
+        {/* OAuth Buttons - Hidden in set-password mode */}
+        {!isSetPasswordMode && (
+          <>
+            <OAuthButtons />
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">
+                  Or Register With Email
+                </span>
+              </div>
+            </div>
+          </>
+        )}
 
-        {/* Divider */}
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
+        {/* Info banner for set-password mode */}
+        {isSetPasswordMode && (
+          <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 p-3">
+            <p className="text-sm text-blue-700">
+              You signed up with Google. Enter your email and create a password
+              to also login with email/password.
+            </p>
           </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">
-              Or Register With Email
-            </span>
-          </div>
-        </div>
+        )}
 
         {/* Global Error Banner - Enhanced based on error code */}
         <AnimatePresence mode="wait">
@@ -184,25 +270,27 @@ export function RegisterForm() {
           )}
         </AnimatePresence>
 
-        {/* Name Field */}
-        <FormField
-          label="Full Name"
-          htmlFor="name"
-          error={errors.name?.message}
-          success={dirtyFields.name && !errors.name}
-        >
-          <AnimatedInput
-            id="name"
-            type="text"
-            placeholder="Your name"
-            autoComplete="name"
-            error={!!errors.name}
-            aria-describedby={errors.name ? 'name-error' : undefined}
-            aria-invalid={!!errors.name}
-            className="transition-form"
-            {...register('name')}
-          />
-        </FormField>
+        {/* Name Field - Optional in set-password mode */}
+        {!isSetPasswordMode && (
+          <FormField
+            label="Full Name"
+            htmlFor="name"
+            error={errors.name?.message}
+            success={dirtyFields.name && !errors.name}
+          >
+            <AnimatedInput
+              id="name"
+              type="text"
+              placeholder="Your name"
+              autoComplete="name"
+              error={!!errors.name}
+              aria-describedby={errors.name ? 'name-error' : undefined}
+              aria-invalid={!!errors.name}
+              className="transition-form"
+              {...register('name')}
+            />
+          </FormField>
+        )}
 
         {/* Email Field */}
         <FormField
@@ -250,40 +338,58 @@ export function RegisterForm() {
           type="submit"
           className="w-full h-12 text-base"
           isLoading={isLoading}
-          loadingText="Creating account..."
+          loadingText={
+            isSetPasswordMode ? 'Setting password...' : 'Creating account...'
+          }
           disabled={isLoading}
         >
-          Create Account
+          {isSetPasswordMode ? 'Set Password' : 'Create Account'}
         </Button>
 
-        {/* Login Link */}
+        {/* Login Link - Different for set-password mode */}
         <p className="text-center text-sm text-gray-600">
-          Already Have An Account?{' '}
-          <Link
-            href="/auth/login"
-            className="font-semibold text-[#5046E5] hover:text-[#4338CA] hover:underline transition-colors"
-          >
-            Log In
-          </Link>
+          {isSetPasswordMode ? (
+            <>
+              Changed your mind?{' '}
+              <Link
+                href="/auth/login"
+                className="font-semibold text-[#5046E5] hover:text-[#4338CA] hover:underline transition-colors"
+              >
+                Back to Login
+              </Link>
+            </>
+          ) : (
+            <>
+              Already Have An Account?{' '}
+              <Link
+                href="/auth/login"
+                className="font-semibold text-[#5046E5] hover:text-[#4338CA] hover:underline transition-colors"
+              >
+                Log In
+              </Link>
+            </>
+          )}
         </p>
 
-        {/* Terms */}
-        <p className="text-center text-xs text-gray-500">
-          By signing up, you agree to our{' '}
-          <Link
-            href="/terms"
-            className="text-[#5046E5] hover:text-[#4338CA] hover:underline"
-          >
-            Terms of Service
-          </Link>{' '}
-          and{' '}
-          <Link
-            href="/privacy"
-            className="text-[#5046E5] hover:text-[#4338CA] hover:underline"
-          >
-            Privacy Policy
-          </Link>
-        </p>
+        {/* Terms - Only show for new registrations */}
+        {!isSetPasswordMode && (
+          <p className="text-center text-xs text-gray-500">
+            By signing up, you agree to our{' '}
+            <Link
+              href="/terms"
+              className="text-[#5046E5] hover:text-[#4338CA] hover:underline"
+            >
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link
+              href="/privacy"
+              className="text-[#5046E5] hover:text-[#4338CA] hover:underline"
+            >
+              Privacy Policy
+            </Link>
+          </p>
+        )}
       </m.form>
     </AnimatedFormWrapper>
   )

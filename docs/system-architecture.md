@@ -1,6 +1,6 @@
 # System Architecture
 
-**Last Updated**: February 1, 2026 | **Version**: 1.0
+**Last Updated**: February 3, 2026 | **Version**: 1.1
 
 ---
 
@@ -528,12 +528,17 @@ async deleteUser() {}
 
 5. Check/Create OAuthAccount
    → If exists: Link to existing user
-   → If new: Create user + oauth account
+   → If new: Create user + oauth account (no password)
 
 6. Generate M-Tracking tokens
    → Create access token
    → Create refresh token
    → Return to frontend
+
+7. Optional: User sets password later
+   → Call POST /auth/add-password/request (authenticated)
+   → Backend sends setup email (1-hour token)
+   → User completes password setup via reset flow
 ```
 
 ---
@@ -849,6 +854,7 @@ Data Retention Policy
 
 ## Related Documents
 
+- [docs/authentication.md](./authentication.md) - Authentication & authorization guide (JWT, OAuth, 2FA, RBAC)
 - [docs/project-overview-pdr.md](./project-overview-pdr.md) - Product overview
 - [docs/codebase-summary.md](./codebase-summary.md) - Code organization
 - [docs/code-standards.md](./code-standards.md) - Development standards

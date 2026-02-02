@@ -79,6 +79,32 @@ export class EmailService {
   }
 
   /**
+   * Send password setup email for OAuth users
+   * @param email User email address
+   * @param token Setup token
+   */
+  async sendPasswordSetupEmail(email: string, token: string): Promise<void> {
+    const setupUrl = `${this.frontendUrl}/auth/reset-password?token=${token}&setup=true`
+
+    try {
+      await this.resend.emails.send({
+        from: this.fromEmail,
+        to: email,
+        subject: 'Set up your password - M-Tracking',
+        html: this.getPasswordSetupEmailTemplate(setupUrl),
+      })
+
+      this.logger.log(`Password setup email sent to ${email}`)
+    } catch (error) {
+      this.logger.error(
+        `Failed to send password setup email to ${email}`,
+        error
+      )
+      throw new Error('Failed to send password setup email')
+    }
+  }
+
+  /**
    * Generate verification email HTML template
    * @param url Verification URL
    * @returns HTML template
@@ -159,6 +185,50 @@ export class EmailService {
     <p style="word-break: break-all; font-size: 12px; color: #6b7280;">${url}</p>
     <p style="margin-top: 30px; color: #ef4444;"><strong>This link expires in 1 hour.</strong></p>
     <p>If you didn't request a password reset, you can safely ignore this email. Your password will not be changed.</p>
+  </div>
+  <div class="footer">
+    <p>&copy; 2026 M-Tracking. All rights reserved.</p>
+  </div>
+</body>
+</html>
+    `
+  }
+
+  /**
+   * Generate password setup email HTML template for OAuth users
+   * @param url Setup URL
+   * @returns HTML template
+   */
+  private getPasswordSetupEmailTemplate(url: string): string {
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Set Up Your Password</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background-color: #4F46E5; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+    .content { background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+    .button { display: inline-block; background-color: #4F46E5; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+    .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #6b7280; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>M-Tracking</h1>
+  </div>
+  <div class="content">
+    <h2>Set Up Your Password</h2>
+    <p>You're currently signed in with Google. To also be able to log in with your email and password, click the button below to set up a password.</p>
+    <p style="text-align: center;">
+      <a href="${url}" class="button">Set Password</a>
+    </p>
+    <p>Or copy and paste this link into your browser:</p>
+    <p style="word-break: break-all; font-size: 12px; color: #6b7280;">${url}</p>
+    <p style="margin-top: 30px; color: #ef4444;"><strong>This link expires in 1 hour.</strong></p>
+    <p>If you didn't request this, you can safely ignore this email.</p>
   </div>
   <div class="footer">
     <p>&copy; 2026 M-Tracking. All rights reserved.</p>

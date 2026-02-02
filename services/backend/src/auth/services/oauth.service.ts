@@ -141,9 +141,24 @@ export class OAuthService {
         this.logger.log(
           `Auto-linking OAuth account to existing user: ${existingUser.id}`
         )
+        let needsUpdate = false
+
         // Update avatar if not set
         if (!existingUser.avatar && profile.avatar) {
           existingUser.avatar = profile.avatar
+          needsUpdate = true
+        }
+
+        // Sync emailVerified status if OAuth confirms email is verified
+        if (!existingUser.emailVerified && profile.emailVerified) {
+          existingUser.emailVerified = true
+          needsUpdate = true
+          this.logger.log(
+            `Email verified via OAuth for user: ${existingUser.id}`
+          )
+        }
+
+        if (needsUpdate) {
           await this.userRepository.save(existingUser)
         }
         return existingUser

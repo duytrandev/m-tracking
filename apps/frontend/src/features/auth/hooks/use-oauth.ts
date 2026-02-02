@@ -5,10 +5,11 @@ import { authApi } from '../api/auth-api'
 import { setAuthToken } from '@/lib/api-client'
 import type { OAuthProvider } from '@/types/api/auth'
 
+// OAuth endpoints are at /api/v1/auth/* (with global prefix)
 const API_BASE_URL =
   typeof window !== 'undefined'
-    ? process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
-    : process.env.API_URL || 'http://localhost:4000'
+    ? process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1'
+    : process.env.API_URL || 'http://localhost:4000/api/v1'
 
 interface UseOAuthReturn {
   initiateOAuth: (provider: OAuthProvider) => void
@@ -46,6 +47,7 @@ interface UseOAuthCallbackReturn {
 
 /**
  * Hook to handle OAuth callback
+ * Backend sends: ?accessToken=xxx&refreshToken=xxx or ?error=xxx
  */
 export function useOAuthCallback(): UseOAuthCallbackReturn {
   const searchParams = useSearchParams()
@@ -57,27 +59,27 @@ export function useOAuthCallback(): UseOAuthCallbackReturn {
   // Process callback on mount
   useEffect(() => {
     const processCallback = async (): Promise<void> => {
-      const accessToken = searchParams.get('access_token')
+      // Backend sends accessToken (camelCase), not access_token
+      const accessToken = searchParams.get('accessToken')
       const errorParam = searchParams.get('error')
-      const errorDescription = searchParams.get('error_description')
 
       if (errorParam) {
-        setError(errorDescription || 'OAuth authentication failed')
+        setError(decodeURIComponent(errorParam))
         setIsProcessing(false)
         return
       }
 
       if (!accessToken) {
-        setError('No access token received')
+        setError('No authentication token received. Please try again.')
         setIsProcessing(false)
         return
       }
 
       try {
-        // Store the access token (with default expiration)
-        setAuthToken(accessToken, 900) // 15 minutes default
+        // Store the access token (15 minutes default expiry)
+        setAuthToken(accessToken, 900)
 
-        // Fetch user profile
+        // Fetch user profile to complete login
         const user = await authApi.getCurrentUser()
         login(user)
 
@@ -88,7 +90,7 @@ export function useOAuthCallback(): UseOAuthCallbackReturn {
 
         router.replace(returnUrl)
       } catch {
-        setError('Failed to complete authentication')
+        setError('Failed to complete authentication. Please try again.')
         setIsProcessing(false)
       }
     }

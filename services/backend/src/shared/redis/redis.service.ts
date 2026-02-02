@@ -212,4 +212,25 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     const key = `session:${userId}:${sessionId}`
     await this.del(key)
   }
+
+  /**
+   * Set token invalidation timestamp for a user
+   * All tokens issued before this timestamp will be considered invalid
+   * TTL set to 7 days (max refresh token lifetime)
+   */
+  async setTokenInvalidationTime(userId: string): Promise<void> {
+    const key = `token:invalidated:${userId}`
+    const timestamp = Date.now().toString()
+    await this.set(key, timestamp, 7 * 24 * 60 * 60) // 7 days TTL
+  }
+
+  /**
+   * Get token invalidation timestamp for a user
+   * Returns null if no invalidation has occurred
+   */
+  async getTokenInvalidationTime(userId: string): Promise<number | null> {
+    const key = `token:invalidated:${userId}`
+    const value = await this.get(key)
+    return value ? parseInt(value, 10) : null
+  }
 }

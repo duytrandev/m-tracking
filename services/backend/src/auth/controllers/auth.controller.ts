@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
   HttpCode,
   HttpStatus,
@@ -74,7 +75,10 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response
   ) {
-    const user = await this.authService.validateUser(dto.email, dto.password)
+    const user = await this.authService.validateUser(
+      dto.identifier,
+      dto.password
+    )
 
     if (!user) {
       throw AuthExceptions.invalidCredentials()
@@ -168,6 +172,29 @@ export class AuthController {
   }
 
   /**
+   * Get current user profile
+   * GET /auth/me
+   */
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  async getMe(@CurrentUser('userId') userId: string) {
+    const user = await this.authService.findById(userId)
+    if (!user) {
+      throw AuthExceptions.userNotFound()
+    }
+    return {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      name: user.name,
+      avatar: user.avatar,
+      emailVerified: user.emailVerified,
+      twoFactorEnabled: user.twoFactorEnabled,
+      createdAt: user.createdAt,
+    }
+  }
+
+  /**
    * Request password reset
    * POST /auth/forgot-password
    * Rate limit: 3 requests per minute to prevent email enumeration
@@ -189,5 +216,26 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto.token, dto.password)
+  }
+
+  /**
+   * Request password setup for OAuth users
+   * POST /auth/add-password/request
+   * Rate limit: 3 requests per minute
+   */
+  @Post('add-password/request')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  async requestAddPassword(
+    @CurrentUser('userId') userId: string,
+    @Req() req: Request
+  ) {
+    const ipAddress = req.ip || 'unknown'
+    const deviceInfo = {
+      userAgent: req.headers['user-agent'],
+      platform: req.headers['sec-ch-ua-platform'] as string | undefined,
+    }
+    return this.authService.requestPasswordSetup(userId, ipAddress, deviceInfo)
   }
 }

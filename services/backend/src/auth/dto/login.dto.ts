@@ -1,8 +1,9 @@
-import { IsEmail, IsOptional, IsString, IsBoolean } from 'class-validator'
+import { IsOptional, IsString, IsBoolean, MinLength } from 'class-validator'
 
 export class LoginDto {
-  @IsEmail({}, { message: 'Invalid email address' })
-  email!: string
+  @IsString({ message: 'Email or username is required' })
+  @MinLength(1, { message: 'Email or username is required' })
+  identifier!: string // Can be email or username
 
   @IsString()
   password!: string

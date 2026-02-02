@@ -25,32 +25,37 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id!: string
 
-  @Column({ unique: true, length: 255 })
+  @Column({ type: 'varchar', unique: true, length: 255 })
   email!: string
 
-  @Column({ nullable: true, select: false, length: 255 })
+  @Column({ type: 'varchar', nullable: true, unique: true, length: 30 })
+  @Index('IDX_USERS_USERNAME')
+  username?: string
+
+  @Column({ type: 'varchar', nullable: true, select: false, length: 255 })
   password!: string
 
-  @Column({ length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   name!: string
 
-  @Column({ nullable: true, length: 500 })
+  @Column({ type: 'varchar', nullable: true, length: 500 })
   avatar!: string
 
-  @Column({ nullable: true, length: 50 })
+  @Column({ type: 'varchar', nullable: true, length: 50 })
   phone!: string
 
-  @Column({ name: 'email_verified', default: false })
+  @Column({ name: 'email_verified', type: 'boolean', default: false })
   emailVerified!: boolean
 
-  @Column({ name: 'phone_verified', default: false })
+  @Column({ name: 'phone_verified', type: 'boolean', default: false })
   phoneVerified!: boolean
 
-  @Column({ name: 'two_factor_enabled', default: false })
+  @Column({ name: 'two_factor_enabled', type: 'boolean', default: false })
   twoFactorEnabled!: boolean
 
   @Column({
     name: 'two_factor_secret',
+    type: 'varchar',
     nullable: true,
     select: false,
     length: 255,

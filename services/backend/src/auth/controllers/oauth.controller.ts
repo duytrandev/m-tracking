@@ -50,16 +50,23 @@ export class OAuthController {
   async googleCallback(@Req() req: OAuthRequest, @Res() res: Response) {
     try {
       const result = await this.oauthService.handleOAuthCallback(req.user, req)
-
-      // Redirect to frontend with tokens
       const frontendUrl = this.configService.get<string>('FRONTEND_URL')
-      const redirectUrl = `${frontendUrl}/auth/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}`
+      const isProd = this.configService.get<string>('NODE_ENV') === 'production'
 
+      // Set refresh token in httpOnly cookie (same as email/password login)
+      res.cookie('refreshToken', result.refreshToken, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? 'strict' : 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      })
+
+      // Redirect to frontend with only access token (refresh token in cookie)
+      const redirectUrl = `${frontendUrl}/auth/oauth/callback?accessToken=${result.accessToken}`
       return res.redirect(redirectUrl)
     } catch (error) {
-      // Redirect to frontend with error
       const frontendUrl = this.configService.get<string>('FRONTEND_URL')
-      const errorUrl = `${frontendUrl}/auth/error?message=${encodeURIComponent((error as Error).message)}`
+      const errorUrl = `${frontendUrl}/auth/oauth/callback?error=${encodeURIComponent((error as Error).message)}`
       return res.redirect(errorUrl)
     }
   }
@@ -81,14 +88,22 @@ export class OAuthController {
   async githubCallback(@Req() req: OAuthRequest, @Res() res: Response) {
     try {
       const result = await this.oauthService.handleOAuthCallback(req.user, req)
-
       const frontendUrl = this.configService.get<string>('FRONTEND_URL')
-      const redirectUrl = `${frontendUrl}/auth/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}`
+      const isProd = this.configService.get<string>('NODE_ENV') === 'production'
 
+      // Set refresh token in httpOnly cookie
+      res.cookie('refreshToken', result.refreshToken, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? 'strict' : 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+
+      const redirectUrl = `${frontendUrl}/auth/oauth/callback?accessToken=${result.accessToken}`
       return res.redirect(redirectUrl)
     } catch (error) {
       const frontendUrl = this.configService.get<string>('FRONTEND_URL')
-      const errorUrl = `${frontendUrl}/auth/error?message=${encodeURIComponent((error as Error).message)}`
+      const errorUrl = `${frontendUrl}/auth/oauth/callback?error=${encodeURIComponent((error as Error).message)}`
       return res.redirect(errorUrl)
     }
   }
@@ -110,14 +125,22 @@ export class OAuthController {
   async facebookCallback(@Req() req: OAuthRequest, @Res() res: Response) {
     try {
       const result = await this.oauthService.handleOAuthCallback(req.user, req)
-
       const frontendUrl = this.configService.get<string>('FRONTEND_URL')
-      const redirectUrl = `${frontendUrl}/auth/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}`
+      const isProd = this.configService.get<string>('NODE_ENV') === 'production'
 
+      // Set refresh token in httpOnly cookie
+      res.cookie('refreshToken', result.refreshToken, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? 'strict' : 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+
+      const redirectUrl = `${frontendUrl}/auth/oauth/callback?accessToken=${result.accessToken}`
       return res.redirect(redirectUrl)
     } catch (error) {
       const frontendUrl = this.configService.get<string>('FRONTEND_URL')
-      const errorUrl = `${frontendUrl}/auth/error?message=${encodeURIComponent((error as Error).message)}`
+      const errorUrl = `${frontendUrl}/auth/oauth/callback?error=${encodeURIComponent((error as Error).message)}`
       return res.redirect(errorUrl)
     }
   }
@@ -127,7 +150,7 @@ export class OAuthController {
    */
   @Get('oauth/accounts')
   @UseGuards(JwtAuthGuard)
-  async getLinkedAccounts(@CurrentUser('id') userId: string) {
+  async getLinkedAccounts(@CurrentUser('userId') userId: string) {
     const accounts = await this.oauthService.getLinkedAccounts(userId)
     return {
       accounts: accounts.map(account => ({
@@ -145,7 +168,7 @@ export class OAuthController {
   @Delete('oauth/accounts/:provider')
   @UseGuards(JwtAuthGuard)
   async unlinkAccount(
-    @CurrentUser('id') userId: string,
+    @CurrentUser('userId') userId: string,
     @Param('provider') provider: string
   ) {
     await this.oauthService.unlinkOAuthAccount(userId, provider)

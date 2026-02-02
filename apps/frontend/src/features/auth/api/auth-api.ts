@@ -137,7 +137,7 @@ export const authApi = {
 
   // Get current user
   getCurrentUser: async (): Promise<User> => {
-    const response = await apiClient.get<User>('/users/me')
+    const response = await apiClient.get<User>('/auth/me')
     return response.data
   },
 

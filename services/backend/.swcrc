@@ -22,9 +22,7 @@
       "@budgets/*": ["budgets/*"],
       "@notifications/*": ["notifications/*"],
       "@shared/*": ["shared/*"],
-      "@integrations/*": ["integrations/*"],
-      "@m-tracking/shared": ["../../libs/shared/src/index.ts"],
-      "@m-tracking/shared/*": ["../../libs/shared/src/*"]
+      "@integrations/*": ["integrations/*"]
     },
     "minify": {
       "compress": false,

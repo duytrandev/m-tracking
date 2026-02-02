@@ -36,7 +36,7 @@ export function LoginForm() {
     mode: 'onBlur',
     reValidateMode: 'onChange',
     defaultValues: {
-      email: '',
+      identifier: '',
       password: '',
       rememberMe: true,
     },
@@ -95,7 +95,8 @@ export function LoginForm() {
   }
 
   // Determine field-level error states
-  const emailFieldHint = error?.fieldHints?.email
+  const identifierFieldHint =
+    error?.fieldHints?.email || error?.fieldHints?.identifier
   const passwordFieldHint = error?.fieldHints?.password
   const hasApiError = !!error
 
@@ -135,31 +136,33 @@ export function LoginForm() {
           )}
         </AnimatePresence>
 
-        {/* Email Field - With inline error hint */}
+        {/* Identifier Field - Email or Username */}
         <FormField
-          label="Email"
-          htmlFor="email"
-          error={errors.email?.message}
-          hint={emailFieldHint}
-          hintType={emailFieldHint ? 'warning' : undefined}
-          success={dirtyFields.email && !errors.email && !emailFieldHint}
+          label="Email or Username"
+          htmlFor="identifier"
+          error={errors.identifier?.message}
+          hint={identifierFieldHint}
+          hintType={identifierFieldHint ? 'warning' : undefined}
+          success={
+            dirtyFields.identifier && !errors.identifier && !identifierFieldHint
+          }
         >
           <AnimatedInput
-            id="email"
-            type="email"
-            placeholder="your.email@example.com"
-            autoComplete="email"
-            error={!!errors.email || !!emailFieldHint}
+            id="identifier"
+            type="text"
+            placeholder="your.email@example.com or username"
+            autoComplete="username"
+            error={!!errors.identifier || !!identifierFieldHint}
             aria-describedby={
-              errors.email
-                ? 'email-error'
-                : emailFieldHint
-                  ? 'email-hint'
+              errors.identifier
+                ? 'identifier-error'
+                : identifierFieldHint
+                  ? 'identifier-hint'
                   : undefined
             }
-            aria-invalid={!!errors.email || !!emailFieldHint}
+            aria-invalid={!!errors.identifier || !!identifierFieldHint}
             className="transition-form"
-            {...register('email', {
+            {...register('identifier', {
               onChange: handleFieldChange,
             })}
           />

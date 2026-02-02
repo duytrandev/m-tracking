@@ -21,13 +21,13 @@ export class Session {
   @Column({ name: 'user_id', type: 'uuid' })
   userId!: string
 
-  @Column({ name: 'refresh_token_hash', length: 255 })
+  @Column({ name: 'refresh_token_hash', type: 'varchar', length: 255 })
   refreshTokenHash!: string
 
   @Column({ name: 'device_info', type: 'jsonb', nullable: true })
   deviceInfo!: Record<string, string | string[] | number | boolean | null>
 
-  @Column({ name: 'ip_address', length: 45, nullable: true })
+  @Column({ name: 'ip_address', type: 'varchar', length: 45, nullable: true })
   ipAddress!: string
 
   @Column({ name: 'expires_at', type: 'timestamp' })

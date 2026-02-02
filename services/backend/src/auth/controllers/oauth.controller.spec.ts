@@ -10,6 +10,7 @@ import { OAuthController } from './oauth.controller'
 const createMockResponse = (): Response => {
   const mockResponse = {
     redirect: vi.fn(),
+    cookie: vi.fn(),
   } as unknown as Response
 
   return mockResponse
@@ -89,11 +90,21 @@ describe('OAuthController', () => {
         mockRequest.user,
         mockRequest
       )
+      // Verify refresh token is set as httpOnly cookie
+      expect(mockResponse.cookie).toHaveBeenCalledWith(
+        'refreshToken',
+        'refresh-token',
+        expect.objectContaining({ httpOnly: true })
+      )
+      // Verify redirect URL only contains accessToken (not refreshToken)
       expect(mockResponse.redirect).toHaveBeenCalledWith(
-        expect.stringContaining('http://localhost:3000/auth/callback')
+        expect.stringContaining('http://localhost:3000/auth/oauth/callback')
       )
       expect(mockResponse.redirect).toHaveBeenCalledWith(
         expect.stringContaining('accessToken=access-token')
+      )
+      expect(mockResponse.redirect).not.toHaveBeenCalledWith(
+        expect.stringContaining('refreshToken=')
       )
     })
 
@@ -107,10 +118,10 @@ describe('OAuthController', () => {
       await controller.googleCallback(mockRequest, mockResponse)
 
       expect(mockResponse.redirect).toHaveBeenCalledWith(
-        expect.stringContaining('http://localhost:3000/auth/error')
+        expect.stringContaining('http://localhost:3000/auth/oauth/callback')
       )
       expect(mockResponse.redirect).toHaveBeenCalledWith(
-        expect.stringContaining('message=OAuth%20failed')
+        expect.stringContaining('error=OAuth%20failed')
       )
     })
   })
@@ -134,8 +145,13 @@ describe('OAuthController', () => {
 
       await controller.githubCallback(mockRequest, mockResponse)
 
+      expect(mockResponse.cookie).toHaveBeenCalledWith(
+        'refreshToken',
+        'refresh-token',
+        expect.objectContaining({ httpOnly: true })
+      )
       expect(mockResponse.redirect).toHaveBeenCalledWith(
-        expect.stringContaining('http://localhost:3000/auth/callback')
+        expect.stringContaining('http://localhost:3000/auth/oauth/callback')
       )
     })
   })
@@ -159,8 +175,13 @@ describe('OAuthController', () => {
 
       await controller.facebookCallback(mockRequest, mockResponse)
 
+      expect(mockResponse.cookie).toHaveBeenCalledWith(
+        'refreshToken',
+        'refresh-token',
+        expect.objectContaining({ httpOnly: true })
+      )
       expect(mockResponse.redirect).toHaveBeenCalledWith(
-        expect.stringContaining('http://localhost:3000/auth/callback')
+        expect.stringContaining('http://localhost:3000/auth/oauth/callback')
       )
     })
   })

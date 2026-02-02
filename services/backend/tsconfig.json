@@ -1,6 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "Node",
     "outDir": "./dist",
     "composite": true,
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
@@ -24,9 +26,5 @@
     "vitest.config.ts",
     "vitest.setup.ts"
   ],
-  "paths": {
-    "@m-tracking/shared": ["../../libs/shared/src/index.ts"],
-    "@m-tracking/shared/*": ["../../libs/shared/src/*"]
-  },
   "references": [{ "path": "../../libs/shared" }]
 }

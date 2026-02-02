@@ -1,4 +1,11 @@
-import { IsEmail, IsString, MinLength, Matches } from 'class-validator'
+import {
+  IsEmail,
+  IsString,
+  MinLength,
+  Matches,
+  IsOptional,
+  MaxLength,
+} from 'class-validator'
 
 export class RegisterDto {
   @IsEmail({}, { message: 'Invalid email address' })
@@ -15,4 +22,13 @@ export class RegisterDto {
   @IsString()
   @MinLength(2, { message: 'Name must be at least 2 characters long' })
   name!: string
+
+  @IsOptional()
+  @IsString()
+  @MinLength(3, { message: 'Username must be at least 3 characters' })
+  @MaxLength(30, { message: 'Username cannot exceed 30 characters' })
+  @Matches(/^[a-zA-Z0-9_]+$/, {
+    message: 'Username can only contain letters, numbers, and underscores',
+  })
+  username?: string
 }

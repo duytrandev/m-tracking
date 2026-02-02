@@ -1,6 +1,6 @@
 # M-Tracking Codebase Summary
 
-**Last Updated**: February 1, 2026 | **Status**: Active Development | **Total LOC**: ~23,035
+**Last Updated**: February 3, 2026 | **Status**: Active Development | **Total LOC**: ~23,150
 
 ---
 
@@ -57,6 +57,7 @@ m-tracking/
 │   │   │   ├── auth/               # Authentication module
 │   │   │   │   ├── auth.controller.ts
 │   │   │   │   ├── auth.service.ts
+│   │   │   │   ├── constants/      # Token expiry times (NEW)
 │   │   │   │   ├── strategies/     # Passport strategies (JWT, OAuth)
 │   │   │   │   ├── guards/         # Auth guards
 │   │   │   │   ├── services/       # Token, Password, Session, OAuth
@@ -127,6 +128,7 @@ m-tracking/
 │   ├── code-standards.md           # Development standards
 │   ├── system-architecture.md      # System design
 │   ├── project-roadmap.md          # Implementation status
+│   ├── authentication.md           # Auth system & API documentation (803 LOC)
 │   └── [other guides]
 │
 ├── plans/                           # Project plans & reports
@@ -246,14 +248,22 @@ features/{feature}/
 
 ### Implemented Features
 
-**Authentication (100% Complete)**
+**Authentication (100% Complete - Core Auth)**
 
-- Email/password registration with verification
-- OAuth (Google, GitHub, Facebook)
-- 2FA (TOTP) infrastructure ready
-- Password reset flow
-- JWT token refresh with auto-retry
-- Session tracking with device info
+- Email/password registration with email verification (24h tokens)
+- OAuth 2.0 (Google PKCE, GitHub, Facebook with auto-linking)
+- Password setup flow for OAuth-only users (NEW: Phase 1)
+  - Users can request password setup email (3/min rate limit)
+  - 1-hour TTL setup tokens, reuses password reset infrastructure
+  - Audit logging with IP and user agent tracking
+- 2FA (TOTP) infrastructure ready, UI pending
+- Password reset with 1-hour token TTL
+- JWT token refresh with 60-second pre-expiry refresh (15m access, 7d refresh)
+- Session tracking with device fingerprinting and IP logging
+- Role-Based Access Control (RBAC) via User → Roles → Permissions
+- Centralized token expiry constants (NEW: Phase 1)
+- Rate limiting (5/min login, 3/min password reset & setup)
+- See [Authentication](./authentication.md) for complete documentation
 
 **Transactions (100% Complete)**
 

@@ -7,7 +7,7 @@ export type { User } from '../entities'
  * Login request payload
  */
 export interface LoginRequest {
-  email: string
+  identifier: string // Can be email or username
   password: string
   rememberMe?: boolean
 }
@@ -139,6 +139,7 @@ export interface OTPVerifyRequest {
  */
 export interface MessageResponse {
   message: string
+  code?: string // Optional response code for specific flows (e.g., PASSWORD_SETUP_EMAIL_SENT)
 }
 
 /**
