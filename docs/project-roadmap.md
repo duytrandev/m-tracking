@@ -628,10 +628,12 @@ M-Tracking is in active Phase 1 MVP development with a 26-week timeline. Core in
 ## Related Documents
 
 - [docs/project-overview-pdr.md](./project-overview-pdr.md) - Product overview & vision
+- [docs/authentication.md](./authentication.md) - Authentication system & database schema
+- [docs/database-migrations.md](./database-migrations.md) - Database migrations guide
 - [docs/codebase-summary.md](./codebase-summary.md) - Code organization & structure
 - [docs/code-standards.md](./code-standards.md) - Development standards
 - [docs/system-architecture.md](./system-architecture.md) - System design & components
-- [docs/prd.md](./prd.md) - Complete product requirements (828 LOC)
+- [docs/prd.md](./prd.md) - Complete product requirements
 
 ---
 
@@ -645,6 +647,15 @@ M-Tracking is in active Phase 1 MVP development with a 26-week timeline. Core in
 
 ### February 3, 2026
 
+- **Auth Refactoring Phase 3 (SessionService)**: Completed session security hardening
+  - O(1) session lookup via refresh token index (eliminated O(n) DoS vector)
+  - XSS sanitization for device info (comprehensive HTML entity escaping)
+  - Session limit enforcement (configurable via AUTH_MAX_SESSIONS)
+  - Event-driven session revocation notifications
+  - Timing attack mitigation utilities for email-based lookups
+  - Orphaned index cleanup on revoke/update
+  - All success criteria met, tests passing
+
 - **Register Flow Refactor (Phase 2)**: Completed frontend dual-mode register support
   - Added `hasPassword` to `/auth/me` endpoint (backend)
   - Updated IUser interface in shared library
@@ -655,4 +666,3 @@ M-Tracking is in active Phase 1 MVP development with a 26-week timeline. Core in
   - Created `OAuthPasswordSetupForm` component
   - All 79 backend tests + 139 frontend tests passing
   - Fixed 6 code review issues (security, performance)
-  - Next: Phase 3 testing & integration validation

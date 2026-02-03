@@ -293,19 +293,63 @@ interface RedisSessionData {
 **Redis Key Patterns:**
 
 ```
-session:{sessionId}        → Hash (session data, TTL 7d)
-user:sessions:{userId}     → Set (session IDs for user)
-activity:{sessionId}       → List (activity log, capped at 100 entries)
-user:activity:{userId}     → Hash (activity summary, TTL 30d)
+session:{sessionId}               → Hash (session data, TTL 7d)
+user:sessions:{userId}            → Set (session IDs for user)
+activity:{sessionId}              → List (activity log, capped at 100 entries)
+user:activity:{userId}            → Hash (activity summary, TTL 30d)
+refreshTokenIdx:{tokenHash}       → String (sessionId) - O(1) lookup index
 ```
+
+### Session Lookup Optimization (Phase 3)
+
+**Previous (O(n) - Deprecated):**
+
+- Scanned all sessions for user to find matching token hash
+- DoS vulnerability: expensive operation on every refresh
+
+**Current (O(1) - Recommended):**
+
+- Direct Redis lookup via token index: `refreshTokenIdx:{SHA256(token)}`
+- Returns sessionId instantly
+- Defense in depth: verifies token hash matches stored session
+- Expired sessions cleaned up automatically
+
+**Lookup Flow:**
+
+```
+1. Hash refresh token (SHA-256)
+2. Get sessionId from refreshTokenIdx:{hash} (instant)
+3. Fetch session data: session:{sessionId}
+4. Verify token hash matches (prevent confusion attacks)
+5. Check expiration, return session or null
+```
+
+### Device Info Sanitization (Phase 3)
+
+Device info XSS-protected before Redis storage:
+
+```
+Input:  { userAgent: '"><script>alert(1)</script>' }
+Process: Escape HTML entities, remove javascript:, remove event handlers
+Output: { userAgent: '&quot;&gt;&lt;script&gt;...' }
+
+Max Lengths Enforced:
+- userAgent: 512 characters
+- platform: 64 characters
+```
+
+Used in `SessionService.createSession()` via `sanitizeDeviceInfo()` utility.
 
 ### Multi-Device Support
 
-- Users can maintain up to **5 concurrent sessions**
+- Users can maintain up to **configurable concurrent sessions** (default: 5)
+  - Configure via `AUTH_MAX_SESSIONS` environment variable
+  - When exceeded: oldest inactive sessions auto-revoked
+  - Revocation emits `session.revoked_by_limit` event for notifications
 - Each session is independent with separate refresh tokens
-- Device info helps identify suspicious activity
+- Device info helps identify suspicious activity (XSS-safe)
 - Logout only affects current session/device
-- Exceeding session limit triggers anomaly warning (logged)
+- Exceeding session limit triggers automatic revocation + event notification
 
 ### Session Expiration
 

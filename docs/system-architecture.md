@@ -287,7 +287,9 @@ Backend updates transaction
 
 ### Database Schema
 
-**Core Tables:**
+> **Detailed schema:** See [authentication.md](./authentication.md#database-schema) for full column definitions. For migrations, see [database-migrations.md](./database-migrations.md).
+
+**Core Tables (Overview):**
 
 ```sql
 -- Users & Authentication
@@ -369,6 +371,33 @@ Cache Layers:
     └── TTL: Token expiry
 ```
 
+**Session Management (Redis):**
+
+```
+Redis Key Patterns:
+├── session:{sessionId}              # Session data (hash)
+├── refreshTokenIdx:{tokenHash}      # O(1) token → sessionId lookup
+├── user:sessions:{userId}           # Active session IDs (set)
+├── activity:{sessionId}             # Session activity log (list)
+└── blacklist:refresh:{tokenHash}    # Revoked tokens
+
+Session Lookup (O(1)):
+  1. Hash refresh token (SHA-256)
+  2. Look up refreshTokenIdx:{hash} → get sessionId instantly
+  3. Fetch session:{sessionId} → get full session data
+  (Previously: scanned all sessions for user - O(n) DoS vector)
+
+Device Info Security:
+  - User agent & platform sanitized for XSS (HTML entities escaped)
+  - Malicious patterns removed (javascript:, event handlers)
+  - Stored in Redis safely
+
+Session Limits:
+  - Configurable: AUTH_MAX_SESSIONS env var (default: 5)
+  - Enforced at creation: oldest sessions revoked when limit exceeded
+  - Events emitted: session.revoked_by_limit → triggers notifications
+```
+
 **Cache Invalidation:**
 
 ```
@@ -383,6 +412,11 @@ On Category Changed:
 On Logout:
   → Blacklist refresh token
   → Delete session:{sessionId}
+  → Delete refreshTokenIdx:{tokenHash}
+
+On Session Limit Exceeded:
+  → Emit session.revoked_by_limit event
+  → Clean up token index + session data
 ```
 
 ---
@@ -487,6 +521,37 @@ External Service (email, reports, notifications)
    → Session marked inactive
 ```
 
+### Session Management
+
+```
+Session Flow:
+1. Create Session (Login)
+   → Generate sessionId (UUID)
+   → Hash refresh token (SHA-256)
+   → Sanitize device info (XSS-safe)
+   → Create token index: refreshTokenIdx:{hash} → sessionId
+   → Store session data: session:{sessionId}
+   → Add to user set: user:sessions:{userId}
+   → Check limit: revoke oldest if over AUTH_MAX_SESSIONS
+
+2. Find Session (Token Refresh)
+   → O(1) lookup: refreshTokenIdx:{hash} → sessionId
+   → Verify token hash matches (defense in depth)
+   → Check expiration, fetch from session:{sessionId}
+   → Return null if expired or not found
+
+3. Revoke Session (Logout)
+   → Delete token index: refreshTokenIdx:{hash}
+   → Delete session: session:{sessionId}
+   → Remove from user set: user:sessions:{userId}
+   → Blacklist token: blacklist:refresh:{hash}
+
+4. Session Limit Enforcement
+   → When created session count > AUTH_MAX_SESSIONS
+   → Revoke oldest inactive sessions
+   → Emit event: session.revoked_by_limit (for notifications)
+```
+
 ### RBAC (Role-Based Access Control)
 
 ```
@@ -540,6 +605,30 @@ async deleteUser() {}
    → Backend sends setup email (1-hour token)
    → User completes password setup via reset flow
    → FlexibleAuthRoute handles seamless transition in register flow
+```
+
+---
+
+## Security Architecture
+
+### Input Sanitization
+
+**XSS Prevention (Device Info):**
+
+```
+Sanitization Pipeline:
+1. Truncate to max length
+2. Escape HTML entities (&, <, >, ", ', `, /)
+3. Remove javascript: protocol
+4. Remove event handlers (onclick=, onerror=, etc.)
+5. Store safely in Redis
+
+User Agent max: 512 chars
+Platform max: 64 chars
+
+Example:
+Input:  { userAgent: '"><script>alert(1)</script>' }
+Output: { userAgent: '&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;' }
 ```
 
 ---
@@ -671,7 +760,9 @@ Layer 1: Network
 Layer 2: Authentication
 ├── JWT with RS256 (asymmetric signing)
 ├── Bcrypt (cost 12) for passwords
-├── Session tracking (device + IP)
+├── Session tracking (device + IP, XSS-sanitized)
+├── O(1) session lookup (token index prevents DoS)
+├── Session limits (AUTH_MAX_SESSIONS, event-driven)
 └── Token blacklisting (Redis)
 
 Layer 3: Authorization
@@ -689,7 +780,9 @@ Layer 5: Input Validation
 ├── Type validation (TypeScript)
 ├── Schema validation (class-validator, Zod)
 ├── SQL injection prevention (TypeORM parameterized)
-└── XSS prevention (React auto-escapes)
+├── XSS prevention (React auto-escapes, device info sanitized)
+├── Device info max lengths enforced (userAgent: 512, platform: 64)
+└── Malicious patterns removed (javascript:, event handlers)
 ```
 
 ---
@@ -856,6 +949,7 @@ Data Retention Policy
 ## Related Documents
 
 - [docs/authentication.md](./authentication.md) - Authentication & authorization guide (JWT, OAuth, 2FA, RBAC)
+- [docs/database-migrations.md](./database-migrations.md) - Database migrations and TypeORM commands
 - [docs/project-overview-pdr.md](./project-overview-pdr.md) - Product overview
 - [docs/codebase-summary.md](./codebase-summary.md) - Code organization
 - [docs/code-standards.md](./code-standards.md) - Development standards

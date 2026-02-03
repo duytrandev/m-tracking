@@ -8,7 +8,6 @@ import {
   User,
   Role,
   Permission,
-  Session,
   OAuthAccount,
   PasswordResetToken,
   EmailVerificationToken,
@@ -22,6 +21,8 @@ import {
   EmailService,
   TokenService,
   SessionService,
+  SessionActivityService,
+  AnomalyDetectionService,
 } from './services'
 import { OAuthService } from './services/oauth.service'
 import { JwtStrategy } from './strategies/jwt.strategy'
@@ -29,6 +30,8 @@ import { GoogleStrategy } from './strategies/google.strategy'
 import { GitHubStrategy } from './strategies/github.strategy'
 import { FacebookStrategy } from './strategies/facebook.strategy'
 import { JwtAuthGuard } from './guards/jwt-auth.guard'
+import { GoogleAuthGuard } from './guards/google-auth.guard'
+import { SessionEventsListener } from './listeners/session-events.listener'
 import * as fs from 'fs'
 
 /**
@@ -41,7 +44,6 @@ import * as fs from 'fs'
       User,
       Role,
       Permission,
-      Session,
       OAuthAccount,
       PasswordResetToken,
       EmailVerificationToken,
@@ -86,12 +88,16 @@ import * as fs from 'fs'
     EmailService,
     TokenService,
     SessionService,
+    SessionActivityService,
+    AnomalyDetectionService,
     OAuthService,
     JwtStrategy,
     GoogleStrategy,
     GitHubStrategy,
     FacebookStrategy,
     JwtAuthGuard,
+    GoogleAuthGuard,
+    SessionEventsListener,
   ],
   exports: [
     TypeOrmModule,
@@ -101,6 +107,7 @@ import * as fs from 'fs'
     SessionService,
     OAuthService,
     JwtAuthGuard,
+    GoogleAuthGuard,
   ],
 })
 export class AuthModule {}
