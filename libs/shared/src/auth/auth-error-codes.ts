@@ -22,6 +22,10 @@ export const AuthErrorCode = {
   // OAuth errors
   OAUTH_ACCOUNT_NOT_FOUND: 'OAUTH_ACCOUNT_NOT_FOUND',
   OAUTH_EMAIL_CONFLICT: 'OAUTH_EMAIL_CONFLICT',
+  OAUTH_ALREADY_LINKED: 'OAUTH_ALREADY_LINKED', // OAuth provider already linked
+  OAUTH_UNLINK_BLOCKED: 'OAUTH_UNLINK_BLOCKED', // Cannot unlink last auth method
+  OAUTH_EMAIL_REQUIRED: 'OAUTH_EMAIL_REQUIRED', // OAuth provider didn't share email
+  OAUTH_UNVERIFIED_EMAIL_CONFLICT: 'OAUTH_UNVERIFIED_EMAIL_CONFLICT', // Existing unverified email
   PASSWORD_NOT_SET: 'PASSWORD_NOT_SET', // OAuth user trying to login with password
   PASSWORD_SETUP_EMAIL_SENT: 'PASSWORD_SETUP_EMAIL_SENT', // OAuth user needs to check email
   PASSWORD_ALREADY_SET: 'PASSWORD_ALREADY_SET', // User already has password set
@@ -29,6 +33,13 @@ export const AuthErrorCode = {
   // General
   USER_NOT_FOUND: 'USER_NOT_FOUND',
   REFRESH_TOKEN_MISSING: 'REFRESH_TOKEN_MISSING',
+
+  // Rate limiting
+  ACCOUNT_LOCKED: 'ACCOUNT_LOCKED', // Too many failed login attempts
+  RATE_LIMITED: 'RATE_LIMITED', // Too many requests
+
+  // Service errors
+  SERVICE_UNAVAILABLE: 'SERVICE_UNAVAILABLE', // Token validation service temporarily unavailable
 } as const
 
 export type AuthErrorCodeType =

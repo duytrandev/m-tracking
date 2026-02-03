@@ -683,38 +683,53 @@ export class AuthController {
 
 ### Error Handling
 
-**Use typed exceptions:**
+**Pattern: Centralized Auth Exceptions**
+
+All authentication errors use type-safe `AuthException` classes with codes from `AuthErrorCode` enum. The global `HttpExceptionFilter` handles formatting and response delivery.
+
+**Quick Reference:**
 
 ```typescript
-// Define custom exceptions
+// Always use factory functions - ensures correct HTTP status codes
+throw AuthExceptions.invalidCredentials() // 401
+throw AuthExceptions.emailNotVerified() // 401
+throw AuthExceptions.emailAlreadyRegistered() // 409
+throw AuthExceptions.accountLocked(60) // 429 + retryAfter
+throw AuthExceptions.rateLimited(30) // 429 + retryAfter
+throw AuthExceptions.oauthEmailConflict(email) // 409
+```
+
+**Features:**
+
+- Error codes are **single source of truth** (shared between frontend/backend)
+- Frontend receives both title + field-specific hints for each error
+- Rate-limited errors include `retryAfter` field (seconds to wait)
+- Stack traces filtered in production
+- Auth failures logged at WARN level for security
+- 5xx errors automatically sent to Sentry
+
+**See [error-handling-guide.md](./error-handling-guide.md) for:**
+
+- Complete factory API reference
+- Response format examples
+- Frontend error handling patterns
+- Best practices and examples
+
+**General Exception Pattern (Non-Auth):**
+
+```typescript
+// Use typed exceptions extending HttpException
 export class UserNotFoundException extends HttpException {
   constructor(userId: string) {
     super(`User ${userId} not found`, HttpStatus.NOT_FOUND)
   }
 }
 
-// Use in service
+// Throw in service - filter handles formatting
 async getUser(id: string): Promise<User> {
   const user = await this.userRepository.findOne({ where: { id } })
   if (!user) throw new UserNotFoundException(id)
   return user
-}
-
-// Handled globally by HttpExceptionFilter
-```
-
-**Error response format:**
-
-```typescript
-// Global interceptor wraps responses
-{
-  success: false,
-  error: {
-    code: 'USER_NOT_FOUND',
-    message: 'User not found',
-    details: { userId: '123' }
-  },
-  timestamp: '2026-02-01T10:00:00Z'
 }
 ```
 
@@ -941,4 +956,6 @@ Key exported functions/components
 - [docs/project-overview-pdr.md](./project-overview-pdr.md) - Product overview
 - [docs/codebase-summary.md](./codebase-summary.md) - Project structure
 - [docs/system-architecture.md](./system-architecture.md) - System design
+- [docs/error-handling-guide.md](./error-handling-guide.md) - Error handling patterns and factories
+- [docs/database-migrations.md](./database-migrations.md) - Database migrations guide
 - [docs/project-roadmap.md](./project-roadmap.md) - Implementation status

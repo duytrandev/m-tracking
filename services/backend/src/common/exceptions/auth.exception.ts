@@ -35,6 +35,30 @@ export class AuthException extends HttpException {
   }
 }
 
+interface AuthExceptionWithRetryResponse extends AuthExceptionResponse {
+  retryAfter: number
+}
+
+/**
+ * Auth Exception with retry-after field for rate limiting.
+ */
+export class AuthExceptionWithRetry extends HttpException {
+  constructor(
+    message: string,
+    code: AuthErrorCodeType,
+    status: HttpStatus,
+    retryAfterSeconds: number
+  ) {
+    const response: AuthExceptionWithRetryResponse = {
+      message,
+      code,
+      error: HttpStatus[status],
+      retryAfter: retryAfterSeconds,
+    }
+    super(response, status)
+  }
+}
+
 /**
  * Factory functions for common auth exceptions
  */
@@ -123,6 +147,34 @@ export const AuthExceptions = {
       HttpStatus.CONFLICT
     ),
 
+  oauthAlreadyLinked: (provider: string) =>
+    new AuthException(
+      `${provider} account already linked to this user`,
+      AuthErrorCode.OAUTH_ALREADY_LINKED,
+      HttpStatus.CONFLICT
+    ),
+
+  oauthUnlinkBlocked: () =>
+    new AuthException(
+      getBackendErrorMessage(AuthErrorCode.OAUTH_UNLINK_BLOCKED),
+      AuthErrorCode.OAUTH_UNLINK_BLOCKED,
+      HttpStatus.CONFLICT
+    ),
+
+  oauthEmailRequired: () =>
+    new AuthException(
+      getBackendErrorMessage(AuthErrorCode.OAUTH_EMAIL_REQUIRED),
+      AuthErrorCode.OAUTH_EMAIL_REQUIRED,
+      HttpStatus.UNAUTHORIZED
+    ),
+
+  oauthUnverifiedEmailConflict: () =>
+    new AuthException(
+      getBackendErrorMessage(AuthErrorCode.OAUTH_UNVERIFIED_EMAIL_CONFLICT),
+      AuthErrorCode.OAUTH_UNVERIFIED_EMAIL_CONFLICT,
+      HttpStatus.CONFLICT
+    ),
+
   passwordNotSet: () =>
     new AuthException(
       getBackendErrorMessage(AuthErrorCode.PASSWORD_NOT_SET),
@@ -135,6 +187,29 @@ export const AuthExceptions = {
       getBackendErrorMessage(AuthErrorCode.PASSWORD_ALREADY_SET),
       AuthErrorCode.PASSWORD_ALREADY_SET,
       HttpStatus.CONFLICT
+    ),
+
+  serviceUnavailable: () =>
+    new AuthException(
+      getBackendErrorMessage(AuthErrorCode.SERVICE_UNAVAILABLE),
+      AuthErrorCode.SERVICE_UNAVAILABLE,
+      HttpStatus.SERVICE_UNAVAILABLE
+    ),
+
+  accountLocked: (retryAfterSeconds: number) =>
+    new AuthExceptionWithRetry(
+      getBackendErrorMessage(AuthErrorCode.ACCOUNT_LOCKED),
+      AuthErrorCode.ACCOUNT_LOCKED,
+      HttpStatus.TOO_MANY_REQUESTS,
+      retryAfterSeconds
+    ),
+
+  rateLimited: (retryAfterSeconds: number) =>
+    new AuthExceptionWithRetry(
+      getBackendErrorMessage(AuthErrorCode.RATE_LIMITED),
+      AuthErrorCode.RATE_LIMITED,
+      HttpStatus.TOO_MANY_REQUESTS,
+      retryAfterSeconds
     ),
 }
 

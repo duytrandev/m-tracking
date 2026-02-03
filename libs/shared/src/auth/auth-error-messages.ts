@@ -193,6 +193,60 @@ export const AUTH_ERROR_MESSAGES: Record<AuthErrorCodeType, AuthErrorMessage> =
       },
     },
 
+    [AuthErrorCode.OAUTH_ALREADY_LINKED]: {
+      backend: 'OAuth provider already linked to this account',
+      frontend: {
+        title: 'Already linked',
+        hints: {},
+        recovery: {
+          label: 'Go to settings',
+          href: '/settings/security',
+        },
+      },
+    },
+
+    [AuthErrorCode.OAUTH_UNLINK_BLOCKED]: {
+      backend:
+        'Cannot unlink last authentication method. Set a password first.',
+      frontend: {
+        title: 'Cannot unlink',
+        hints: {},
+        recovery: {
+          label: 'Set a password first',
+          href: '/settings/security',
+        },
+      },
+    },
+
+    [AuthErrorCode.OAUTH_EMAIL_REQUIRED]: {
+      backend: 'Email is required for account creation',
+      frontend: {
+        title: 'Email required',
+        hints: {
+          email: 'Please ensure your OAuth provider shares your email address.',
+        },
+        recovery: {
+          label: 'Try a different method',
+          href: '/auth/login',
+        },
+      },
+    },
+
+    [AuthErrorCode.OAUTH_UNVERIFIED_EMAIL_CONFLICT]: {
+      backend: 'An account with this email exists but is not verified',
+      frontend: {
+        title: 'Email not verified',
+        hints: {
+          email:
+            'Please verify your email first or use a different login method.',
+        },
+        recovery: {
+          label: 'Verify email',
+          href: '/auth/verify-email',
+        },
+      },
+    },
+
     [AuthErrorCode.PASSWORD_NOT_SET]: {
       backend: 'No password set. This account was created with OAuth.',
       frontend: {
@@ -228,6 +282,42 @@ export const AUTH_ERROR_MESSAGES: Record<AuthErrorCodeType, AuthErrorMessage> =
         },
         recovery: {
           label: 'Log in with your password',
+          href: '/auth/login',
+        },
+      },
+    },
+
+    [AuthErrorCode.ACCOUNT_LOCKED]: {
+      backend: 'Account temporarily locked due to too many failed attempts',
+      frontend: {
+        title: 'Account locked',
+        hints: {
+          password:
+            'Too many failed login attempts. Please wait before trying again.',
+        },
+        recovery: {
+          label: 'Reset password',
+          href: '/auth/forgot-password',
+        },
+      },
+    },
+
+    [AuthErrorCode.RATE_LIMITED]: {
+      backend: 'Too many requests. Please slow down.',
+      frontend: {
+        title: 'Too many requests',
+        hints: {},
+        recovery: undefined,
+      },
+    },
+
+    [AuthErrorCode.SERVICE_UNAVAILABLE]: {
+      backend: 'Token validation service temporarily unavailable',
+      frontend: {
+        title: 'Service temporarily unavailable',
+        hints: {},
+        recovery: {
+          label: 'Try again',
           href: '/auth/login',
         },
       },

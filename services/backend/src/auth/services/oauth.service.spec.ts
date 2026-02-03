@@ -1,4 +1,3 @@
-import { ConflictException, UnauthorizedException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
@@ -8,7 +7,9 @@ import { Role } from '../entities/role.entity'
 import { User } from '../entities/user.entity'
 import { OAuthProfile, OAuthService } from './oauth.service'
 import { SessionService } from './session.service'
+import { SessionActivityService } from './session-activity.service'
 import { TokenService } from './token.service'
+import { AuthException } from '../../common/exceptions/auth.exception'
 
 describe('OAuthService', () => {
   let service: OAuthService
@@ -61,6 +62,9 @@ describe('OAuthService', () => {
             findOne: vi.fn(),
             save: vi.fn(),
             create: vi.fn(),
+            manager: {
+              transaction: vi.fn(),
+            },
           },
         },
         {
@@ -92,6 +96,15 @@ describe('OAuthService', () => {
           useValue: {
             createSession: vi.fn().mockResolvedValue({ id: 'session-123' }),
             updateRefreshToken: vi.fn(),
+          },
+        },
+        {
+          provide: SessionActivityService,
+          useValue: {
+            recordLogin: vi.fn(),
+            recordRefresh: vi.fn(),
+            recordIpChange: vi.fn(),
+            recordLogout: vi.fn(),
           },
         },
       ],
@@ -186,19 +199,24 @@ describe('OAuthService', () => {
         oauthAccounts: [mockOAuthAccount, {} as OAuthAccount],
       } as User
 
-      vi.spyOn(oauthAccountRepository, 'findOne').mockResolvedValue(
-        mockOAuthAccount
-      )
-      vi.spyOn(userRepository, 'findOne').mockResolvedValue(
-        userWithMultipleAccounts
-      )
-      vi.spyOn(oauthAccountRepository, 'remove').mockResolvedValue(
-        mockOAuthAccount
-      )
+      // Mock the transaction to execute the callback
+      const mockTransactionManager = {
+        findOne: vi.fn().mockResolvedValue(userWithMultipleAccounts),
+        remove: vi.fn().mockResolvedValue(mockOAuthAccount),
+      }
+
+      vi.spyOn(userRepository, 'manager' as never, 'get').mockReturnValue({
+        transaction: vi
+          .fn()
+          .mockImplementation(
+            (callback: (em: typeof mockTransactionManager) => unknown) =>
+              callback(mockTransactionManager)
+          ),
+      } as never)
 
       await service.unlinkOAuthAccount(mockUser.id, 'google')
 
-      expect(oauthAccountRepository.remove).toHaveBeenCalledWith(
+      expect(mockTransactionManager.remove).toHaveBeenCalledWith(
         mockOAuthAccount
       )
     })
@@ -216,24 +234,69 @@ describe('OAuthService', () => {
         oauthAccounts: [mockOAuthAccount],
       } as User
 
-      vi.spyOn(oauthAccountRepository, 'findOne').mockResolvedValue(
-        mockOAuthAccount
-      )
-      vi.spyOn(userRepository, 'findOne').mockResolvedValue(
-        userWithSingleAccount
-      )
+      const mockTransactionManager = {
+        findOne: vi.fn().mockResolvedValue(userWithSingleAccount),
+        remove: vi.fn(),
+      }
+
+      vi.spyOn(userRepository, 'manager' as never, 'get').mockReturnValue({
+        transaction: vi
+          .fn()
+          .mockImplementation(
+            (callback: (em: typeof mockTransactionManager) => unknown) =>
+              callback(mockTransactionManager)
+          ),
+      } as never)
 
       await expect(
         service.unlinkOAuthAccount(mockUser.id, 'google')
-      ).rejects.toThrow(ConflictException)
+      ).rejects.toThrow(AuthException)
     })
 
     it('should throw error when OAuth account not found', async () => {
-      vi.spyOn(oauthAccountRepository, 'findOne').mockResolvedValue(null)
+      const userWithAccounts = {
+        ...mockUser,
+        password: 'hashed-password',
+        oauthAccounts: [],
+      } as User
+
+      const mockTransactionManager = {
+        findOne: vi.fn().mockResolvedValue(userWithAccounts),
+        remove: vi.fn(),
+      }
+
+      vi.spyOn(userRepository, 'manager' as never, 'get').mockReturnValue({
+        transaction: vi
+          .fn()
+          .mockImplementation(
+            (callback: (em: typeof mockTransactionManager) => unknown) =>
+              callback(mockTransactionManager)
+          ),
+      } as never)
 
       await expect(
         service.unlinkOAuthAccount(mockUser.id, 'google')
-      ).rejects.toThrow(UnauthorizedException)
+      ).rejects.toThrow(AuthException)
+    })
+
+    it('should throw error when user not found', async () => {
+      const mockTransactionManager = {
+        findOne: vi.fn().mockResolvedValue(null),
+        remove: vi.fn(),
+      }
+
+      vi.spyOn(userRepository, 'manager' as never, 'get').mockReturnValue({
+        transaction: vi
+          .fn()
+          .mockImplementation(
+            (callback: (em: typeof mockTransactionManager) => unknown) =>
+              callback(mockTransactionManager)
+          ),
+      } as never)
+
+      await expect(
+        service.unlinkOAuthAccount(mockUser.id, 'google')
+      ).rejects.toThrow(AuthException)
     })
   })
 

@@ -1,9 +1,5 @@
-import {
-  Injectable,
-  ConflictException,
-  UnauthorizedException,
-  Logger,
-} from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
+import { AuthExceptions } from '../../common/exceptions'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { User } from '../entities/user.entity'
@@ -11,6 +7,7 @@ import { OAuthAccount } from '../entities/oauth-account.entity'
 import { Role } from '../entities/role.entity'
 import { TokenService } from './token.service'
 import { SessionService } from './session.service'
+import { SessionActivityService } from './session-activity.service'
 import { EncryptionUtil } from '../utils/encryption.util'
 
 export interface OAuthProfile {
@@ -57,7 +54,8 @@ export class OAuthService {
     @InjectRepository(Role)
     private roleRepository: Repository<Role>,
     private tokenService: TokenService,
-    private sessionService: SessionService
+    private sessionService: SessionService,
+    private sessionActivityService: SessionActivityService
   ) {}
 
   /**
@@ -115,6 +113,15 @@ export class OAuthService {
     // Update session with refresh token
     await this.sessionService.updateRefreshToken(session.id, refreshToken)
 
+    // Record login activity
+    const ipAddress = req.ip || req.connection?.remoteAddress || 'Unknown'
+    await this.sessionActivityService.recordLogin(
+      session.id,
+      user.id,
+      ipAddress,
+      { userAgent: String(req.headers['user-agent'] || 'Unknown') }
+    )
+
     return {
       accessToken,
       refreshToken,
@@ -135,32 +142,29 @@ export class OAuthService {
     if (profile.email && profile.emailVerified) {
       const existingUser = await this.userRepository.findOne({
         where: { email: profile.email },
+        relations: ['roles'], // Load roles for token generation
       })
 
       if (existingUser) {
+        // SECURITY: Only auto-link if existing user has verified email
+        // This prevents account takeover via unverified email squatting
+        if (!existingUser.emailVerified) {
+          this.logger.warn(
+            `OAuth auto-link blocked: existing user ${existingUser.id} has unverified email`
+          )
+          throw AuthExceptions.oauthUnverifiedEmailConflict()
+        }
+
         this.logger.log(
           `Auto-linking OAuth account to existing user: ${existingUser.id}`
         )
-        let needsUpdate = false
 
         // Update avatar if not set
         if (!existingUser.avatar && profile.avatar) {
           existingUser.avatar = profile.avatar
-          needsUpdate = true
-        }
-
-        // Sync emailVerified status if OAuth confirms email is verified
-        if (!existingUser.emailVerified && profile.emailVerified) {
-          existingUser.emailVerified = true
-          needsUpdate = true
-          this.logger.log(
-            `Email verified via OAuth for user: ${existingUser.id}`
-          )
-        }
-
-        if (needsUpdate) {
           await this.userRepository.save(existingUser)
         }
+
         return existingUser
       }
     }
@@ -173,6 +177,14 @@ export class OAuthService {
    * Create new user from OAuth profile
    */
   private async createUserFromOAuth(profile: OAuthProfile): Promise<User> {
+    // Validate email is present and non-empty
+    if (!profile.email || profile.email.trim() === '') {
+      throw AuthExceptions.oauthEmailRequired()
+    }
+
+    // Normalize email
+    const normalizedEmail = profile.email.toLowerCase().trim()
+
     // Get default user role
     let userRole = await this.roleRepository.findOne({
       where: { name: 'user' },
@@ -189,7 +201,7 @@ export class OAuthService {
     }
 
     const user = new User()
-    user.email = profile.email
+    user.email = normalizedEmail
     user.name = profile.name
     user.avatar = profile.avatar || ''
     user.emailVerified = profile.emailVerified
@@ -217,9 +229,7 @@ export class OAuthService {
     })
 
     if (existing) {
-      throw new ConflictException(
-        `${profile.provider} account already linked to this user`
-      )
+      throw AuthExceptions.oauthAlreadyLinked(profile.provider)
     }
 
     const oauthAccount = new OAuthAccount()
@@ -252,35 +262,42 @@ export class OAuthService {
 
   /**
    * Unlink OAuth account from user
+   * Uses transaction with pessimistic lock to prevent race condition
+   * where concurrent unlink requests could delete last auth method
    */
   async unlinkOAuthAccount(userId: string, provider: string): Promise<void> {
-    const oauthAccount = await this.oauthAccountRepository.findOne({
-      where: { userId, provider },
-    })
+    await this.userRepository.manager.transaction(
+      async transactionalEntityManager => {
+        // Lock user row for update to prevent concurrent unlink race
+        const user = await transactionalEntityManager.findOne(User, {
+          where: { id: userId },
+          relations: ['oauthAccounts'],
+          lock: { mode: 'pessimistic_write' },
+        })
 
-    if (!oauthAccount) {
-      throw new UnauthorizedException('OAuth account not found')
-    }
+        if (!user) {
+          throw AuthExceptions.userNotFound()
+        }
 
-    // Ensure user has password or other OAuth account
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-      relations: ['oauthAccounts'],
-    })
+        const oauthAccount = user.oauthAccounts.find(
+          acc => acc.provider === provider
+        )
 
-    if (!user) {
-      throw new UnauthorizedException('User not found')
-    }
+        if (!oauthAccount) {
+          throw AuthExceptions.oauthAccountNotFound()
+        }
 
-    // Check if user has password authentication
-    if (!user.password && user.oauthAccounts.length === 1) {
-      throw new ConflictException(
-        'Cannot unlink last authentication method. Set a password first.'
-      )
-    }
+        // Check if user has password (empty string means no password)
+        const hasPassword = user.password && user.password.length > 0
 
-    await this.oauthAccountRepository.remove(oauthAccount)
-    this.logger.log(`Unlinked ${provider} account for user: ${userId}`)
+        if (!hasPassword && user.oauthAccounts.length === 1) {
+          throw AuthExceptions.oauthUnlinkBlocked()
+        }
+
+        await transactionalEntityManager.remove(oauthAccount)
+        this.logger.log(`Unlinked ${provider} account for user: ${userId}`)
+      }
+    )
   }
 
   /**
