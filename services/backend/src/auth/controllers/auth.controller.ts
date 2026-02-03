@@ -15,12 +15,15 @@ import { AuthExceptions } from '../../common/exceptions'
 import { Throttle } from '@nestjs/throttler'
 import type { Request, Response } from 'express'
 import { AuthService } from '../services/auth.service'
+import { RegistrationService } from '../services/registration.service'
+import { PasswordManagementService } from '../services/password-management.service'
 import {
   RegisterDto,
   LoginDto,
   VerifyEmailDto,
   ForgotPasswordDto,
   ResetPasswordDto,
+  ResendVerificationDto,
 } from '../dto'
 import { JwtAuthGuard } from '../guards/jwt-auth.guard'
 import { Public } from '../decorators/public.decorator'
@@ -29,12 +32,17 @@ import { CurrentUser } from '../decorators/current-user.decorator'
 interface JwtPayload {
   userId: string
   email: string
+  sessionId: string
 }
 
 @Controller('auth')
 @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private registrationService: RegistrationService,
+    private passwordManagementService: PasswordManagementService
+  ) {}
 
   /**
    * Register new user
@@ -46,7 +54,7 @@ export class AuthController {
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto)
+    return this.registrationService.register(dto)
   }
 
   /**
@@ -57,14 +65,27 @@ export class AuthController {
   @Post('verify-email')
   @HttpCode(HttpStatus.OK)
   async verifyEmail(@Body() dto: VerifyEmailDto) {
-    return this.authService.verifyEmail(dto.token)
+    return this.registrationService.verifyEmail(dto.token)
+  }
+
+  /**
+   * Resend verification email
+   * POST /auth/resend-verification
+   * Rate limit: 3 requests per minute
+   */
+  @Public()
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @Post('resend-verification')
+  @HttpCode(HttpStatus.OK)
+  async resendVerification(@Body() dto: ResendVerificationDto) {
+    return this.registrationService.resendVerificationEmail(dto.email)
   }
 
   /**
    * Login with email and password
    * POST /auth/login
    * Returns access token + sets refresh token in httpOnly cookie
-   * Rate limit: 5 requests per minute to prevent brute force
+   * Rate limit: 5 requests per minute
    */
   @Public()
   @Throttle({ default: { limit: 5, ttl: 60000 } })
@@ -93,7 +114,6 @@ export class AuthController {
     const tokens = await this.authService.login(user, deviceInfo, ipAddress)
 
     // Set refresh token in httpOnly cookie
-    // If rememberMe is true, extend the cookie expiration to 30 days, otherwise use 7 days
     const cookieMaxAge = dto.rememberMe
       ? 30 * 24 * 60 * 60 * 1000 // 30 days
       : 7 * 24 * 60 * 60 * 1000 // 7 days
@@ -103,6 +123,7 @@ export class AuthController {
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
       maxAge: cookieMaxAge,
+      path: '/',
     })
 
     return {
@@ -115,7 +136,6 @@ export class AuthController {
   /**
    * Refresh access token
    * POST /auth/refresh
-   * Reads refresh token from cookie, returns new access token
    */
   @Public()
   @Post('refresh')
@@ -131,14 +151,15 @@ export class AuthController {
       throw AuthExceptions.refreshTokenMissing()
     }
 
-    const tokens = await this.authService.refresh(refreshToken)
+    const ipAddress = req.ip || 'unknown'
+    const tokens = await this.authService.refresh(refreshToken, ipAddress)
 
-    // Set new refresh token
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/',
     })
 
     return {
@@ -150,7 +171,6 @@ export class AuthController {
   /**
    * Logout
    * POST /auth/logout
-   * Blacklists tokens and revokes session
    */
   @Post('logout')
   @HttpCode(HttpStatus.OK)
@@ -164,9 +184,14 @@ export class AuthController {
       ?.refreshToken
     const accessToken = req.headers.authorization?.split(' ')[1]
 
-    await this.authService.logout(user.userId, refreshToken, accessToken)
+    await this.authService.logout(
+      user.userId,
+      user.sessionId,
+      refreshToken,
+      accessToken
+    )
 
-    res.clearCookie('refreshToken')
+    res.clearCookie('refreshToken', { path: '/' })
 
     return { message: 'Logged out successfully' }
   }
@@ -174,7 +199,6 @@ export class AuthController {
   /**
    * Get current user profile
    * GET /auth/me
-   * Returns hasPassword flag to detect OAuth-only users
    */
   @Get('me')
   @UseGuards(JwtAuthGuard)
@@ -184,8 +208,8 @@ export class AuthController {
       throw AuthExceptions.userNotFound()
     }
 
-    // Check password status separately (password not included in default select)
-    const hasPassword = await this.authService.userHasPassword(userId)
+    const hasPassword =
+      await this.passwordManagementService.userHasPassword(userId)
 
     return {
       id: user.id,
@@ -203,14 +227,14 @@ export class AuthController {
   /**
    * Request password reset
    * POST /auth/forgot-password
-   * Rate limit: 3 requests per minute to prevent email enumeration
+   * Rate limit: 3 requests per minute
    */
   @Public()
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
-    return this.authService.forgotPassword(dto.email)
+    return this.passwordManagementService.forgotPassword(dto.email)
   }
 
   /**
@@ -221,7 +245,7 @@ export class AuthController {
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   async resetPassword(@Body() dto: ResetPasswordDto) {
-    return this.authService.resetPassword(dto.token, dto.password)
+    return this.passwordManagementService.resetPassword(dto.token, dto.password)
   }
 
   /**
@@ -242,6 +266,10 @@ export class AuthController {
       userAgent: req.headers['user-agent'],
       platform: req.headers['sec-ch-ua-platform'] as string | undefined,
     }
-    return this.authService.requestPasswordSetup(userId, ipAddress, deviceInfo)
+    return this.passwordManagementService.requestPasswordSetup(
+      userId,
+      ipAddress,
+      deviceInfo
+    )
   }
 }

@@ -10,6 +10,8 @@ import { ConflictException } from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AuthController } from './auth.controller'
 import { AuthService } from '../services/auth.service'
+import { RegistrationService } from '../services/registration.service'
+import { PasswordManagementService } from '../services/password-management.service'
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler'
 import { APP_GUARD } from '@nestjs/core'
 import { AuthException } from '../../common/exceptions/auth.exception'
@@ -18,6 +20,8 @@ import type { Request, Response } from 'express'
 describe('AuthController', () => {
   let controller: AuthController
   let authService: AuthService
+  let registrationService: RegistrationService
+  let passwordManagementService: PasswordManagementService
 
   const mockUser = {
     id: 'user-123',
@@ -52,16 +56,28 @@ describe('AuthController', () => {
         {
           provide: AuthService,
           useValue: {
-            register: vi.fn(),
             validateUser: vi.fn(),
             login: vi.fn(),
             refresh: vi.fn(),
             logout: vi.fn(),
+            findById: vi.fn(),
+          },
+        },
+        {
+          provide: RegistrationService,
+          useValue: {
+            register: vi.fn(),
             verifyEmail: vi.fn(),
+            resendVerificationEmail: vi.fn(),
+          },
+        },
+        {
+          provide: PasswordManagementService,
+          useValue: {
             forgotPassword: vi.fn(),
             resetPassword: vi.fn(),
-            findById: vi.fn(),
             requestPasswordSetup: vi.fn(),
+            userHasPassword: vi.fn(),
           },
         },
         {
@@ -73,6 +89,10 @@ describe('AuthController', () => {
 
     controller = module.get<AuthController>(AuthController)
     authService = module.get<AuthService>(AuthService)
+    registrationService = module.get<RegistrationService>(RegistrationService)
+    passwordManagementService = module.get<PasswordManagementService>(
+      PasswordManagementService
+    )
   })
 
   describe('POST /auth/register', () => {
@@ -83,7 +103,7 @@ describe('AuthController', () => {
         name: 'New User',
       }
 
-      vi.spyOn(authService, 'register').mockResolvedValue({
+      vi.spyOn(registrationService, 'register').mockResolvedValue({
         message:
           'Registration successful. Please check your email to verify your account.',
       })
@@ -91,7 +111,7 @@ describe('AuthController', () => {
       const result = await controller.register(dto)
 
       expect(result.message).toContain('Registration successful')
-      expect(authService.register).toHaveBeenCalledWith(dto)
+      expect(registrationService.register).toHaveBeenCalledWith(dto)
     })
 
     it('should reject duplicate email', async () => {
@@ -101,7 +121,7 @@ describe('AuthController', () => {
         name: 'Existing User',
       }
 
-      vi.spyOn(authService, 'register').mockRejectedValue(
+      vi.spyOn(registrationService, 'register').mockRejectedValue(
         new ConflictException('Email already exists')
       )
 
@@ -111,7 +131,7 @@ describe('AuthController', () => {
 
   describe('POST /auth/verify-email', () => {
     it('should verify email with valid token', async () => {
-      vi.spyOn(authService, 'verifyEmail').mockResolvedValue({
+      vi.spyOn(registrationService, 'verifyEmail').mockResolvedValue({
         message: 'Email verified successfully',
       })
 
@@ -120,7 +140,7 @@ describe('AuthController', () => {
       })
 
       expect(result.message).toBe('Email verified successfully')
-      expect(authService.verifyEmail).toHaveBeenCalledWith(
+      expect(registrationService.verifyEmail).toHaveBeenCalledWith(
         'valid-verification-token'
       )
     })
@@ -200,8 +220,12 @@ describe('AuthController', () => {
   })
 
   describe('POST /auth/logout', () => {
-    it('should logout successfully', async () => {
-      const user = { userId: 'user-123', email: 'test@example.com' }
+    it('should logout successfully and only revoke current session', async () => {
+      const user = {
+        userId: 'user-123',
+        email: 'test@example.com',
+        sessionId: 'session-456',
+      }
 
       vi.spyOn(authService, 'logout').mockResolvedValue(undefined)
 
@@ -210,16 +234,19 @@ describe('AuthController', () => {
       expect(result.message).toBe('Logged out successfully')
       expect(authService.logout).toHaveBeenCalledWith(
         'user-123',
+        'session-456',
         'mock-refresh-token',
         'mock-access-token'
       )
-      expect(mockResponse.clearCookie).toHaveBeenCalledWith('refreshToken')
+      expect(mockResponse.clearCookie).toHaveBeenCalledWith('refreshToken', {
+        path: '/',
+      })
     })
   })
 
   describe('POST /auth/forgot-password', () => {
     it('should send password reset email', async () => {
-      vi.spyOn(authService, 'forgotPassword').mockResolvedValue({
+      vi.spyOn(passwordManagementService, 'forgotPassword').mockResolvedValue({
         message: 'If the email exists, a reset link has been sent.',
       })
 
@@ -231,7 +258,7 @@ describe('AuthController', () => {
     })
 
     it('should return same response for non-existent email (security)', async () => {
-      vi.spyOn(authService, 'forgotPassword').mockResolvedValue({
+      vi.spyOn(passwordManagementService, 'forgotPassword').mockResolvedValue({
         message: 'If the email exists, a reset link has been sent.',
       })
 
@@ -246,7 +273,7 @@ describe('AuthController', () => {
 
   describe('POST /auth/reset-password', () => {
     it('should reset password with valid token', async () => {
-      vi.spyOn(authService, 'resetPassword').mockResolvedValue({
+      vi.spyOn(passwordManagementService, 'resetPassword').mockResolvedValue({
         message: 'Password reset successfully',
       })
 
@@ -256,7 +283,7 @@ describe('AuthController', () => {
       })
 
       expect(result.message).toBe('Password reset successfully')
-      expect(authService.resetPassword).toHaveBeenCalledWith(
+      expect(passwordManagementService.resetPassword).toHaveBeenCalledWith(
         'valid-reset-token',
         'NewSecurePassword123!'
       )
@@ -267,7 +294,10 @@ describe('AuthController', () => {
     it('should send password setup email for OAuth user', async () => {
       const userId = 'oauth-user-123'
 
-      vi.spyOn(authService, 'requestPasswordSetup').mockResolvedValue({
+      vi.spyOn(
+        passwordManagementService,
+        'requestPasswordSetup'
+      ).mockResolvedValue({
         message: 'Password setup email sent. Check your inbox.',
         code: 'PASSWORD_SETUP_EMAIL_SENT',
       })
@@ -276,7 +306,9 @@ describe('AuthController', () => {
 
       expect(result.code).toBe('PASSWORD_SETUP_EMAIL_SENT')
       expect(result.message).toContain('Password setup email sent')
-      expect(authService.requestPasswordSetup).toHaveBeenCalledWith(
+      expect(
+        passwordManagementService.requestPasswordSetup
+      ).toHaveBeenCalledWith(
         userId,
         '127.0.0.1',
         expect.objectContaining({ userAgent: 'Test Browser' })
@@ -286,7 +318,10 @@ describe('AuthController', () => {
     it('should reject if user already has password', async () => {
       const userId = 'user-with-password'
 
-      vi.spyOn(authService, 'requestPasswordSetup').mockRejectedValue(
+      vi.spyOn(
+        passwordManagementService,
+        'requestPasswordSetup'
+      ).mockRejectedValue(
         new AuthException(
           'Password already set for this account',
           'PASSWORD_ALREADY_SET' as never

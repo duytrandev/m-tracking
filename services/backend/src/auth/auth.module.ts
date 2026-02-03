@@ -4,6 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { JwtModule } from '@nestjs/jwt'
 import { PassportModule } from '@nestjs/passport'
 import { ThrottlerModule } from '@nestjs/throttler'
+import { EventEmitterModule } from '@nestjs/event-emitter'
 import {
   User,
   Role,
@@ -23,6 +24,8 @@ import {
   SessionService,
   SessionActivityService,
   AnomalyDetectionService,
+  RegistrationService,
+  PasswordManagementService,
 } from './services'
 import { OAuthService } from './services/oauth.service'
 import { JwtStrategy } from './strategies/jwt.strategy'
@@ -32,6 +35,7 @@ import { FacebookStrategy } from './strategies/facebook.strategy'
 import { JwtAuthGuard } from './guards/jwt-auth.guard'
 import { GoogleAuthGuard } from './guards/google-auth.guard'
 import { SessionEventsListener } from './listeners/session-events.listener'
+import { AuthAuditListener } from './listeners/auth-audit.listener'
 import * as fs from 'fs'
 
 /**
@@ -49,6 +53,7 @@ import * as fs from 'fs'
       EmailVerificationToken,
     ]),
     ConfigModule,
+    EventEmitterModule.forRoot(),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     ThrottlerModule.forRoot([
       {
@@ -83,7 +88,11 @@ import * as fs from 'fs'
   ],
   controllers: [AuthController, OAuthController],
   providers: [
+    // Core auth services
     AuthService,
+    RegistrationService,
+    PasswordManagementService,
+    // Infrastructure services
     PasswordService,
     EmailService,
     TokenService,
@@ -91,17 +100,23 @@ import * as fs from 'fs'
     SessionActivityService,
     AnomalyDetectionService,
     OAuthService,
+    // Strategies
     JwtStrategy,
     GoogleStrategy,
     GitHubStrategy,
     FacebookStrategy,
+    // Guards
     JwtAuthGuard,
     GoogleAuthGuard,
+    // Event listeners
     SessionEventsListener,
+    AuthAuditListener,
   ],
   exports: [
     TypeOrmModule,
     AuthService,
+    RegistrationService,
+    PasswordManagementService,
     PasswordService,
     TokenService,
     SessionService,

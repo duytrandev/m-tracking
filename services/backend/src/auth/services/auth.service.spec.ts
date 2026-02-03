@@ -1,18 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
-import { Repository, UpdateResult } from 'typeorm'
+import { Repository } from 'typeorm'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { EventEmitter2 } from '@nestjs/event-emitter'
 import { AuthErrorCode } from '@m-tracking/shared'
 import { AuthException } from '../../common/exceptions/auth.exception'
-import { RegisterDto } from '../dto/register.dto'
-import { EmailVerificationToken } from '../entities/email-verification-token.entity'
-import { PasswordResetToken } from '../entities/password-reset-token.entity'
-import { Role } from '../entities/role.entity'
 import { User } from '../entities/user.entity'
 import type { RedisSessionData } from '../interfaces/session.interface'
 import { CryptoService } from '../../shared/crypto/crypto.service'
 import { AuthService } from './auth.service'
-import { EmailService } from './email.service'
 import { PasswordService } from './password.service'
 import { SessionService } from './session.service'
 import { SessionActivityService } from './session-activity.service'
@@ -22,11 +18,7 @@ import { TokenService } from './token.service'
 describe('AuthService', () => {
   let service: AuthService
   let userRepository: Repository<User>
-  let roleRepository: Repository<Role>
-  let verificationTokenRepository: Repository<EmailVerificationToken>
-  let resetTokenRepository: Repository<PasswordResetToken>
   let passwordService: PasswordService
-  let emailService: EmailService
   let tokenService: TokenService
   let sessionService: SessionService
 
@@ -47,11 +39,7 @@ describe('AuthService', () => {
       language: 'en',
       currency: 'USD',
       timezone: 'UTC',
-      notifications: {
-        email: true,
-        push: true,
-        sms: false,
-      },
+      notifications: { email: true, push: true, sms: false },
     },
     oauthAccounts: [],
     passwordResetTokens: [],
@@ -60,42 +48,12 @@ describe('AuthService', () => {
     updatedAt: new Date(),
   } as unknown as User
 
-  const mockRole = {
-    id: 'role-1',
-    name: 'user',
-  } as Role
-
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         {
           provide: getRepositoryToken(User),
-          useValue: {
-            findOne: vi.fn(),
-            create: vi.fn(),
-            save: vi.fn(),
-            update: vi.fn(),
-            createQueryBuilder: vi.fn(),
-          },
-        },
-        {
-          provide: getRepositoryToken(Role),
-          useValue: {
-            findOne: vi.fn(),
-          },
-        },
-        {
-          provide: getRepositoryToken(EmailVerificationToken),
-          useValue: {
-            findOne: vi.fn(),
-            create: vi.fn(),
-            save: vi.fn(),
-            update: vi.fn(),
-          },
-        },
-        {
-          provide: getRepositoryToken(PasswordResetToken),
           useValue: {
             findOne: vi.fn(),
             create: vi.fn(),
@@ -122,14 +80,6 @@ describe('AuthService', () => {
             compare: vi.fn(),
             generateToken: vi.fn(),
             hashToken: vi.fn(),
-          },
-        },
-        {
-          provide: EmailService,
-          useValue: {
-            sendVerificationEmail: vi.fn(),
-            sendPasswordResetEmail: vi.fn(),
-            sendPasswordSetupEmail: vi.fn(),
           },
         },
         {
@@ -169,78 +119,20 @@ describe('AuthService', () => {
             checkForAnomalies: vi.fn(),
           },
         },
+        {
+          provide: EventEmitter2,
+          useValue: {
+            emit: vi.fn(),
+          },
+        },
       ],
     }).compile()
 
     service = module.get<AuthService>(AuthService)
     userRepository = module.get<Repository<User>>(getRepositoryToken(User))
-    roleRepository = module.get<Repository<Role>>(getRepositoryToken(Role))
-    verificationTokenRepository = module.get<
-      Repository<EmailVerificationToken>
-    >(getRepositoryToken(EmailVerificationToken))
-    resetTokenRepository = module.get<Repository<PasswordResetToken>>(
-      getRepositoryToken(PasswordResetToken)
-    )
     passwordService = module.get<PasswordService>(PasswordService)
-    emailService = module.get<EmailService>(EmailService)
     tokenService = module.get<TokenService>(TokenService)
     sessionService = module.get<SessionService>(SessionService)
-  })
-
-  describe('register', () => {
-    it('should register a new user successfully', async () => {
-      const dto: RegisterDto = {
-        email: 'newuser@example.com',
-        password: 'SecurePassword123',
-        name: 'New User',
-      }
-
-      vi.spyOn(userRepository, 'findOne').mockResolvedValue(null)
-      vi.spyOn(passwordService, 'hash').mockResolvedValue('hashedPassword')
-      vi.spyOn(userRepository, 'create').mockReturnValue(mockUser)
-      vi.spyOn(userRepository, 'save').mockResolvedValue(mockUser)
-      vi.spyOn(roleRepository, 'findOne').mockResolvedValue(mockRole)
-      vi.spyOn(passwordService, 'generateToken').mockReturnValue(
-        'verification-token'
-      )
-      vi.spyOn(passwordService, 'hashToken').mockReturnValue('hashed-token')
-      vi.spyOn(verificationTokenRepository, 'create').mockReturnValue(
-        {} as EmailVerificationToken
-      )
-      vi.spyOn(verificationTokenRepository, 'save').mockResolvedValue(
-        {} as EmailVerificationToken
-      )
-      vi.spyOn(emailService, 'sendVerificationEmail').mockResolvedValue(
-        undefined
-      )
-
-      const result = await service.register(dto)
-
-      expect(result.message).toContain('Registration successful')
-      expect(userRepository.findOne).toHaveBeenCalledWith({
-        where: { email: dto.email },
-        select: ['id', 'email', 'password'],
-      })
-      expect(passwordService.hash).toHaveBeenCalledWith(dto.password)
-      expect(emailService.sendVerificationEmail).toHaveBeenCalled()
-    })
-
-    it('should throw AuthException if email already exists', async () => {
-      const dto: RegisterDto = {
-        email: 'existing@example.com',
-        password: 'password',
-        name: 'User',
-      }
-
-      vi.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser)
-
-      await expect(service.register(dto)).rejects.toThrow(AuthException)
-      await expect(service.register(dto)).rejects.toMatchObject({
-        response: expect.objectContaining({
-          code: AuthErrorCode.EMAIL_ALREADY_REGISTERED,
-        }),
-      })
-    })
   })
 
   describe('validateUser', () => {
@@ -458,208 +350,38 @@ describe('AuthService', () => {
     })
   })
 
-  describe('verifyEmail', () => {
-    it('should verify email with valid token', async () => {
-      const token = 'verification-token'
-      const tokenHash = 'hashed-token'
-      const mockVerificationToken = {
-        id: 'token-123',
-        userId: 'user-123',
-        tokenHash,
-        expiresAt: new Date(Date.now() + 1000000),
-        used: false,
-      }
-
-      vi.spyOn(passwordService, 'hashToken').mockReturnValue(tokenHash)
-      vi.spyOn(verificationTokenRepository, 'findOne').mockResolvedValue(
-        mockVerificationToken as Partial<EmailVerificationToken> as EmailVerificationToken
-      )
-      vi.spyOn(userRepository, 'update').mockResolvedValue({} as UpdateResult)
-      vi.spyOn(verificationTokenRepository, 'update').mockResolvedValue(
-        {} as UpdateResult
-      )
-
-      const result = await service.verifyEmail(token)
-
-      expect(result.message).toContain('Email verified successfully')
-      expect(userRepository.update).toHaveBeenCalledWith('user-123', {
-        emailVerified: true,
-      })
-    })
-
-    it('should throw AuthException for invalid token', async () => {
-      vi.spyOn(passwordService, 'hashToken').mockReturnValue('hash')
-      vi.spyOn(verificationTokenRepository, 'findOne').mockResolvedValue(null)
-
-      await expect(service.verifyEmail('invalid-token')).rejects.toThrow(
-        AuthException
-      )
-      await expect(service.verifyEmail('invalid-token')).rejects.toMatchObject({
-        response: expect.objectContaining({
-          code: AuthErrorCode.INVALID_TOKEN,
-        }),
-      })
-    })
-  })
-
-  describe('forgotPassword', () => {
-    it('should create reset token and send email', async () => {
+  describe('findById', () => {
+    it('should return user by ID', async () => {
       vi.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser)
-      vi.spyOn(passwordService, 'generateToken').mockReturnValue('reset-token')
-      vi.spyOn(passwordService, 'hashToken').mockReturnValue('hashed-token')
-      vi.spyOn(resetTokenRepository, 'create').mockReturnValue(
-        {} as unknown as PasswordResetToken
-      )
-      vi.spyOn(resetTokenRepository, 'save').mockResolvedValue(
-        {} as unknown as PasswordResetToken
-      )
-      vi.spyOn(emailService, 'sendPasswordResetEmail').mockResolvedValue(
-        undefined
-      )
 
-      const result = await service.forgotPassword('test@example.com')
+      const result = await service.findById('user-123')
 
-      expect(result.message).toContain('reset link has been sent')
-      expect(emailService.sendPasswordResetEmail).toHaveBeenCalled()
+      expect(result).toEqual(mockUser)
+      expect(userRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 'user-123' },
+        relations: ['roles'],
+      })
     })
 
-    it('should return generic message for non-existent email', async () => {
+    it('should return null if user not found', async () => {
       vi.spyOn(userRepository, 'findOne').mockResolvedValue(null)
 
-      const result = await service.forgotPassword('notfound@example.com')
+      const result = await service.findById('invalid-id')
 
-      expect(result.message).toContain('reset link has been sent')
+      expect(result).toBeNull()
     })
   })
 
-  describe('resetPassword', () => {
-    it('should reset password with valid token', async () => {
-      const token = 'reset-token'
-      const newPassword = 'NewSecurePassword123'
-      const mockResetToken = {
-        id: 'token-123',
-        userId: 'user-123',
-        tokenHash: 'hashed-token',
-        expiresAt: new Date(Date.now() + 1000000),
-        used: false,
-      }
+  describe('findByEmail', () => {
+    it('should return user by email', async () => {
+      vi.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser)
 
-      vi.spyOn(passwordService, 'hashToken').mockReturnValue('hashed-token')
-      vi.spyOn(resetTokenRepository, 'findOne').mockResolvedValue(
-        mockResetToken as Partial<PasswordResetToken> as PasswordResetToken
-      )
-      vi.spyOn(passwordService, 'hash').mockResolvedValue('new-hashed-password')
-      vi.spyOn(userRepository, 'update').mockResolvedValue({} as UpdateResult)
-      vi.spyOn(resetTokenRepository, 'update').mockResolvedValue(
-        {} as UpdateResult
-      )
+      const result = await service.findByEmail('test@example.com')
 
-      const result = await service.resetPassword(token, newPassword)
-
-      expect(result.message).toContain('Password reset successfully')
-      expect(userRepository.update).toHaveBeenCalledWith('user-123', {
-        password: 'new-hashed-password',
-      })
-    })
-
-    it('should throw AuthException for invalid token', async () => {
-      vi.spyOn(passwordService, 'hashToken').mockReturnValue('hash')
-      vi.spyOn(resetTokenRepository, 'findOne').mockResolvedValue(null)
-
-      await expect(
-        service.resetPassword('invalid-token', 'newpass')
-      ).rejects.toThrow(AuthException)
-      await expect(
-        service.resetPassword('invalid-token', 'newpass')
-      ).rejects.toMatchObject({
-        response: expect.objectContaining({
-          code: AuthErrorCode.INVALID_TOKEN,
-        }),
-      })
-    })
-  })
-
-  describe('requestPasswordSetup', () => {
-    // Helper to create mock QueryBuilder for pessimistic read lock
-    const createMockQueryBuilder = (user: Partial<User> | null) => ({
-      setLock: vi.fn().mockReturnThis(),
-      where: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-      getOne: vi.fn().mockResolvedValue(user),
-    })
-
-    it('should send setup email for OAuth user without password', async () => {
-      const userId = 'oauth-user-id'
-      const oauthUser = {
-        id: userId,
-        email: 'oauth@example.com',
-        password: '', // OAuth user has no password
-      }
-
-      vi.spyOn(userRepository, 'createQueryBuilder').mockReturnValue(
-        createMockQueryBuilder(oauthUser as Partial<User> as User) as never
-      )
-      vi.spyOn(resetTokenRepository, 'findOne').mockResolvedValue(null) // No existing token
-      vi.spyOn(passwordService, 'generateToken').mockReturnValue('setup-token')
-      vi.spyOn(passwordService, 'hashToken').mockReturnValue('hashed-token')
-      vi.spyOn(resetTokenRepository, 'create').mockReturnValue(
-        {} as PasswordResetToken
-      )
-      vi.spyOn(resetTokenRepository, 'save').mockResolvedValue(
-        {} as PasswordResetToken
-      )
-      vi.spyOn(emailService, 'sendPasswordSetupEmail').mockResolvedValue(
-        undefined
-      )
-
-      const result = await service.requestPasswordSetup(userId)
-
-      expect(result.code).toBe('PASSWORD_SETUP_EMAIL_SENT')
-      expect(result.message).toContain('Password setup email sent')
-      expect(emailService.sendPasswordSetupEmail).toHaveBeenCalledWith(
-        'oauth@example.com',
-        'setup-token'
-      )
-    })
-
-    it('should throw AuthException if user already has password', async () => {
-      const userId = 'user-with-password'
-      const userWithPassword = {
-        id: userId,
-        email: 'test@example.com',
-        password: 'hashedPassword', // User already has password
-      }
-
-      vi.spyOn(userRepository, 'createQueryBuilder').mockReturnValue(
-        createMockQueryBuilder(
-          userWithPassword as Partial<User> as User
-        ) as never
-      )
-
-      await expect(service.requestPasswordSetup(userId)).rejects.toThrow(
-        AuthException
-      )
-      await expect(service.requestPasswordSetup(userId)).rejects.toMatchObject({
-        response: expect.objectContaining({
-          code: AuthErrorCode.PASSWORD_ALREADY_SET,
-        }),
-      })
-    })
-
-    it('should throw AuthException if user not found', async () => {
-      vi.spyOn(userRepository, 'createQueryBuilder').mockReturnValue(
-        createMockQueryBuilder(null) as never
-      )
-
-      await expect(service.requestPasswordSetup('invalid-id')).rejects.toThrow(
-        AuthException
-      )
-      await expect(
-        service.requestPasswordSetup('invalid-id')
-      ).rejects.toMatchObject({
-        response: expect.objectContaining({
-          code: AuthErrorCode.USER_NOT_FOUND,
-        }),
+      expect(result).toEqual(mockUser)
+      expect(userRepository.findOne).toHaveBeenCalledWith({
+        where: { email: 'test@example.com' },
+        relations: ['roles'],
       })
     })
   })
