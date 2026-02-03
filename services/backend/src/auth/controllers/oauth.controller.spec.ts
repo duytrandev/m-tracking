@@ -35,6 +35,8 @@ describe('OAuthController', () => {
   const mockRedisService = {
     storeOAuthCode: vi.fn(),
     consumeOAuthCode: vi.fn(),
+    storeOAuthState: vi.fn(),
+    getOAuthState: vi.fn(),
   }
 
   const mockCryptoService = {
@@ -268,6 +270,110 @@ describe('OAuthController', () => {
         'google'
       )
       expect(result.message).toContain('unlinked successfully')
+    })
+  })
+
+  describe('PKCE Flow', () => {
+    describe('googleAuth with PKCE', () => {
+      it('should store PKCE state when challenge and state provided', async () => {
+        mockRedisService.storeOAuthState.mockResolvedValue(undefined)
+
+        await controller.googleAuth('test-challenge', 'test-state')
+
+        expect(mockRedisService.storeOAuthState).toHaveBeenCalledWith(
+          'test-state',
+          { challenge: 'test-challenge' }
+        )
+      })
+
+      it('should not store state when PKCE params missing', async () => {
+        // Clear mock from previous test
+        mockRedisService.storeOAuthState.mockClear()
+
+        await controller.googleAuth(undefined, undefined)
+
+        expect(mockRedisService.storeOAuthState).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('exchangeCode with PKCE', () => {
+      it('should exchange code without PKCE verification', async () => {
+        mockRedisService.consumeOAuthCode.mockResolvedValue({
+          accessToken: 'access-token',
+          userId: 'user-123',
+        })
+
+        const result = await controller.exchangeCode({
+          code: 'valid-auth-code-1234567890123456789012345',
+        })
+
+        expect(mockRedisService.consumeOAuthCode).toHaveBeenCalledWith(
+          'valid-auth-code-1234567890123456789012345'
+        )
+        expect(result.accessToken).toBe('access-token')
+        expect(result.expiresIn).toBe(900)
+      })
+
+      it('should verify PKCE when codeVerifier and state provided', async () => {
+        // Generate a valid verifier/challenge pair for testing
+        const testVerifier = 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk'
+        const testChallenge = 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM'
+
+        mockRedisService.getOAuthState.mockResolvedValue({
+          challenge: testChallenge,
+        })
+        mockRedisService.consumeOAuthCode.mockResolvedValue({
+          accessToken: 'access-token',
+          userId: 'user-123',
+        })
+
+        const result = await controller.exchangeCode({
+          code: 'valid-auth-code-1234567890123456789012345',
+          codeVerifier: testVerifier,
+          state: 'test-state-12345678901234567890',
+        })
+
+        expect(mockRedisService.getOAuthState).toHaveBeenCalledWith(
+          'test-state-12345678901234567890'
+        )
+        expect(result.accessToken).toBe('access-token')
+      })
+
+      it('should reject when PKCE state not found', async () => {
+        mockRedisService.getOAuthState.mockResolvedValue(null)
+
+        await expect(
+          controller.exchangeCode({
+            code: 'valid-auth-code-1234567890123456789012345',
+            codeVerifier: 'test-verifier-that-is-at-least-43-characters-long',
+            state: 'test-state-12345678901234567890',
+          })
+        ).rejects.toThrow()
+      })
+
+      it('should reject when PKCE challenge verification fails', async () => {
+        mockRedisService.getOAuthState.mockResolvedValue({
+          challenge: 'wrong-challenge-value-for-testing-purposes',
+        })
+
+        await expect(
+          controller.exchangeCode({
+            code: 'valid-auth-code-1234567890123456789012345',
+            codeVerifier: 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk',
+            state: 'test-state-12345678901234567890',
+          })
+        ).rejects.toThrow()
+      })
+
+      it('should reject when auth code is invalid', async () => {
+        mockRedisService.consumeOAuthCode.mockResolvedValue(null)
+
+        await expect(
+          controller.exchangeCode({
+            code: 'invalid-auth-code-123456789012345678901',
+          })
+        ).rejects.toThrow()
+      })
     })
   })
 })

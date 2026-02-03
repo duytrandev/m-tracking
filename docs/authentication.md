@@ -83,17 +83,17 @@ M-Tracking implements a comprehensive authentication system with multiple login 
 
 ### OAuth Endpoints
 
-| Method | Path                             | Auth   | Purpose                             |
-| ------ | -------------------------------- | ------ | ----------------------------------- |
-| GET    | `/auth/google`                   | Public | Redirect to Google OAuth login      |
-| GET    | `/auth/google/callback`          | Public | Handle Google OAuth callback        |
-| GET    | `/auth/github`                   | Public | Redirect to GitHub OAuth login      |
-| GET    | `/auth/github/callback`          | Public | Handle GitHub OAuth callback        |
-| GET    | `/auth/facebook`                 | Public | Redirect to Facebook OAuth login    |
-| GET    | `/auth/facebook/callback`        | Public | Handle Facebook OAuth callback      |
-| POST   | `/auth/oauth/exchange`           | Public | Exchange auth code for access token |
-| GET    | `/auth/oauth/accounts`           | JWT    | Get user's linked OAuth accounts    |
-| DELETE | `/auth/oauth/accounts/:provider` | JWT    | Unlink OAuth account                |
+| Method | Path                             | Auth   | Purpose                                             |
+| ------ | -------------------------------- | ------ | --------------------------------------------------- |
+| GET    | `/auth/google`                   | Public | Redirect to Google OAuth login                      |
+| GET    | `/auth/google/callback`          | Public | Handle Google OAuth callback                        |
+| GET    | `/auth/github`                   | Public | Redirect to GitHub OAuth login                      |
+| GET    | `/auth/github/callback`          | Public | Handle GitHub OAuth callback                        |
+| GET    | `/auth/facebook`                 | Public | Redirect to Facebook OAuth login                    |
+| GET    | `/auth/facebook/callback`        | Public | Handle Facebook OAuth callback                      |
+| POST   | `/auth/oauth/exchange`           | Public | Exchange auth code for access token (supports PKCE) |
+| GET    | `/auth/oauth/accounts`           | JWT    | Get user's linked OAuth accounts                    |
+| DELETE | `/auth/oauth/accounts/:provider` | JWT    | Unlink OAuth account                                |
 
 ### Two-Factor Authentication Endpoints
 
@@ -480,36 +480,49 @@ Currently **permission enforcement not yet implemented** in API endpoints. Roles
 - Public email required (not all users expose)
 - Requires: FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, FACEBOOK_CALLBACK_URL
 
-### OAuth Flow
+### OAuth Flow with PKCE
 
 ```
-1. User clicks "Sign in with Google"
-   └─> Frontend redirects to GET /auth/google
+1. Frontend initiates PKCE flow (if browser supports Web Crypto API)
+   └─> Generate code_verifier (43-128 chars base64url)
+   └─> Generate state token (CSRF protection)
+   └─> Compute code_challenge = BASE64URL(SHA256(code_verifier))
+   └─> Store verifier + state in sessionStorage (single-use, cleared after callback)
 
-2. Backend redirects to Google login
+2. User clicks "Sign in with Google"
+   └─> Frontend redirects to GET /auth/google?code_challenge={challenge}&state={state}&code_challenge_method=S256
+
+3. Backend redirects to Google login
    └─> Google OAuth flow (user authenticates)
 
-3. Google redirects back to GET /auth/google/callback
-   └─> Passport validates, creates/updates user
-   └─> OAuthAccount record created/updated
+4. Google redirects back to GET /auth/google/callback
+   └─> Passport validates code + state
+   └─> Creates/updates user and OAuthAccount record
+   └─> Stores code_challenge in Redis (for callback verification)
    └─> Access + refresh tokens generated
    └─> Refresh token set in httpOnly cookie
    └─> Authorization code stored in Redis (60s TTL, single-use)
    └─> Redirect to frontend: /auth/oauth/callback?code={authCode}
 
-4. Frontend exchanges code for access token
-   └─> POST /auth/oauth/exchange with authorization code
-   └─> Backend retrieves token from Redis, deletes code (single-use)
+5. Frontend exchanges code for access token (with PKCE verification)
+   └─> Retrieve stored code_verifier + state from sessionStorage
+   └─> POST /auth/oauth/exchange { code, codeVerifier, state }
+   └─> Backend verifies: SHA256(codeVerifier) === stored_challenge (timing-safe)
+   └─> Backend verifies: state matches stored value
+   └─> Token from Redis retrieved, code deleted (single-use)
    └─> Access token returned in response body
-   └─> Frontend stores token, fetches user profile, redirects to dashboard
+   └─> Frontend clears sessionStorage, stores token, redirects to dashboard
 ```
 
-**Security Note**: Authorization code pattern prevents token exposure in:
+**Security Benefits of PKCE (RFC 7636)**:
 
-- Browser history
-- Server logs
-- HTTP Referer headers
-- Browser extensions
+1. **Authorization Code Interception Prevention**: Code alone is useless without the code_verifier
+2. **Timing-Safe Verification**: Backend uses `crypto.timingSafeEqual()` to prevent timing attacks
+3. **State Validation**: CSRF protection via independent state parameter
+4. **Single-Use Data**: PKCE verifier stored only in sessionStorage, cleared after use
+5. **SessionStorage Scope**: Verifier not shared across tabs (single-tab security)
+
+**Fallback Mechanism**: If browser lacks Web Crypto API, flow falls back to standard OAuth code exchange
 
 ### Account Linking
 
@@ -530,6 +543,62 @@ Currently **permission enforcement not yet implemented** in API endpoints. Roles
 - Provider OAuth tokens encrypted using AES encryption (configurable)
 - Storage enables account refresh without re-authentication
 - Tokens can be revoked per provider
+
+### PKCE Implementation Details
+
+**Frontend PKCE Utilities** (`apps/frontend/src/features/auth/utils/pkce.ts`):
+
+```typescript
+// Generate cryptographically secure code verifier (43-128 chars)
+const verifier = generateCodeVerifier()
+
+// Generate random state parameter for CSRF protection
+const state = generateState()
+
+// Compute S256 code challenge from verifier (async)
+const challenge = await generateCodeChallenge(verifier)
+
+// Store verifier + state in sessionStorage (single-use)
+storePkceData(verifier, state)
+
+// Retrieve and clear PKCE data (single-use, auto-clears)
+const { verifier, state } = getAndClearPkceData()
+
+// Check browser support for Web Crypto API
+const supported = isPkceSupported()
+```
+
+**Backend PKCE Utilities** (`services/backend/src/auth/utils/pkce.util.ts`):
+
+```typescript
+// Generate cryptographically secure code verifier
+const verifier = generateCodeVerifier()
+
+// Compute S256 code challenge from verifier
+const challenge = generateCodeChallenge(verifier)
+
+// Verify code challenge with timing-safe comparison
+const isValid = verifyCodeChallenge(verifier, storedChallenge)
+```
+
+**OAuth Exchange DTO** (`services/backend/src/auth/dto/oauth-exchange.dto.ts`):
+
+```typescript
+{
+  code: string                    // Authorization code (32-64 chars)
+  codeVerifier?: string           // PKCE verifier (43-128 chars) - optional for non-PKCE
+  state?: string                  // CSRF state parameter (16-64 chars) - optional for non-PKCE
+}
+```
+
+**Integration in useOAuth Hook**:
+
+1. Check `isPkceSupported()` before attempting PKCE flow
+2. Generate verifier, state, and challenge if supported
+3. Store verifier + state in sessionStorage immediately
+4. Append challenge, state, and method to OAuth URL
+5. On callback, retrieve verifier + state and include in exchange request
+6. Backend verifies challenge before issuing tokens
 
 ---
 

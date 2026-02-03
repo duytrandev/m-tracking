@@ -386,4 +386,42 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     await this.del(key)
     return JSON.parse(data) as { accessToken: string; userId: string }
   }
+
+  // =========================================
+  // OAuth PKCE State Management
+  // =========================================
+
+  /**
+   * Store OAuth state for PKCE flow
+   * State ties code_challenge to OAuth callback for CSRF + PKCE protection
+   * @param state Random state parameter (CSRF protection)
+   * @param data PKCE challenge and optional redirect URI
+   * @param ttl Time to live in seconds (default 10 minutes)
+   */
+  async storeOAuthState(
+    state: string,
+    data: { challenge: string; redirectUri?: string },
+    ttl = 600
+  ): Promise<void> {
+    const key = `oauth:state:${state}`
+    await this.set(key, JSON.stringify(data), ttl)
+  }
+
+  /**
+   * Retrieve and delete OAuth state (single-use)
+   * Deletes immediately after retrieval to prevent replay
+   * @param state State parameter from OAuth callback
+   * @returns PKCE data or null if expired/invalid
+   */
+  async getOAuthState(
+    state: string
+  ): Promise<{ challenge: string; redirectUri?: string } | null> {
+    const key = `oauth:state:${state}`
+    const data = await this.get(key)
+    if (!data) return null
+
+    // Single-use: delete immediately
+    await this.del(key)
+    return JSON.parse(data) as { challenge: string; redirectUri?: string }
+  }
 }

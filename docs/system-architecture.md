@@ -574,37 +574,50 @@ Route Protection:
 async deleteUser() {}
 ```
 
-### OAuth Flow (Google Example)
+### OAuth Flow with PKCE (Google Example)
 
 ```
-1. Frontend redirects to: /auth/google
-   → Parameter: redirect_uri = frontend_callback_url
+1. Frontend initiates PKCE generation (if Web Crypto supported)
+   → Generate verifier + challenge + state
+   → Store verifier + state in sessionStorage
 
-2. Backend initiates OAuth with Google
-   → Generates state + PKCE challenge
-   → Redirects to Google consent screen
+2. Frontend redirects to: /auth/google?code_challenge={challenge}&state={state}&code_challenge_method=S256
+   → Google OAuth flow initiated with PKCE parameters
 
 3. User consents on Google
    → Google redirects back with auth code + state
 
-4. Backend exchanges code for tokens
-   → Validates state + PKCE
-   → Gets user profile from Google
+4. Backend processes callback: GET /auth/google/callback
+   → Validates code + state parameters
+   → Retrieves user profile from Google
+   → Stores code_challenge in Redis for verification
+   → Generates M-Tracking authorization code
+   → Redirect to frontend: /auth/oauth/callback?code={authCode}
 
-5. Check/Create OAuthAccount
-   → If exists: Link to existing user
-   → If new: Create user + oauth account (no password)
+5. Frontend exchanges code for access token: POST /auth/oauth/exchange
+   → Retrieve stored verifier + state from sessionStorage
+   → Send: { code, codeVerifier, state } in request body
+   → Clear sessionStorage (single-use data deleted)
 
-6. Generate M-Tracking tokens
-   → Create access token
-   → Create refresh token
-   → Return to frontend
+6. Backend verifies and exchanges token
+   → Validate state parameter (CSRF protection)
+   → Verify: SHA256(codeVerifier) === stored_challenge (timing-safe)
+   → Retrieve authorization code from Redis, delete (single-use)
+   → Create/link OAuthAccount to user
+   → Generate access token + refresh token
 
-7. Optional: User sets password later (Phase 2 enhancement)
+7. Frontend receives access token
+   → Stores in memory (TokenService)
+   → Fetches user profile
+   → Redirects to dashboard
+
+8. Optional: User sets password later (Phase 2 enhancement)
    → Call POST /auth/add-password/request (authenticated, with request locking)
    → Backend sends setup email (1-hour token)
    → User completes password setup via reset flow
    → FlexibleAuthRoute handles seamless transition in register flow
+
+**Fallback**: If Web Crypto API unavailable, flow uses standard OAuth code exchange
 ```
 
 ---

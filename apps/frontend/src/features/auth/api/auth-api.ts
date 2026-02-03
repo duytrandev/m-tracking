@@ -141,6 +141,38 @@ export const authApi = {
     return response.data
   },
 
+  /**
+   * OAuth code exchange with optional PKCE verification
+   * Exchanges authorization code for access token
+   * @param code Authorization code from OAuth callback
+   * @param pkceData Optional PKCE verifier and state for enhanced security
+   */
+  exchangeOAuthCode: async (
+    code: string,
+    pkceData?: { codeVerifier: string; state: string }
+  ): Promise<{ accessToken: string; expiresIn: number }> => {
+    const payload: {
+      code: string
+      codeVerifier?: string
+      state?: string
+    } = { code }
+
+    if (pkceData) {
+      payload.codeVerifier = pkceData.codeVerifier
+      payload.state = pkceData.state
+    }
+
+    const response = await apiClient.post<{
+      accessToken: string
+      expiresIn: number
+    }>('/auth/oauth/exchange', payload)
+
+    if (response.data.accessToken) {
+      setAuthToken(response.data.accessToken, response.data.expiresIn)
+    }
+    return response.data
+  },
+
   // Magic Link
   requestMagicLink: async (email: string): Promise<MessageResponse> => {
     const response = await apiClient.post<MessageResponse>(
