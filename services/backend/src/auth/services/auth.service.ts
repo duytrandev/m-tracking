@@ -8,9 +8,12 @@ import { EmailVerificationToken } from '../entities/email-verification-token.ent
 import { PasswordResetToken } from '../entities/password-reset-token.entity'
 import { Role } from '../entities/role.entity'
 import { User } from '../entities/user.entity'
+import { CryptoService } from '../../shared/crypto/crypto.service'
 import { EmailService } from './email.service'
 import { PasswordService } from './password.service'
 import { SessionService } from './session.service'
+import { SessionActivityService } from './session-activity.service'
+import { AnomalyDetectionService } from './anomaly-detection.service'
 import { TokenService } from './token.service'
 
 @Injectable()
@@ -26,10 +29,13 @@ export class AuthService {
     private verificationTokenRepository: Repository<EmailVerificationToken>,
     @InjectRepository(PasswordResetToken)
     private resetTokenRepository: Repository<PasswordResetToken>,
+    private cryptoService: CryptoService,
     private passwordService: PasswordService,
     private emailService: EmailService,
     private tokenService: TokenService,
-    private sessionService: SessionService
+    private sessionService: SessionService,
+    private sessionActivityService: SessionActivityService,
+    private anomalyDetectionService: AnomalyDetectionService
   ) {}
 
   /**
@@ -43,8 +49,11 @@ export class AuthService {
   ): Promise<{ message: string; code?: string }> {
     this.logger.log(`Registration attempt for email: ${dto.email}`)
     // Check if user already exists
+    // Note: Password has select: false in entity, so we must explicitly select it
+    // to distinguish OAuth-only users (no password) from regular users
     const existingUser = await this.userRepository.findOne({
       where: { email: dto.email },
+      select: ['id', 'email', 'password'],
     })
 
     if (existingUser) {
@@ -143,6 +152,104 @@ export class AuthService {
   }
 
   /**
+   * Resend verification email
+   * @param email User email
+   * @returns Success message
+   */
+  async resendVerificationEmail(email: string): Promise<{ message: string }> {
+    this.logger.log(`Resend verification request for email: ${email}`)
+
+    const user = await this.userRepository.findOne({
+      where: { email },
+      select: ['id', 'email', 'emailVerified'],
+    })
+
+    // Don't reveal if email exists (security best practice)
+    if (!user) {
+      this.logger.log(
+        `Resend verification requested for non-existent email: ${email}`
+      )
+      return {
+        message:
+          'If the email exists and is unverified, a new link has been sent.',
+      }
+    }
+
+    // Check if already verified
+    if (user.emailVerified) {
+      this.logger.log(
+        `Resend verification skipped: Email already verified - ${email}`
+      )
+      return {
+        message:
+          'If the email exists and is unverified, a new link has been sent.',
+      }
+    }
+
+    // Check for existing unused token to prevent spam
+    const existingToken = await this.verificationTokenRepository.findOne({
+      where: {
+        userId: user.id,
+        used: false,
+      },
+      order: { createdAt: 'DESC' },
+    })
+
+    // If valid token exists and was created in last 1 minute, don't create new one
+    if (existingToken) {
+      const TOKEN_COOLDOWN_MS = 60 * 1000 // 1 minute
+      const tokenAge = Date.now() - existingToken.createdAt.getTime()
+      if (
+        tokenAge < TOKEN_COOLDOWN_MS &&
+        existingToken.expiresAt > new Date()
+      ) {
+        this.logger.log(
+          `Resend verification throttled: Recent token exists - ${email}`
+        )
+        return {
+          message:
+            'If the email exists and is unverified, a new link has been sent.',
+        }
+      }
+    }
+
+    // Invalidate any existing unused tokens
+    await this.verificationTokenRepository.update(
+      { userId: user.id, used: false },
+      { used: true }
+    )
+
+    // Generate new verification token
+    const token = this.passwordService.generateToken()
+    const tokenHash = this.passwordService.hashToken(token)
+
+    const verificationToken = this.verificationTokenRepository.create({
+      userId: user.id,
+      tokenHash,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+      used: false,
+    })
+
+    await this.verificationTokenRepository.save(verificationToken)
+    this.logger.log(`New verification token created for user: ${user.id}`)
+
+    // Send verification email
+    try {
+      await this.emailService.sendVerificationEmail(user.email, token)
+    } catch (error) {
+      this.logger.error(
+        `Failed to send verification email for user: ${user.id}`,
+        error
+      )
+    }
+
+    return {
+      message:
+        'If the email exists and is unverified, a new link has been sent.',
+    }
+  }
+
+  /**
    * Verify user email with token
    * @param token Verification token from email
    * @returns Success message
@@ -235,6 +342,15 @@ export class AuthService {
     if (!isPasswordValid) {
       this.logger.warn(`Login failed: Invalid password - ${identifier}`)
       return null
+    }
+
+    // Auto-migrate bcrypt hash to Argon2id on successful login
+    if (this.cryptoService.needsMigration(user.password)) {
+      this.logger.log(
+        `Migrating password hash to Argon2id for user: ${user.id}`
+      )
+      const newHash = await this.cryptoService.hashPassword(password)
+      await this.userRepository.update(user.id, { password: newHash })
     }
 
     if (!user.emailVerified) {
@@ -417,6 +533,14 @@ export class AuthService {
     // Update session with final refresh token
     await this.sessionService.updateRefreshToken(session.id, finalRefreshToken)
 
+    // Record login activity
+    await this.sessionActivityService.recordLogin(
+      session.id,
+      user.id,
+      ipAddress,
+      deviceInfo
+    )
+
     return {
       accessToken: finalAccessToken,
       refreshToken: finalRefreshToken,
@@ -434,7 +558,7 @@ export class AuthService {
   /**
    * Refresh access token using refresh token
    */
-  async refresh(refreshToken: string) {
+  async refresh(refreshToken: string, ipAddress?: string) {
     this.logger.log('Token refresh attempt')
 
     // Verify refresh token
@@ -448,7 +572,7 @@ export class AuthService {
     }
 
     // Check session expiration
-    if (session.expiresAt < new Date()) {
+    if (new Date(session.expiresAt) < new Date()) {
       this.logger.warn('Refresh failed: Session expired')
       await this.sessionService.revokeSession(session.id)
       throw AuthExceptions.sessionExpired()
@@ -478,6 +602,22 @@ export class AuthService {
     // Update session with new refresh token
     await this.sessionService.updateRefreshToken(session.id, newRefreshToken)
 
+    // Check for anomalies and record refresh activity
+    if (ipAddress) {
+      await this.anomalyDetectionService.checkForAnomalies(
+        user.id,
+        session.id,
+        {
+          ip: ipAddress,
+        }
+      )
+      await this.sessionActivityService.recordRefresh(
+        session.id,
+        user.id,
+        ipAddress
+      )
+    }
+
     this.logger.log(`Tokens refreshed for user: ${user.id}`)
 
     return {
@@ -488,36 +628,50 @@ export class AuthService {
   }
 
   /**
-   * Logout user and revoke ALL tokens across all devices
-   * This ensures user must re-login on any device
+   * Logout user from current session only
+   * Other devices remain logged in
+   * @param userId User ID
+   * @param sessionId Current session ID to revoke
+   * @param refreshToken Optional refresh token to blacklist
+   * @param accessToken Optional access token to blacklist
    */
   async logout(
     userId: string,
-    _refreshToken?: string,
-    _accessToken?: string
+    sessionId: string,
+    refreshToken?: string,
+    accessToken?: string
   ): Promise<void> {
-    this.logger.log(`Logout attempt for user: ${userId}`)
+    this.logger.log(`Logout attempt for user: ${userId}, session: ${sessionId}`)
+
+    // Blacklist current tokens if provided
+    if (refreshToken) {
+      await this.tokenService.blacklistRefreshToken(refreshToken, userId)
+    }
+    if (accessToken) {
+      await this.tokenService.blacklistAccessToken(accessToken, userId)
+    }
+
+    // Revoke only the current session
+    await this.sessionService.revokeSession(sessionId)
+
+    this.logger.log(
+      `Logout successful - session ${sessionId} revoked for user: ${userId}`
+    )
+  }
+
+  /**
+   * Logout from all devices - revokes ALL sessions and invalidates ALL tokens
+   * Use this for security-sensitive actions (password change, account compromise)
+   * @param userId User ID
+   */
+  async logoutAllDevices(userId: string): Promise<void> {
+    this.logger.log(`Logout all devices for user: ${userId}`)
 
     // Invalidate all tokens by setting invalidation timestamp in Redis
     // Any token issued before this time will be rejected
     await this.tokenService.invalidateAllUserTokens(userId)
 
     // Revoke all sessions from database
-    await this.sessionService.revokeAllUserSessions(userId)
-
-    this.logger.log(
-      `Logout successful - all sessions revoked for user: ${userId}`
-    )
-  }
-
-  /**
-   * Logout from all devices (alias for logout, kept for API compatibility)
-   */
-  async logoutAllDevices(userId: string): Promise<void> {
-    this.logger.log(`Logout all devices for user: ${userId}`)
-
-    // Invalidate all tokens and revoke all sessions
-    await this.tokenService.invalidateAllUserTokens(userId)
     await this.sessionService.revokeAllUserSessions(userId)
 
     this.logger.log(`All devices logged out for user: ${userId}`)

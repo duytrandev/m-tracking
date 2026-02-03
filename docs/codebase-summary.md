@@ -68,6 +68,7 @@ m-tracking/
 │   │   │   │   ├── entities/       # Transaction, Category
 │   │   │   │   └── dto/            # Data transfer objects
 │   │   │   ├── shared/             # Shared services
+│   │   │   │   ├── crypto/         # Cryptographic operations (Argon2id, SHA-256)
 │   │   │   │   ├── redis.service.ts
 │   │   │   │   ├── logger.service.ts
 │   │   │   │   ├── queue.service.ts
@@ -199,7 +200,7 @@ features/{feature}/
 
 - **AuthModule**: User registration, login, OAuth, 2FA, sessions
 - **TransactionsModule**: CRUD operations, categorization, analytics
-- **SharedModule**: Redis, Logger, Queue, Email services (global scope)
+- **SharedModule**: Crypto (Argon2id hashing, token generation), Redis, Logger, Queue, Email services (global scope)
 - **Placeholder Modules**: Banking, Budgets, Notifications (ready for implementation)
 
 ---
@@ -227,6 +228,7 @@ features/{feature}/
 | `src/main.ts`                                      | ~60   | Bootstrap sequence (Sentry, middleware, filters) |
 | `src/auth/auth.service.ts`                         | ~150  | Auth business logic                              |
 | `src/auth/strategies/jwt.strategy.ts`              | ~50   | JWT validation strategy                          |
+| `src/shared/crypto/crypto.service.ts`              | ~100  | Argon2id hashing, token generation, verification |
 | `src/shared/redis.service.ts`                      | ~150  | Redis wrapper with utility methods               |
 | `src/config/database.config.ts`                    | ~40   | PostgreSQL/Supabase configuration                |
 | `src/common/filters/http-exception.filter.ts`      | ~40   | Global error handling                            |
@@ -388,7 +390,8 @@ features/{feature}/
 - **Redis 7**: Cache/sessions
 - **RabbitMQ 3.12**: Message queue (BullMQ)
 - **Passport.js**: Authentication
-- **Bcrypt**: Password hashing
+- **Argon2id**: Password hashing (OWASP 2025 standard)
+- **bcrypt**: Legacy password hashing (for backward compatibility)
 - **Winston**: Logging
 - **Class Validator**: DTO validation
 
@@ -404,6 +407,8 @@ features/{feature}/
 ---
 
 ## Database Schema Summary
+
+> See [authentication.md](./authentication.md#database-schema) for detailed column definitions and [database-migrations.md](./database-migrations.md) for migration commands.
 
 **Core Tables:**
 
@@ -521,6 +526,8 @@ features/{feature}/
 ## Related Documentation
 
 - [docs/system-architecture.md](./system-architecture.md) - Detailed system design
+- [docs/authentication.md](./authentication.md) - Auth system & database schema
+- [docs/database-migrations.md](./database-migrations.md) - Database migrations guide
 - [docs/code-standards.md](./code-standards.md) - Coding standards
 - [docs/project-overview-pdr.md](./project-overview-pdr.md) - Product overview
 - [docs/project-roadmap.md](./project-roadmap.md) - Implementation status

@@ -1,15 +1,18 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { PasswordService } from './password.service'
+import { CryptoService } from '../../shared/crypto/crypto.service'
 
 describe('PasswordService', () => {
   let service: PasswordService
+  let cryptoService: CryptoService
 
   beforeEach(() => {
-    service = new PasswordService()
+    cryptoService = new CryptoService()
+    service = new PasswordService(cryptoService)
   })
 
   describe('hash', () => {
-    it('should hash password using bcrypt', async () => {
+    it('should hash password using Argon2id', async () => {
       const password = 'SecurePassword123'
 
       const hashed = await service.hash(password)
@@ -29,12 +32,12 @@ describe('PasswordService', () => {
       expect(hash1).not.toBe(hash2)
     })
 
-    it('should use bcrypt with salt rounds', async () => {
+    it('should use Argon2id algorithm', async () => {
       const password = 'TestPassword123'
 
       const hashed = await service.hash(password)
 
-      expect(hashed).toMatch(/^\$2[aby]\$/)
+      expect(hashed).toMatch(/^\$argon2id\$/)
     })
 
     it('should handle empty password', async () => {

@@ -4,6 +4,8 @@ import { Response } from 'express'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { JwtAuthGuard } from '../guards/jwt-auth.guard'
 import { OAuthService } from '../services/oauth.service'
+import { CryptoService } from '../../shared/crypto/crypto.service'
+import { RedisService } from '../../shared/redis/redis.service'
 import { OAuthController } from './oauth.controller'
 
 // Mock Response interface implementation for testing
@@ -28,6 +30,16 @@ describe('OAuthController', () => {
 
   const mockConfigService = {
     get: vi.fn().mockReturnValue('http://localhost:3000'),
+  }
+
+  const mockRedisService = {
+    storeOAuthCode: vi.fn(),
+    consumeOAuthCode: vi.fn(),
+  }
+
+  const mockCryptoService = {
+    generateSecureToken: vi.fn().mockReturnValue('secure-auth-code'),
+    hashToken: vi.fn().mockReturnValue('hashed-token'),
   }
 
   const mockRequest = {
@@ -57,6 +69,14 @@ describe('OAuthController', () => {
           provide: ConfigService,
           useValue: mockConfigService,
         },
+        {
+          provide: RedisService,
+          useValue: mockRedisService,
+        },
+        {
+          provide: CryptoService,
+          useValue: mockCryptoService,
+        },
       ],
     })
       .overrideGuard(JwtAuthGuard)
@@ -81,6 +101,7 @@ describe('OAuthController', () => {
       }
 
       mockOAuthService.handleOAuthCallback.mockResolvedValue(mockResult)
+      mockRedisService.storeOAuthCode.mockResolvedValue(undefined)
 
       const mockResponse = createMockResponse()
 
@@ -96,15 +117,23 @@ describe('OAuthController', () => {
         'refresh-token',
         expect.objectContaining({ httpOnly: true })
       )
-      // Verify redirect URL only contains accessToken (not refreshToken)
+      // Verify authorization code is stored in Redis
+      expect(mockRedisService.storeOAuthCode).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          accessToken: 'access-token',
+          userId: 'user-123',
+        })
+      )
+      // Verify redirect URL contains code (not the actual token)
       expect(mockResponse.redirect).toHaveBeenCalledWith(
         expect.stringContaining('http://localhost:3000/auth/oauth/callback')
       )
       expect(mockResponse.redirect).toHaveBeenCalledWith(
-        expect.stringContaining('accessToken=access-token')
+        expect.stringContaining('code=')
       )
       expect(mockResponse.redirect).not.toHaveBeenCalledWith(
-        expect.stringContaining('refreshToken=')
+        expect.stringContaining('accessToken=')
       )
     })
 
@@ -140,6 +169,7 @@ describe('OAuthController', () => {
       }
 
       mockOAuthService.handleOAuthCallback.mockResolvedValue(mockResult)
+      mockRedisService.storeOAuthCode.mockResolvedValue(undefined)
 
       const mockResponse = createMockResponse()
 
@@ -150,8 +180,12 @@ describe('OAuthController', () => {
         'refresh-token',
         expect.objectContaining({ httpOnly: true })
       )
+      expect(mockRedisService.storeOAuthCode).toHaveBeenCalled()
       expect(mockResponse.redirect).toHaveBeenCalledWith(
         expect.stringContaining('http://localhost:3000/auth/oauth/callback')
+      )
+      expect(mockResponse.redirect).toHaveBeenCalledWith(
+        expect.stringContaining('code=')
       )
     })
   })
@@ -170,6 +204,7 @@ describe('OAuthController', () => {
       }
 
       mockOAuthService.handleOAuthCallback.mockResolvedValue(mockResult)
+      mockRedisService.storeOAuthCode.mockResolvedValue(undefined)
 
       const mockResponse = createMockResponse()
 
@@ -180,8 +215,12 @@ describe('OAuthController', () => {
         'refresh-token',
         expect.objectContaining({ httpOnly: true })
       )
+      expect(mockRedisService.storeOAuthCode).toHaveBeenCalled()
       expect(mockResponse.redirect).toHaveBeenCalledWith(
         expect.stringContaining('http://localhost:3000/auth/oauth/callback')
+      )
+      expect(mockResponse.redirect).toHaveBeenCalledWith(
+        expect.stringContaining('code=')
       )
     })
   })

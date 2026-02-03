@@ -1,4 +1,5 @@
 export * from './shared.module'
+export * from './crypto'
 export * from './redis'
 export * from './logger'
 export * from './queue'

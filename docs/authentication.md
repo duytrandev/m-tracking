@@ -1,6 +1,6 @@
 # Authentication & Authorization
 
-**Last Updated**: February 2, 2026 | **Version**: 1.0 | **Status**: Production Ready (Core Auth)
+**Last Updated**: February 3, 2026 | **Version**: 1.1 | **Status**: Production Ready (Core Auth)
 
 ---
 
@@ -42,7 +42,9 @@ M-Tracking implements a comprehensive authentication system with multiple login 
 │             Backend (NestJS)                                 │
 │  • Auth Controller (login, register, OAuth)                  │
 │  • Token Service (JWT generation, validation)                │
-│  • Session Service (device tracking, multi-device)           │
+│  • Session Service (Redis-based, device tracking)            │
+│  • Session Activity Service (login/refresh monitoring)       │
+│  • Anomaly Detection Service (IP change, abuse detection)    │
 │  • OAuth Service (provider integration, account linking)     │
 │  • Email Service (verification, password reset)              │
 │  • Password Service (hashing, validation)                    │
@@ -53,13 +55,12 @@ M-Tracking implements a comprehensive authentication system with multiple login 
     ┌─────▼────┐      ┌──────▼─────┐         ┌────────▼──┐
     │PostgreSQL│      │   Redis    │         │ RabbitMQ  │
     │          │      │            │         │           │
-    │ Users    │      │ Token      │         │ Email     │
-    │ Sessions │      │ Blacklist  │         │ Queue     │
-    │ Roles    │      │ Rate Limit │         │           │
-    │ Perms    │      │ Cache      │         │           │
-    │ OAuth    │      └────────────┘         └───────────┘
-    │ Tokens   │
-    └──────────┘
+    │ Users    │      │ Sessions   │         │ Email     │
+    │ Roles    │      │ Activity   │         │ Queue     │
+    │ Perms    │      │ Token BL   │         │           │
+    │ OAuth    │      │ Rate Limit │         │           │
+    │ Tokens   │      │ Cache      │         └───────────┘
+    └──────────┘      └────────────┘
 ```
 
 ---
@@ -82,16 +83,17 @@ M-Tracking implements a comprehensive authentication system with multiple login 
 
 ### OAuth Endpoints
 
-| Method | Path                             | Auth   | Purpose                          |
-| ------ | -------------------------------- | ------ | -------------------------------- |
-| GET    | `/auth/google`                   | Public | Redirect to Google OAuth login   |
-| GET    | `/auth/google/callback`          | Public | Handle Google OAuth callback     |
-| GET    | `/auth/github`                   | Public | Redirect to GitHub OAuth login   |
-| GET    | `/auth/github/callback`          | Public | Handle GitHub OAuth callback     |
-| GET    | `/auth/facebook`                 | Public | Redirect to Facebook OAuth login |
-| GET    | `/auth/facebook/callback`        | Public | Handle Facebook OAuth callback   |
-| GET    | `/auth/oauth/accounts`           | JWT    | Get user's linked OAuth accounts |
-| DELETE | `/auth/oauth/accounts/:provider` | JWT    | Unlink OAuth account             |
+| Method | Path                             | Auth   | Purpose                             |
+| ------ | -------------------------------- | ------ | ----------------------------------- |
+| GET    | `/auth/google`                   | Public | Redirect to Google OAuth login      |
+| GET    | `/auth/google/callback`          | Public | Handle Google OAuth callback        |
+| GET    | `/auth/github`                   | Public | Redirect to GitHub OAuth login      |
+| GET    | `/auth/github/callback`          | Public | Handle GitHub OAuth callback        |
+| GET    | `/auth/facebook`                 | Public | Redirect to Facebook OAuth login    |
+| GET    | `/auth/facebook/callback`        | Public | Handle Facebook OAuth callback      |
+| POST   | `/auth/oauth/exchange`           | Public | Exchange auth code for access token |
+| GET    | `/auth/oauth/accounts`           | JWT    | Get user's linked OAuth accounts    |
+| DELETE | `/auth/oauth/accounts/:provider` | JWT    | Unlink OAuth account                |
 
 ### Two-Factor Authentication Endpoints
 
@@ -169,10 +171,38 @@ M-Tracking implements a comprehensive authentication system with multiple login 
 
 ### Password Hashing
 
-- **Algorithm**: bcrypt
-- **Salt Rounds**: 10 (balance between security and performance)
+**Current Implementation (Phase 1 - Feb 2026):**
+
+- **Algorithm**: Argon2id (OWASP 2025 recommended standard)
+- **Parameters**: 64MB memory, 3 iterations, 4 threads
+- **Token Hashing**: SHA-256 for reset/verification/setup tokens
+- **Legacy Backward Compatibility**: bcrypt hashes supported during verification for seamless migration
+- **Auto-Migration**: Passwords are rehashed to Argon2id on next successful login
 - **Password never returned**: API responses omit password fields
 - **Plaintext never logged**: Sanitized in logging/error responses
+
+**CryptoService Centralization:**
+
+All cryptographic operations delegated to `CryptoService` (global scope):
+
+```typescript
+// Hash password (Argon2id)
+const hash = await cryptoService.hashPassword(password)
+
+// Verify password (auto-detects Argon2 or bcrypt)
+const matches = await cryptoService.verifyPassword(storedHash, password)
+
+// Hash tokens (SHA-256)
+const tokenHash = cryptoService.hashToken(token)
+
+// Generate secure random tokens
+const token = cryptoService.generateSecureToken(bytes)
+
+// Migration detection
+const needsMigration = cryptoService.needsMigration(hash)
+```
+
+**PasswordService** maintains backward compatibility, delegating to CryptoService internally.
 
 ### Password Reset Flow
 
@@ -240,38 +270,83 @@ Client-side cooldown synced with backend throttle (5 minutes) via `useAddPasswor
 
 ## Session Management
 
-### Session Storage
+### Session Storage (Redis)
 
-Sessions stored in PostgreSQL with device tracking:
+Sessions stored in Redis with device tracking and activity monitoring:
 
 ```typescript
-interface SessionEntity {
-  id: string // UUID
-  userId: string // FK to User
+interface RedisSessionData {
+  id: string // UUID (session ID)
+  userId: string // User UUID
+  refreshTokenHash: string // SHA-256 hash of refresh token
   deviceInfo: {
-    userAgent: string // Browser/device identifier
-    platform: string // OS platform (from sec-ch-ua-platform)
+    userAgent?: string // Browser/device identifier
+    platform?: string // OS platform (from sec-ch-ua-platform)
   }
   ipAddress: string // IP at login
-  expiresAt: Date // 7 days from creation
-  lastActiveAt: Date // Last request timestamp
-  createdAt: Date
-  updatedAt: Date
+  createdAt: string // ISO timestamp
+  lastActiveAt: string // Last activity timestamp
+  expiresAt: string // Expiration (7 days from creation)
 }
+```
+
+**Redis Key Patterns:**
+
+```
+session:{sessionId}        → Hash (session data, TTL 7d)
+user:sessions:{userId}     → Set (session IDs for user)
+activity:{sessionId}       → List (activity log, capped at 100 entries)
+user:activity:{userId}     → Hash (activity summary, TTL 30d)
 ```
 
 ### Multi-Device Support
 
-- Users can maintain multiple concurrent sessions
+- Users can maintain up to **5 concurrent sessions**
 - Each session is independent with separate refresh tokens
 - Device info helps identify suspicious activity
 - Logout only affects current session/device
+- Exceeding session limit triggers anomaly warning (logged)
 
 ### Session Expiration
 
-- **Idle Timeout**: Sessions expire after 7 days regardless of activity
+- **Session TTL**: Sessions expire after 7 days
 - **Activity Tracking**: `lastActiveAt` updated on token refresh
-- **Expired Sessions**: Refresh token becomes invalid, user re-authenticates
+- **Expired Sessions**: Automatically cleaned up, user re-authenticates
+
+### Activity Monitoring
+
+Session activity is tracked for security monitoring:
+
+```typescript
+interface ActivityEntry {
+  type: 'login' | 'refresh' | 'ip_change' | 'device_change' | 'logout'
+  timestamp: string
+  ip?: string
+  oldIp?: string // For ip_change events
+  newIp?: string // For ip_change events
+  metadata?: Record<string, unknown>
+}
+```
+
+**Tracked Events:**
+
+- Login with device info and IP
+- Token refresh with IP
+- IP address changes between requests
+- Logout events
+
+### Anomaly Detection
+
+The system monitors for suspicious activity patterns:
+
+| Anomaly Type        | Threshold                 | Action          |
+| ------------------- | ------------------------- | --------------- |
+| IP Change           | Any change during session | WARN log + flag |
+| Excessive Logins    | >10 logins in 24h         | WARN log + flag |
+| Excessive Refreshes | >50 refreshes in 1h       | WARN log + flag |
+| Concurrent Sessions | >5 active sessions        | WARN log + flag |
+
+**Note:** Currently logging only (no automatic blocking). Flags stored in user activity summary for manual review.
 
 ---
 
@@ -375,10 +450,22 @@ Currently **permission enforcement not yet implemented** in API endpoints. Roles
    └─> OAuthAccount record created/updated
    └─> Access + refresh tokens generated
    └─> Refresh token set in httpOnly cookie
-   └─> Redirect to frontend: /auth/oauth/callback?accessToken={token}
+   └─> Authorization code stored in Redis (60s TTL, single-use)
+   └─> Redirect to frontend: /auth/oauth/callback?code={authCode}
 
-4. Frontend stores access token, validates, redirects to dashboard
+4. Frontend exchanges code for access token
+   └─> POST /auth/oauth/exchange with authorization code
+   └─> Backend retrieves token from Redis, deletes code (single-use)
+   └─> Access token returned in response body
+   └─> Frontend stores token, fetches user profile, redirects to dashboard
 ```
+
+**Security Note**: Authorization code pattern prevents token exposure in:
+
+- Browser history
+- Server logs
+- HTTP Referer headers
+- Browser extensions
 
 ### Account Linking
 
@@ -646,13 +733,19 @@ Enhanced route wrapper for register/auth flows:
 
 The `/auth/oauth/callback` page:
 
-1. Extracts `accessToken` from URL query parameter
-2. Sets token in-memory via TokenService
-3. Updates auth store with user data
-4. Redirects to dashboard on success
-5. Displays error message on failure
+1. Extracts authorization `code` from URL query parameter
+2. Exchanges code for access token via POST `/auth/oauth/exchange`
+3. Token service stores access token in-memory
+4. Fetches user profile via `/auth/me`
+5. Updates auth store with user data
+6. Redirects to dashboard on success
+7. Displays error message on failure
 
-**URL Safety**: Access token passed via URL (short-lived, visible in referrer logs)
+**Security**: Authorization code pattern used instead of passing tokens in URL:
+
+- Code is single-use (consumed on exchange, deleted from Redis)
+- Code expires in 60 seconds
+- Actual token never appears in URLs, logs, or browser history
 
 ---
 
@@ -816,6 +909,8 @@ OAuth callbacks validate:
 
 ## Database Schema
 
+> **Note:** This documents the TypeORM entity structure. For actual SQL schemas and migration details, see [Database Migrations Guide](./database-migrations.md).
+
 ### Core Tables
 
 **users**
@@ -875,19 +970,6 @@ permissionId (FK permissions.id)
 PRIMARY KEY (roleId, permissionId)
 ```
 
-**sessions**
-
-```
-id (UUID PK)
-userId (FK users.id)
-deviceInfo (JSONB: {userAgent, platform})
-ipAddress (VARCHAR)
-expiresAt (TIMESTAMP)
-lastActiveAt (TIMESTAMP)
-createdAt (TIMESTAMP)
-updatedAt (TIMESTAMP)
-```
-
 **oauth_accounts**
 
 ```
@@ -933,7 +1015,8 @@ createdAt (TIMESTAMP)
 - Email/Password authentication (register, login, logout)
 - Password reset with email verification
 - OAuth integration (Google, GitHub, Facebook)
-- Session management with device tracking
+- Redis-based session management with device tracking
+- Session activity monitoring and anomaly detection
 - JWT token generation and validation
 - Token blacklisting on logout
 - RBAC infrastructure (roles, permissions)
@@ -954,18 +1037,38 @@ createdAt (TIMESTAMP)
 - Session header sanitization for security
 - Token validation with clock skew buffer
 
+### Phase 3 Enhancements (Completed - Feb 2026)
+
+- **Redis Session Migration**: Sessions moved from PostgreSQL to Redis for better performance
+- **Activity Monitoring**: Login, refresh, and IP change tracking per session
+- **Anomaly Detection**: Automatic flagging of suspicious patterns (IP changes, excessive activity)
+- **Concurrent Session Limit**: 5 sessions per user with monitoring
+- **User Activity Summary**: 30-day activity rollup per user
+- **Breaking Change**: All existing sessions invalidated (users must re-login after migration)
+
+### Phase 1 CryptoService (Completed - Feb 2026)
+
+- **Centralized Crypto Module**: New `CryptoService` in shared module for all cryptographic operations
+- **Argon2id Migration**: Switch from bcrypt to Argon2id (OWASP 2025 standard, 64MB/3 iterations/4 threads)
+- **SHA-256 Token Hashing**: All tokens (reset, verification, setup) hashed with SHA-256
+- **Backward Compatibility**: Bcrypt hashes verified transparently during login
+- **Auto-Migration**: User passwords rehashed to Argon2id on next successful login
+- **Hash Format Detection**: Automatic detection of Argon2/bcrypt format for seamless migration
+- **Global Scope**: CryptoModule marked @Global, available throughout application without imports
+
 ### Planned
 
 - Magic links (API endpoints stubbed)
 - SMS OTP (API endpoints stubbed)
 - Passwordless authentication
 - Account recovery flows
+- Email alerts for anomaly detection (currently logging only)
 
 ---
 
 ## Related Documents
 
+- **[Database Migrations](./database-migrations.md)** - Migration files, SQL schemas, and commands
 - **[System Architecture](./system-architecture.md)** - Complete system design including auth module
 - **[Code Standards](./code-standards.md)** - Coding patterns and project conventions
 - **[Project Roadmap](./project-roadmap.md)** - Feature timeline and development phases
-- **[Error Handling Guide](./code-standards.md#error-handling)** - Exception patterns (if exists)

@@ -8,12 +8,15 @@ import { RegisterDto } from '../dto/register.dto'
 import { EmailVerificationToken } from '../entities/email-verification-token.entity'
 import { PasswordResetToken } from '../entities/password-reset-token.entity'
 import { Role } from '../entities/role.entity'
-import { Session } from '../entities/session.entity'
 import { User } from '../entities/user.entity'
+import type { RedisSessionData } from '../interfaces/session.interface'
+import { CryptoService } from '../../shared/crypto/crypto.service'
 import { AuthService } from './auth.service'
 import { EmailService } from './email.service'
 import { PasswordService } from './password.service'
 import { SessionService } from './session.service'
+import { SessionActivityService } from './session-activity.service'
+import { AnomalyDetectionService } from './anomaly-detection.service'
 import { TokenService } from './token.service'
 
 describe('AuthService', () => {
@@ -50,7 +53,6 @@ describe('AuthService', () => {
         sms: false,
       },
     },
-    sessions: [],
     oauthAccounts: [],
     passwordResetTokens: [],
     emailVerificationTokens: [],
@@ -102,6 +104,18 @@ describe('AuthService', () => {
           },
         },
         {
+          provide: CryptoService,
+          useValue: {
+            hashPassword: vi.fn().mockResolvedValue('hashedPassword'),
+            verifyPassword: vi.fn().mockResolvedValue(true),
+            hashToken: vi.fn().mockReturnValue('hashedToken'),
+            generateSecureToken: vi.fn().mockReturnValue('secureToken'),
+            needsMigration: vi.fn().mockReturnValue(false),
+            isArgon2Hash: vi.fn().mockReturnValue(true),
+            isBcryptHash: vi.fn().mockReturnValue(false),
+          },
+        },
+        {
           provide: PasswordService,
           useValue: {
             hash: vi.fn(),
@@ -138,6 +152,21 @@ describe('AuthService', () => {
             findByRefreshToken: vi.fn(),
             revokeSession: vi.fn(),
             revokeAllUserSessions: vi.fn(),
+          },
+        },
+        {
+          provide: SessionActivityService,
+          useValue: {
+            recordLogin: vi.fn(),
+            recordRefresh: vi.fn(),
+            recordIpChange: vi.fn(),
+            recordLogout: vi.fn(),
+          },
+        },
+        {
+          provide: AnomalyDetectionService,
+          useValue: {
+            checkForAnomalies: vi.fn(),
           },
         },
       ],
@@ -190,6 +219,7 @@ describe('AuthService', () => {
       expect(result.message).toContain('Registration successful')
       expect(userRepository.findOne).toHaveBeenCalledWith({
         where: { email: dto.email },
+        select: ['id', 'email', 'password'],
       })
       expect(passwordService.hash).toHaveBeenCalledWith(dto.password)
       expect(emailService.sendVerificationEmail).toHaveBeenCalled()
@@ -278,7 +308,7 @@ describe('AuthService', () => {
         'refresh-token'
       )
       vi.spyOn(sessionService, 'createSession').mockResolvedValue(
-        mockSession as Partial<Session> as Session
+        mockSession as Partial<RedisSessionData> as RedisSessionData
       )
       vi.spyOn(tokenService, 'generateAccessToken').mockReturnValue(
         'access-token'
@@ -301,7 +331,7 @@ describe('AuthService', () => {
       const oldRefreshToken = 'old-refresh-token'
       const mockSession = {
         id: 'session-123',
-        expiresAt: new Date(Date.now() + 1000000),
+        expiresAt: new Date(Date.now() + 1000000).toISOString(),
       }
       const decodedToken = {
         sub: 'user-123',
@@ -313,7 +343,7 @@ describe('AuthService', () => {
         decodedToken
       )
       vi.spyOn(sessionService, 'findByRefreshToken').mockResolvedValue(
-        mockSession as Partial<Session> as Session
+        mockSession as Partial<RedisSessionData> as RedisSessionData
       )
       vi.spyOn(service, 'findById').mockResolvedValue(mockUser)
       vi.spyOn(tokenService, 'blacklistRefreshToken').mockResolvedValue(
@@ -342,7 +372,7 @@ describe('AuthService', () => {
     it('should throw AuthException if session expired', async () => {
       const expiredSession = {
         id: 'session-123',
-        expiresAt: new Date(Date.now() - 1000),
+        expiresAt: new Date(Date.now() - 1000).toISOString(),
       }
       const decodedToken = {
         sub: 'user-123',
@@ -354,7 +384,7 @@ describe('AuthService', () => {
         decodedToken
       )
       vi.spyOn(sessionService, 'findByRefreshToken').mockResolvedValue(
-        expiredSession as Partial<Session> as Session
+        expiredSession as Partial<RedisSessionData> as RedisSessionData
       )
       vi.spyOn(sessionService, 'revokeSession').mockResolvedValue(undefined)
 
@@ -371,10 +401,48 @@ describe('AuthService', () => {
   })
 
   describe('logout', () => {
-    it('should blacklist tokens and revoke session', async () => {
+    it('should blacklist tokens and revoke only current session', async () => {
       const userId = 'user-123'
+      const sessionId = 'session-456'
       const refreshToken = 'refresh-token'
       const accessToken = 'access-token'
+
+      vi.spyOn(tokenService, 'blacklistRefreshToken').mockResolvedValue(
+        undefined
+      )
+      vi.spyOn(tokenService, 'blacklistAccessToken').mockResolvedValue(
+        undefined
+      )
+      vi.spyOn(sessionService, 'revokeSession').mockResolvedValue(undefined)
+
+      await service.logout(userId, sessionId, refreshToken, accessToken)
+
+      expect(tokenService.blacklistRefreshToken).toHaveBeenCalledWith(
+        refreshToken,
+        userId
+      )
+      expect(tokenService.blacklistAccessToken).toHaveBeenCalledWith(
+        accessToken,
+        userId
+      )
+      expect(sessionService.revokeSession).toHaveBeenCalledWith(sessionId)
+    })
+
+    it('should work without tokens provided', async () => {
+      const userId = 'user-123'
+      const sessionId = 'session-456'
+
+      vi.spyOn(sessionService, 'revokeSession').mockResolvedValue(undefined)
+
+      await service.logout(userId, sessionId)
+
+      expect(sessionService.revokeSession).toHaveBeenCalledWith(sessionId)
+    })
+  })
+
+  describe('logoutAllDevices', () => {
+    it('should invalidate all tokens and revoke all sessions', async () => {
+      const userId = 'user-123'
 
       vi.spyOn(tokenService, 'invalidateAllUserTokens').mockResolvedValue(
         undefined
@@ -383,7 +451,7 @@ describe('AuthService', () => {
         undefined
       )
 
-      await service.logout(userId, refreshToken, accessToken)
+      await service.logoutAllDevices(userId)
 
       expect(tokenService.invalidateAllUserTokens).toHaveBeenCalledWith(userId)
       expect(sessionService.revokeAllUserSessions).toHaveBeenCalledWith(userId)

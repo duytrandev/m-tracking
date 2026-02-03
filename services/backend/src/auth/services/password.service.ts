@@ -1,28 +1,33 @@
 import { Injectable } from '@nestjs/common'
-import * as bcrypt from 'bcrypt'
-import * as crypto from 'crypto'
+import { CryptoService } from '../../shared/crypto/crypto.service'
 
+/**
+ * Password Service
+ * Delegates all cryptographic operations to CryptoService
+ * Maintained for backward compatibility with existing code
+ */
 @Injectable()
 export class PasswordService {
-  private readonly SALT_ROUNDS = 10
+  constructor(private cryptoService: CryptoService) {}
 
   /**
-   * Hash password using bcrypt
+   * Hash password using Argon2id (via CryptoService)
    * @param password Plain text password
    * @returns Hashed password
    */
   async hash(password: string): Promise<string> {
-    return bcrypt.hash(password, this.SALT_ROUNDS)
+    return this.cryptoService.hashPassword(password)
   }
 
   /**
    * Compare plain text password with hash
+   * Supports both Argon2 and legacy bcrypt
    * @param password Plain text password
    * @param hash Hashed password from database
    * @returns True if passwords match
    */
   async compare(password: string, hash: string): Promise<boolean> {
-    return bcrypt.compare(password, hash)
+    return this.cryptoService.verifyPassword(hash, password)
   }
 
   /**
@@ -30,7 +35,7 @@ export class PasswordService {
    * @returns Random token
    */
   generateToken(): string {
-    return crypto.randomBytes(32).toString('hex')
+    return this.cryptoService.generateSecureToken()
   }
 
   /**
@@ -39,6 +44,6 @@ export class PasswordService {
    * @returns Hashed token
    */
   hashToken(token: string): string {
-    return crypto.createHash('sha256').update(token).digest('hex')
+    return this.cryptoService.hashToken(token)
   }
 }

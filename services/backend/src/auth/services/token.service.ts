@@ -3,8 +3,8 @@ import { AuthExceptions } from '../../common/exceptions'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
 import { RedisService } from '../../shared/redis/redis.service'
+import { CryptoService } from '../../shared/crypto/crypto.service'
 import { User } from '../entities/user.entity'
-import * as crypto from 'crypto'
 import * as fs from 'fs'
 
 export interface TokenPayload {
@@ -29,7 +29,8 @@ export class TokenService {
   constructor(
     private jwtService: JwtService,
     private redisService: RedisService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private cryptoService: CryptoService
   ) {
     // Load RSA keys from configurable paths
     const privateKeyPath = this.configService.get<string>(
@@ -41,10 +42,21 @@ export class TokenService {
       'jwt-public-key.pem'
     )
 
-    this.privateKey = fs.readFileSync(privateKeyPath, 'utf8')
-    this.publicKey = fs.readFileSync(publicKeyPath, 'utf8')
-
-    this.logger.log('JWT keys loaded successfully')
+    try {
+      this.privateKey = fs.readFileSync(privateKeyPath, 'utf8')
+      this.publicKey = fs.readFileSync(publicKeyPath, 'utf8')
+      this.logger.log('JWT keys loaded successfully')
+    } catch (error) {
+      const err = error as NodeJS.ErrnoException
+      if (err.code === 'ENOENT') {
+        throw new Error(
+          `JWT key file not found: ${err.path}. ` +
+            'Generate keys with: openssl genrsa -out jwt-private-key.pem 2048 && ' +
+            'openssl rsa -in jwt-private-key.pem -pubout -out jwt-public-key.pem'
+        )
+      }
+      throw new Error(`Failed to read JWT key files: ${err.message}`)
+    }
   }
 
   /**
@@ -107,9 +119,17 @@ export class TokenService {
       )
 
       // Check if token is blacklisted
-      const isBlacklisted = await this.redisService.isTokenBlacklisted(
-        this.hashToken(token)
-      )
+      // Graceful degradation: if Redis unavailable, allow auth to continue with warning
+      let isBlacklisted = false
+      try {
+        isBlacklisted = await this.redisService.isTokenBlacklisted(
+          this.cryptoService.hashToken(token)
+        )
+      } catch (error) {
+        this.logger.warn(
+          `Redis unavailable for blacklist check, allowing token: ${(error as Error).message}`
+        )
+      }
 
       if (isBlacklisted) {
         this.logger.warn('Access token is blacklisted')
@@ -157,9 +177,16 @@ export class TokenService {
       })
 
       // Check if token is blacklisted
-      const tokenHash = this.hashToken(token)
-      const isBlacklisted =
-        await this.redisService.isTokenBlacklisted(tokenHash)
+      // Graceful degradation: if Redis unavailable, allow auth to continue with warning
+      const tokenHash = this.cryptoService.hashToken(token)
+      let isBlacklisted = false
+      try {
+        isBlacklisted = await this.redisService.isTokenBlacklisted(tokenHash)
+      } catch (error) {
+        this.logger.warn(
+          `Redis unavailable for refresh token blacklist check, allowing token: ${(error as Error).message}`
+        )
+      }
 
       if (isBlacklisted) {
         this.logger.warn('Refresh token is blacklisted')
@@ -197,7 +224,7 @@ export class TokenService {
    * Blacklist access token in Redis (15 minutes TTL)
    */
   async blacklistAccessToken(token: string, userId: string): Promise<void> {
-    const tokenHash = this.hashToken(token)
+    const tokenHash = this.cryptoService.hashToken(token)
     await this.redisService.blacklistToken(tokenHash, userId, 15 * 60) // 15 minutes
     this.logger.log(`Access token blacklisted for user: ${userId}`)
   }
@@ -206,16 +233,9 @@ export class TokenService {
    * Blacklist refresh token in Redis (7 days TTL)
    */
   async blacklistRefreshToken(token: string, userId: string): Promise<void> {
-    const tokenHash = this.hashToken(token)
+    const tokenHash = this.cryptoService.hashToken(token)
     await this.redisService.blacklistToken(tokenHash, userId, 7 * 24 * 60 * 60) // 7 days
     this.logger.log(`Refresh token blacklisted for user: ${userId}`)
-  }
-
-  /**
-   * Hash token using SHA-256
-   */
-  private hashToken(token: string): string {
-    return crypto.createHash('sha256').update(token).digest('hex')
   }
 
   /**
