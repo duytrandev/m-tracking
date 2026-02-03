@@ -146,6 +146,49 @@ Server State (React Query)
 └── Automatic cache invalidation
 ```
 
+**Session Management & Events:**
+
+Frontend components subscribe to auth state changes via event system (prevents tight coupling):
+
+```
+api-client (detects session expiration)
+    ↓
+emits: session-expired event
+    ↓
+SessionWarningProvider (listens)
+    ↓
+showToast: "Session expired. Please log in again."
+```
+
+**Auth Event Types**:
+
+```typescript
+onAuthEvent('logout', () => {
+  // User clicked logout
+  // Clear local cache, redirect to login
+})
+
+onAuthEvent('session-expired', () => {
+  // Token expired, requires re-login
+  // Show toast, optionally auto-redirect
+})
+```
+
+**Session Recovery**:
+
+Manually extend session before expiration via `useSessionRefresh()`:
+
+```typescript
+const { refreshSession } = useSessionRefresh()
+const success = await refreshSession() // true if successful
+
+if (success) {
+  // Session extended, continue working
+} else {
+  // Refresh failed, redirect to login
+}
+```
+
 ### 2. Backend Layer (NestJS 11)
 
 **Purpose:** Core business logic, data validation, authentication, transaction processing
@@ -576,13 +619,14 @@ async deleteUser() {}
 
 ### OAuth Flow with PKCE (Google Example)
 
-```
+````
 1. Frontend initiates PKCE generation (if Web Crypto supported)
    → Generate verifier + challenge + state
    → Store verifier + state in sessionStorage
 
 2. Frontend redirects to: /auth/google?code_challenge={challenge}&state={state}&code_challenge_method=S256
    → Google OAuth flow initiated with PKCE parameters
+   → OAuthLoadingState shows: "Connecting to Google... You'll be redirected to Google to sign in"
 
 3. User consents on Google
    → Google redirects back with auth code + state
@@ -595,6 +639,7 @@ async deleteUser() {}
    → Redirect to frontend: /auth/oauth/callback?code={authCode}
 
 5. Frontend exchanges code for access token: POST /auth/oauth/exchange
+   → OAuthLoadingState shows: "Completing sign in... Please wait while we verify your account"
    → Retrieve stored verifier + state from sessionStorage
    → Send: { code, codeVerifier, state } in request body
    → Clear sessionStorage (single-use data deleted)
@@ -618,6 +663,50 @@ async deleteUser() {}
    → FlexibleAuthRoute handles seamless transition in register flow
 
 **Fallback**: If Web Crypto API unavailable, flow uses standard OAuth code exchange
+
+**OAuth Error Handling**:
+
+Technical OAuth errors are automatically humanized for display:
+
+```typescript
+import { humanizeOAuthError } from '@/features/auth/utils/error-humanizer'
+
+// Convert technical error to user message
+const message = humanizeOAuthError('access_denied')
+// → "You cancelled the sign in. Try again when ready."
+
+// Parse OAuth callback errors
+const error = parseOAuthCallbackError(new URLSearchParams(location.search))
+// Handles: error + error_description params
+````
+
+**Common OAuth Errors**:
+
+| Error                   | Message                                                 |
+| ----------------------- | ------------------------------------------------------- |
+| access_denied           | "You cancelled the sign in. Try again when ready."      |
+| server_error            | "The sign in service is temporarily unavailable."       |
+| invalid_grant           | "Login link expired or already used. Please try again." |
+| PKCE verifier not found | "Your login session was interrupted. Please try again." |
+
+**OAuth Loading States**:
+
+Component: `OAuthLoadingState` displays stage-specific messages
+
+```typescript
+<OAuthLoadingState provider="google" stage="connecting" />
+// → "Connecting to Google... You'll be redirected to Google to sign in"
+
+<OAuthLoadingState provider="github" stage="completing" />
+// → "Completing sign in... Please wait while we verify your account"
+```
+
+**Stage Flow**:
+
+```
+idle → connecting (user initiated) → completing (code exchange) → error | success
+```
+
 ```
 
 ---
@@ -629,7 +718,9 @@ async deleteUser() {}
 **XSS Prevention (Device Info):**
 
 ```
+
 Sanitization Pipeline:
+
 1. Truncate to max length
 2. Escape HTML entities (&, <, >, ", ', `, /)
 3. Remove javascript: protocol
@@ -640,9 +731,10 @@ User Agent max: 512 chars
 Platform max: 64 chars
 
 Example:
-Input:  { userAgent: '"><script>alert(1)</script>' }
+Input: { userAgent: '"><script>alert(1)</script>' }
 Output: { userAgent: '&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;' }
-```
+
+````
 
 ---
 
@@ -664,7 +756,7 @@ Output: { userAgent: '&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;' }
     "requestId": "req-456"
   }
 }
-```
+````
 
 **Error Response:**
 

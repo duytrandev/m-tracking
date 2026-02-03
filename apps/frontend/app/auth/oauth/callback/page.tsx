@@ -1,84 +1,67 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
-import { Loader2, AlertCircle } from 'lucide-react'
+import { AlertCircle } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { AuthCard } from '@/features/auth/components/auth-card'
-import { useAuthStore } from '@/features/auth/store/auth-store'
-import { setAuthToken } from '@/lib/api-client'
-import { authApi } from '@/features/auth/api/auth-api'
 import { Button } from '@/components/ui/button'
+import { useOAuthCallback } from '@/features/auth/hooks/use-oauth'
+import { OAuthLoadingState } from '@/features/auth/components/oauth-loading-state'
 
+/**
+ * OAuth Callback Page
+ * Handles OAuth provider redirect with PKCE verification
+ * Uses humanized error messages for better UX
+ */
 export default function OAuthCallbackPage() {
-  const searchParams = useSearchParams()
   const router = useRouter()
-  const { login } = useAuthStore()
-  const [error, setError] = useState<string | null>(null)
+  const { isProcessing, error, stage, provider } = useOAuthCallback()
 
-  useEffect(() => {
-    const processCallback = async (): Promise<void> => {
-      const accessToken = searchParams.get('accessToken')
-      // Note: refreshToken is stored server-side via HTTP-only cookie by backend
-      const errorParam = searchParams.get('error')
-
-      // Handle error from OAuth provider
-      if (errorParam) {
-        setError(decodeURIComponent(errorParam))
-        return
-      }
-
-      // No tokens received
-      if (!accessToken) {
-        setError('No authentication token received. Please try again.')
-        return
-      }
-
-      try {
-        // Store the access token (15 minutes default expiry)
-        setAuthToken(accessToken, 900)
-
-        // Fetch user profile to complete login
-        const user = await authApi.getCurrentUser()
-        login(user)
-
-        // Get stored return URL or default to dashboard
-        const returnUrl =
-          sessionStorage.getItem('oauth_return_url') || '/dashboard'
-        sessionStorage.removeItem('oauth_return_url')
-
-        router.replace(returnUrl)
-      } catch {
-        setError('Failed to complete authentication. Please try again.')
-      }
-    }
-
-    void processCallback()
-  }, [searchParams, router, login])
-
-  // Show error state
+  // Show error state with humanized message
   if (error) {
     return (
-      <AuthCard title="Authentication Failed">
+      <AuthCard title="Sign In Failed">
         <div className="flex flex-col items-center justify-center py-8 text-center">
-          <AlertCircle className="h-12 w-12 text-destructive mb-4" />
-          <p className="text-sm text-muted-foreground mb-6">{error}</p>
-          <Button onClick={() => router.push('/auth/login')} variant="outline">
-            Back to Login
-          </Button>
+          <AlertCircle
+            className="h-12 w-12 text-destructive mb-4"
+            aria-hidden="true"
+          />
+          <p
+            className="text-sm text-muted-foreground mb-6 max-w-xs"
+            role="alert"
+            aria-live="assertive"
+          >
+            {error}
+          </p>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => router.push('/auth/login')}
+              variant="outline"
+            >
+              Back to Login
+            </Button>
+            <Button onClick={() => window.location.reload()}>Try Again</Button>
+          </div>
         </div>
       </AuthCard>
     )
   }
 
-  // Loading state
+  // Loading state with contextual messages
+  if (isProcessing) {
+    return (
+      <AuthCard title="Signing In">
+        <OAuthLoadingState
+          provider={provider || 'unknown'}
+          stage={stage === 'completing' ? 'completing' : 'connecting'}
+        />
+      </AuthCard>
+    )
+  }
+
+  // Fallback (shouldn't reach here in normal flow)
   return (
-    <AuthCard title="Processing...">
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="mt-4 text-sm text-muted-foreground">
-          Please wait while we complete your sign in...
-        </p>
-      </div>
+    <AuthCard title="Processing">
+      <OAuthLoadingState provider={provider || 'unknown'} stage="completing" />
     </AuthCard>
   )
 }

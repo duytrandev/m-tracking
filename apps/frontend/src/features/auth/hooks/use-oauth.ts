@@ -11,6 +11,7 @@ import {
   getAndClearPkceData,
   isPkceSupported,
 } from '../utils/pkce'
+import { humanizeOAuthError } from '../utils/error-humanizer'
 
 // OAuth endpoints are at /api/v1/auth/* (with global prefix)
 const API_BASE_URL =
@@ -18,9 +19,15 @@ const API_BASE_URL =
     ? process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1'
     : process.env.API_URL || 'http://localhost:4000/api/v1'
 
+/** OAuth flow stage for UI feedback */
+export type OAuthStage = 'idle' | 'connecting' | 'completing' | 'error'
+
 interface UseOAuthReturn {
   initiateOAuth: (provider: OAuthProvider) => void
   isLoading: boolean
+  stage: OAuthStage
+  currentProvider: OAuthProvider | null
+  error: string | null
 }
 
 /**
@@ -29,6 +36,11 @@ interface UseOAuthReturn {
  */
 export function useOAuth(): UseOAuthReturn {
   const [isLoading, setIsLoading] = useState(false)
+  const [stage, setStage] = useState<OAuthStage>('idle')
+  const [currentProvider, setCurrentProvider] = useState<OAuthProvider | null>(
+    null
+  )
+  const [error, setError] = useState<string | null>(null)
 
   const initiateOAuth = useCallback(
     async (provider: OAuthProvider) => {
@@ -36,11 +48,15 @@ export function useOAuth(): UseOAuthReturn {
       if (isLoading) return
 
       setIsLoading(true)
+      setStage('connecting')
+      setCurrentProvider(provider)
+      setError(null)
 
       // Store current URL for redirect after auth
       const returnUrl = window.location.pathname
       sessionStorage.setItem('oauth_return_url', returnUrl)
       sessionStorage.setItem('oauth_pending', 'true')
+      sessionStorage.setItem('oauth_provider', provider)
 
       // Build OAuth URL with optional PKCE parameters
       let oauthUrl = `${API_BASE_URL}/auth/${provider}`
@@ -64,7 +80,7 @@ export function useOAuth(): UseOAuthReturn {
           oauthUrl = `${oauthUrl}?${params.toString()}`
         } catch {
           // Fall back to non-PKCE flow if crypto fails
-          // Silently degrade - PKCE is optional for OAuth security
+          // PKCE is optional - degradation is acceptable for OAuth security
         }
       }
 
@@ -79,12 +95,17 @@ export function useOAuth(): UseOAuthReturn {
   return {
     initiateOAuth,
     isLoading,
+    stage,
+    currentProvider,
+    error,
   }
 }
 
 interface UseOAuthCallbackReturn {
   isProcessing: boolean
   error: string | null
+  stage: OAuthStage
+  provider: OAuthProvider | null
 }
 
 /**
@@ -98,26 +119,42 @@ export function useOAuthCallback(): UseOAuthCallbackReturn {
   const { login } = useAuthStore()
   const [isProcessing, setIsProcessing] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [stage, setStage] = useState<OAuthStage>('completing')
+  const [provider, setProvider] = useState<OAuthProvider | null>(null)
 
   // Process callback on mount
   useEffect(() => {
     const processCallback = async (): Promise<void> => {
+      // Restore provider from session for UI feedback
+      const storedProvider = sessionStorage.getItem(
+        'oauth_provider'
+      ) as OAuthProvider | null
+      setProvider(storedProvider)
+
       const code = searchParams.get('code')
       const errorParam = searchParams.get('error')
+      const errorDescription = searchParams.get('error_description')
 
       if (errorParam) {
-        setError(decodeURIComponent(errorParam))
+        // Use humanized error message
+        const rawError = errorDescription || errorParam
+        const humanizedError = humanizeOAuthError(decodeURIComponent(rawError))
+        setError(humanizedError)
+        setStage('error')
         setIsProcessing(false)
         return
       }
 
       if (!code) {
         setError('No authorization code received. Please try again.')
+        setStage('error')
         setIsProcessing(false)
         return
       }
 
       try {
+        setStage('completing')
+
         // Retrieve and clear PKCE data (single-use)
         const pkceData = getAndClearPkceData()
 
@@ -141,10 +178,17 @@ export function useOAuthCallback(): UseOAuthCallbackReturn {
           sessionStorage.getItem('oauth_return_url') || '/dashboard'
         sessionStorage.removeItem('oauth_return_url')
         sessionStorage.removeItem('oauth_pending')
+        sessionStorage.removeItem('oauth_provider')
 
+        setStage('idle')
         router.replace(returnUrl)
-      } catch {
-        setError('Failed to complete authentication. Please try again.')
+      } catch (err) {
+        // Use humanized error for better UX
+        const errorMessage =
+          err instanceof Error ? err.message : 'Unknown error'
+        const humanizedError = humanizeOAuthError(errorMessage)
+        setError(humanizedError)
+        setStage('error')
         setIsProcessing(false)
       }
     }
@@ -155,5 +199,7 @@ export function useOAuthCallback(): UseOAuthCallbackReturn {
   return {
     isProcessing,
     error,
+    stage,
+    provider,
   }
 }

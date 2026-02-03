@@ -436,6 +436,136 @@ async getUser(id: string): Promise<User> {
 
 ---
 
+## Retry Queue System
+
+### Overview
+
+Transient network failures (timeouts, temporary service unavailability) are automatically retried with exponential backoff. The retry queue prevents memory exhaustion during network storms by:
+
+- Limiting queue size to 50 requests
+- Setting max 30-second wait time per request
+- Checking request age before processing
+- Clearing stale requests
+
+### Retryable Error Codes
+
+Only specific errors trigger automatic retry:
+
+| Error Code          | HTTP Status | Cause                    | Retry Behavior        |
+| ------------------- | ----------- | ------------------------ | --------------------- |
+| SERVICE_UNAVAILABLE | 503         | Backend temporarily down | Yes (3 attempts)      |
+| RATE_LIMITED        | 429         | Too many requests        | Yes (3 attempts)      |
+| All other errors    | -           | -                        | No (fail immediately) |
+
+### Retry Behavior
+
+```
+Attempt 1: Immediate
+    ↓
+Attempt 2: Wait 1 second + jitter
+    ↓
+Attempt 3: Wait 2 seconds + jitter
+    ↓
+Attempt 4: Wait 4 seconds + jitter
+    ↓
+Give up: Return error to caller
+```
+
+**Jitter**: Random 0-100ms added to prevent "thundering herd" problem
+
+**Queue Limits**:
+
+- Max queue size: 50 pending requests
+- Max request age: 30 seconds
+- If queue is full: Throw "Request queue full" error immediately
+
+### Using Retry Queue
+
+The retry queue is transparent for most use cases. API errors automatically route through it:
+
+```typescript
+import { showErrorToast } from '@/lib/toast-error-handler'
+
+try {
+  await authApi.login(email, password)
+} catch (error) {
+  // If error is retryable, it's automatically retried
+  // If it fails after 3 attempts, error is shown here
+  showErrorToast(error)
+}
+```
+
+### Retry Queue API Reference
+
+**Location**: `apps/frontend/src/lib/retry-queue.ts`
+
+#### `isRetryableError(errorCode?: string): boolean`
+
+Check if error should trigger automatic retry.
+
+```typescript
+import { isRetryableError } from '@/lib/retry-queue'
+
+if (isRetryableError(error.code)) {
+  // Will be automatically retried
+}
+```
+
+**Returns**: `true` if error code is in RETRYABLE_ERROR_CODES list
+
+---
+
+#### `retryQueue.enqueue<T>(retryFn: () => Promise<T>): Promise<T>`
+
+Manually queue a request for retry handling.
+
+```typescript
+import { retryQueue } from '@/lib/retry-queue'
+
+const result = await retryQueue.enqueue(async () => {
+  return fetch('/api/data').then(r => r.json())
+})
+```
+
+**Throws**:
+
+- `Error('Request queue full...')` if queue has 50+ items
+- `Error('Request timed out in queue')` if request waits > 30 seconds
+
+**Max retries**: 3 attempts with exponential backoff
+
+---
+
+#### `retryQueue.clear(): void`
+
+Clear all pending requests and timeouts. Call on logout or session expiration.
+
+```typescript
+import { retryQueue } from '@/lib/retry-queue'
+
+onLogout(() => {
+  retryQueue.clear() // Prevents orphaned requests
+})
+```
+
+**Use cases**:
+
+- User logout (cancel all in-flight requests)
+- Session expiration
+- App cleanup
+
+---
+
+#### `retryQueue.size: number`
+
+Get current number of pending requests in queue.
+
+```typescript
+console.log(`Pending: ${retryQueue.size}`) // For monitoring/debugging
+```
+
+---
+
 ## Frontend Error Handling
 
 ### Reading Error Codes
@@ -478,6 +608,29 @@ if (failure.recoveryAction) {
   </Button>
 }
 ```
+
+### Retry Countdown Display
+
+When error includes `retryAfter` field (rate-limited, account locked), show countdown:
+
+```typescript
+import { showErrorToast } from '@/lib/toast-error-handler'
+import { isRetryableError } from '@/lib/retry-queue'
+
+try {
+  await authApi.login(email, password)
+} catch (error) {
+  // Handler automatically includes retry countdown if applicable
+  showErrorToast(error, 'Login failed')
+  // Toast: "Too many requests. Try again in 1 minute."
+}
+```
+
+**Automatic behavior**:
+
+- Error is checked if retryable via `isRetryableError()`
+- If `retryAfter` is present, display: `"Try again in X minute(s)"`
+- Countdown calculated from seconds to minutes (rounded up)
 
 ---
 

@@ -5,6 +5,8 @@ import axios, {
 } from 'axios'
 import { tokenService } from '@/features/auth/services/token-service'
 import * as Sentry from '@sentry/nextjs'
+import { showErrorToast } from './toast-error-handler'
+import { type AuthErrorCodeType } from '@m-tracking/shared'
 
 /**
  * Auth event system for handling authentication state changes
@@ -12,6 +14,16 @@ import * as Sentry from '@sentry/nextjs'
  */
 type AuthEventType = 'logout' | 'session-expired'
 const authEvents = new EventTarget()
+
+/**
+ * Error response structure from backend
+ */
+interface ApiErrorResponse {
+  message?: string
+  code?: AuthErrorCodeType
+  error?: string
+  retryAfter?: number
+}
 
 export function onAuthEvent(
   type: AuthEventType,
@@ -82,6 +94,10 @@ apiClient.interceptors.request.use(
  * Handles 401 errors by attempting to refresh the access token
  */
 let isRefreshing = false
+
+// Limit queue size to prevent memory exhaustion during refresh storms
+const MAX_FAILED_QUEUE_SIZE = 100
+
 let failedQueue: Array<{
   resolve: (token: string) => void
   reject: (error: Error) => void
@@ -103,22 +119,46 @@ const processQueue = (
 
 apiClient.interceptors.response.use(
   response => response,
-  async (error: AxiosError) => {
+  async (error: AxiosError<ApiErrorResponse>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean
     }
+    const errorData = error.response?.data
 
-    // Skip refresh for auth endpoints to prevent loops and preserve error codes
-    // Auth endpoints (login, register, etc.) should pass through errors directly
-    const isAuthEndpoint = originalRequest.url?.startsWith('/auth/')
+    // Skip refresh for public auth endpoints to prevent loops and preserve error codes
+    // Only skip for endpoints that don't require authentication (login, register, etc.)
+    // Protected auth endpoints like /auth/me should still use refresh logic
+    const publicAuthEndpoints = [
+      '/auth/login',
+      '/auth/register',
+      '/auth/refresh',
+      '/auth/forgot-password',
+      '/auth/reset-password',
+      '/auth/verify-email',
+      '/auth/resend-verification',
+      '/auth/magic-link',
+      '/auth/otp',
+      '/auth/oauth/exchange',
+      '/auth/2fa/validate',
+    ]
+    const isPublicAuthEndpoint = publicAuthEndpoints.some(endpoint =>
+      originalRequest.url?.startsWith(endpoint)
+    )
 
-    // If 401 and not already retrying and not an auth endpoint
+    // If 401 and not already retrying and not a public auth endpoint
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      !isAuthEndpoint
+      !isPublicAuthEndpoint
     ) {
       if (isRefreshing) {
+        // Prevent unbounded queue growth during refresh storms
+        if (failedQueue.length >= MAX_FAILED_QUEUE_SIZE) {
+          return Promise.reject(
+            new Error('Too many concurrent requests during token refresh')
+          )
+        }
+
         // Queue the request while refreshing
         return new Promise((resolve, reject) => {
           failedQueue.push({
@@ -182,14 +222,36 @@ apiClient.interceptors.response.use(
             status: error.response.status,
             statusText: error.response.statusText,
             baseURL: error.config?.baseURL,
+            errorCode: errorData?.code,
           },
         },
         tags: {
           api_endpoint: error.config?.url?.split('?')[0], // URL without query params
           http_method: error.config?.method?.toUpperCase(),
           http_status: String(error.response.status),
+          error_code: errorData?.code,
         },
       })
+    }
+
+    // Show error toast for API errors (except 401 which triggers auth flow)
+    if (error.response?.status !== 401) {
+      showErrorToast(error)
+    }
+
+    // Create enhanced error with code for downstream handlers
+    if (errorData?.code) {
+      const enhancedError = new Error(
+        errorData.message || error.message
+      ) as Error & {
+        code?: string
+        retryAfter?: number
+      }
+      enhancedError.code = errorData.code
+      if (errorData.retryAfter) {
+        enhancedError.retryAfter = errorData.retryAfter
+      }
+      return Promise.reject(enhancedError)
     }
 
     return Promise.reject(error)

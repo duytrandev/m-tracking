@@ -516,6 +516,75 @@ export function EmailField({ control, errors }) {
 }
 ```
 
+### Error Handling
+
+**Frontend Error System:**
+
+All API errors route through centralized handler which extracts error codes, checks if retryable, and displays appropriate toasts:
+
+```typescript
+import { showErrorToast } from '@/lib/toast-error-handler'
+
+try {
+  await authApi.login(email, password)
+} catch (error) {
+  // Automatically:
+  // 1. Extracts error code from response
+  // 2. Maps to friendly message
+  // 3. Shows retry countdown if applicable
+  showErrorToast(error, 'Login failed')
+}
+```
+
+**Handling Rate-Limited Errors:**
+
+When error includes `retryAfter` field (429 Too Many Requests), countdown is automatically displayed:
+
+```
+"Too many requests. Try again in 1 minute."
+```
+
+**OAuth Error Humanization:**
+
+Technical OAuth errors are converted to user-friendly messages:
+
+```typescript
+import { humanizeOAuthError } from '@/features/auth/utils/error-humanizer'
+import { parseOAuthCallbackError } from '@/features/auth/utils/error-humanizer'
+
+// Direct humanization
+const message = humanizeOAuthError('access_denied')
+// → "You cancelled the sign in. Try again when ready."
+
+// From OAuth callback URL
+const urlParams = new URLSearchParams(window.location.search)
+const error = parseOAuthCallbackError(urlParams)
+// Handles: ?error=access_denied&error_description=...
+```
+
+**Session Management:**
+
+Extend user session before expiration:
+
+```typescript
+import { useSessionRefresh } from '@/features/auth/components/session-warning-provider'
+
+export function MyComponent() {
+  const { refreshSession } = useSessionRefresh()
+
+  const handleRefreshClick = async () => {
+    const success = await refreshSession()
+    if (success) {
+      showToast('Session extended')
+    } else {
+      redirectToLogin()
+    }
+  }
+}
+```
+
+---
+
 ### Hooks
 
 **Custom hook naming & pattern:**
@@ -955,7 +1024,7 @@ Key exported functions/components
 
 - [docs/project-overview-pdr.md](./project-overview-pdr.md) - Product overview
 - [docs/codebase-summary.md](./codebase-summary.md) - Project structure
-- [docs/system-architecture.md](./system-architecture.md) - System design
-- [docs/error-handling-guide.md](./error-handling-guide.md) - Error handling patterns and factories
+- [docs/system-architecture.md](./system-architecture.md) - System design, session management, OAuth flows
+- [docs/error-handling-guide.md](./error-handling-guide.md) - Error handling patterns, retry queue, factories
 - [docs/database-migrations.md](./database-migrations.md) - Database migrations guide
 - [docs/project-roadmap.md](./project-roadmap.md) - Implementation status
