@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional, IsDateString } from 'class-validator'
+import { IsEnum, IsOptional, IsDateString, IsString } from 'class-validator'
 
 export enum TimePeriod {
   DAY = 'day',
@@ -19,4 +19,8 @@ export class SpendingQueryDto {
   @IsOptional()
   @IsDateString()
   endDate?: string
+
+  @IsOptional()
+  @IsString()
+  timezone?: string // IANA timezone e.g., 'Asia/Saigon', defaults to UTC
 }

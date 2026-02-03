@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
-import { AlertCircle, Check, ArrowRight } from 'lucide-react'
+import { AlertCircle, Check, ArrowRight, Loader2 } from 'lucide-react'
 import { m, AnimatePresence } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -22,7 +22,7 @@ type FormState = 'idle' | 'submitting' | 'success' | 'error'
 
 export function LoginForm() {
   const [formState, setFormState] = useState<FormState>('idle')
-  const { login, isLoading, error, clearError } = useLogin()
+  const { login, isLoading, isSuccess, error, clearError } = useLogin()
   const prefersReducedMotion = useReducedMotion()
 
   const {
@@ -52,6 +52,13 @@ export function LoginForm() {
     }
   }, [error, formState])
 
+  // Show success state when login succeeds (navigating to dashboard)
+  useEffect(() => {
+    if (isSuccess) {
+      setFormState('success')
+    }
+  }, [isSuccess])
+
   // Clear error when user starts typing
   const handleFieldChange = useCallback(() => {
     if (error) {
@@ -65,14 +72,14 @@ export function LoginForm() {
     login(data)
   }
 
-  // Success state UI
+  // Success state UI - Show loading while navigating to dashboard
   if (formState === 'success') {
     return (
       <m.div
         key="success"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="text-center py-8 space-y-4"
+        className="text-center py-12 space-y-6"
       >
         <m.div
           initial={{ scale: 0 }}
@@ -84,11 +91,12 @@ export function LoginForm() {
             <Check className="h-12 w-12 text-green-600" />
           </div>
         </m.div>
-        <div>
+        <div className="space-y-2">
           <p className="text-lg font-medium text-gray-900">Welcome back!</p>
-          <p className="text-sm text-gray-600 mt-1">
-            Redirecting to your dashboard...
-          </p>
+          <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Redirecting to your dashboard...</span>
+          </div>
         </div>
       </m.div>
     )

@@ -45,9 +45,12 @@ let tokenService: typeof mockTokenService
 const handlers = [
   // Login
   http.post(`${API_URL}/auth/login`, async ({ request }) => {
-    const body = (await request.json()) as { email: string; password: string }
+    const body = (await request.json()) as {
+      identifier: string
+      password: string
+    }
 
-    if (!body.email || !body.password) {
+    if (!body.identifier || !body.password) {
       return HttpResponse.json(
         { message: 'Email and password are required', statusCode: 400 },
         { status: 400 }
@@ -79,7 +82,7 @@ const handlers = [
       },
     }
 
-    const userRecord = mockUsers[body.email]
+    const userRecord = mockUsers[body.identifier]
     if (!userRecord || userRecord.password !== body.password) {
       return HttpResponse.json(
         { message: 'Invalid email or password', statusCode: 401 },
@@ -355,7 +358,7 @@ describe('Auth API', () => {
   describe('Login', () => {
     it('should login successfully with valid credentials', async () => {
       const result = await authApi.login({
-        email: 'test@example.com',
+        identifier: 'test@example.com',
         password: 'password123',
       })
 
@@ -367,7 +370,7 @@ describe('Auth API', () => {
 
     it('should login with demo user', async () => {
       const result = await authApi.login({
-        email: 'demo@example.com',
+        identifier: 'demo@example.com',
         password: 'demo123',
       })
 
@@ -378,7 +381,7 @@ describe('Auth API', () => {
     it('should reject invalid credentials', async () => {
       await expect(
         authApi.login({
-          email: 'test@example.com',
+          identifier: 'test@example.com',
           password: 'wrongpassword',
         })
       ).rejects.toThrow('Invalid email or password')
@@ -387,7 +390,7 @@ describe('Auth API', () => {
     it('should reject missing email or password', async () => {
       await expect(
         authApi.login({
-          email: '',
+          identifier: '',
           password: 'password123',
         })
       ).rejects.toThrow()

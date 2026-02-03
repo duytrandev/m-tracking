@@ -38,11 +38,14 @@ export const protectedRoutes = [
 
 /**
  * Routes that are only for unauthenticated users
+ * These redirect to dashboard if user is already logged in
  */
 export const authRoutes = [
   '/auth/login',
   '/auth/register',
   '/auth/forgot-password',
+  '/auth/magic-link',
+  '/auth/otp',
 ]
 
 /**

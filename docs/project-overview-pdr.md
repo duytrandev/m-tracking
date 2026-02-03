@@ -371,6 +371,8 @@ Eliminate manual transaction tracking by integrating directly with banking APIs 
 **Related Documents:**
 
 - [docs/system-architecture.md](./system-architecture.md) - Detailed system design
+- [docs/authentication.md](./authentication.md) - Authentication system & database schema
+- [docs/database-migrations.md](./database-migrations.md) - Database migrations guide
 - [docs/codebase-summary.md](./codebase-summary.md) - Code organization
 - [docs/code-standards.md](./code-standards.md) - Development standards
 - [docs/prd.md](./prd.md) - Complete product requirements

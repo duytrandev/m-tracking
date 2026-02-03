@@ -2,17 +2,10 @@ import { Injectable } from '@nestjs/common'
 import { PassportStrategy } from '@nestjs/passport'
 import { Strategy, VerifyCallback, Profile } from 'passport-google-oauth20'
 import { ConfigService } from '@nestjs/config'
-
-interface OAuthUserProfile {
-  provider: string
-  providerId: string
-  email: string
-  emailVerified: boolean
-  name: string
-  avatar: string | null
-  accessToken: string
-  refreshToken: string | null
-}
+import {
+  mapOAuthProfile,
+  toPassportProfile,
+} from '../utils/oauth-profile-mapper.util'
 
 /**
  * Google OAuth 2.1 Strategy with PKCE support
@@ -30,6 +23,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       state: true,
       pkce: true,
       passReqToCallback: false,
+      // Force Google to always show account selection screen
+      // This ensures users must explicitly select their account after logout
+      prompt: 'select_account',
     })
   }
 
@@ -43,22 +39,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: Profile,
     done: VerifyCallback
   ): void {
-    const { id, emails, displayName, photos } = profile
-
-    const email = emails?.[0]?.value ?? ''
-    const emailVerified = emails?.[0]?.verified ?? false
-    const avatarUrl = photos?.[0]?.value ?? null
-
-    const user: OAuthUserProfile = {
+    const passportProfile = toPassportProfile(profile)
+    const user = mapOAuthProfile(accessToken, refreshToken, passportProfile, {
       provider: 'google',
-      providerId: id,
-      email,
-      emailVerified,
-      name: displayName ?? '',
-      avatar: avatarUrl,
-      accessToken,
-      refreshToken: refreshToken ?? null,
-    }
+      extractEmailVerified: p => p.emails?.[0]?.verified ?? false,
+      extractName: p => p.displayName ?? '',
+    })
 
     done(null, user)
   }

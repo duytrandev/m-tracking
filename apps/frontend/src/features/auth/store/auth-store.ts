@@ -1,9 +1,22 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import type { User } from '@m-tracking/shared'
+import { z } from 'zod'
 
 // Re-export User type for backwards compatibility
 export type { User } from '@m-tracking/shared'
+
+// Schema for validating hydrated user data from sessionStorage
+// Prevents app crash if storage contains corrupted/malformed data
+const userSchema = z
+  .object({
+    id: z.string(),
+    email: z.string().email(),
+    name: z.string(),
+    avatar: z.string().nullable().optional(),
+    emailVerified: z.boolean().optional(),
+  })
+  .passthrough() // Allow additional fields from User type
 
 /**
  * Auth state interface
@@ -81,6 +94,21 @@ export const useAuthStore = create<AuthState>()(
         // Auth state is re-validated on app load
         user: state.user,
       }),
+      onRehydrateStorage: () => state => {
+        // Validate hydrated user object to prevent crash from corrupted storage
+        if (state?.user) {
+          const result = userSchema.safeParse(state.user)
+          if (result.success) {
+            // Valid user found in storage - mark as authenticated
+            // The actual token validity will be verified by useAuthInit
+            state.isAuthenticated = true
+          } else {
+            // Invalid user data in storage, clearing
+            state.user = null
+            state.isAuthenticated = false
+          }
+        }
+      },
     }
   )
 )

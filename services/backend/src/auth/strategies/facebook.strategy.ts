@@ -3,6 +3,10 @@ import { PassportStrategy } from '@nestjs/passport'
 import { Strategy, Profile } from 'passport-facebook'
 import { ConfigService } from '@nestjs/config'
 import { OAuthProfile } from '../services/oauth.service'
+import {
+  mapOAuthProfile,
+  toPassportProfile,
+} from '../utils/oauth-profile-mapper.util'
 
 type DoneCallback = (error: Error | null, user?: OAuthProfile | false) => void
 
@@ -21,6 +25,9 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       profileFields: ['id', 'emails', 'name', 'picture.type(large)'],
       enableProof: true,
       state: true,
+      // Force Facebook to always show login screen
+      // This ensures users must explicitly authenticate after logout
+      authType: 'reauthenticate',
     })
   }
 
@@ -34,20 +41,16 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     profile: Profile,
     done: DoneCallback
   ): void {
-    const { id, emails, name, photos } = profile
-
-    const firstName = name?.givenName || ''
-    const lastName = name?.familyName || ''
-    const user: OAuthProfile = {
+    const passportProfile = toPassportProfile(profile)
+    const user = mapOAuthProfile(accessToken, refreshToken, passportProfile, {
       provider: 'facebook',
-      providerId: id,
-      email: emails?.[0]?.value || '',
-      emailVerified: false, // Facebook doesn't provide verification status
-      name: `${firstName} ${lastName}`.trim(),
-      avatar: photos?.[0]?.value || null,
-      accessToken,
-      refreshToken: refreshToken || null,
-    }
+      extractEmailVerified: () => false, // Facebook doesn't provide verification status
+      extractName: p => {
+        const firstName = p.name?.givenName || ''
+        const lastName = p.name?.familyName || ''
+        return `${firstName} ${lastName}`.trim()
+      },
+    })
 
     done(null, user)
   }

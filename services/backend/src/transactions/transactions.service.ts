@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  ConflictException,
   Inject,
   Logger,
 } from '@nestjs/common'
@@ -196,6 +197,19 @@ export class TransactionsService {
 
   async deleteCategory(userId: string, id: string): Promise<void> {
     const category = await this.findOneCategory(userId, id)
+
+    // Check for transactions using this category to prevent orphaned data
+    const transactionCount = await this.transactionRepository.count({
+      where: { categoryId: id, userId },
+    })
+
+    if (transactionCount > 0) {
+      throw new ConflictException(
+        `Cannot delete category: ${transactionCount} transaction(s) are using it. ` +
+          'Please reassign transactions first.'
+      )
+    }
+
     await this.categoryRepository.remove(category)
   }
 
@@ -337,49 +351,103 @@ export class TransactionsService {
     }))
   }
 
+  /**
+   * Get user's current date in their timezone
+   * @param timezone IANA timezone string (e.g., 'Asia/Saigon')
+   */
+  private getUserDateInTimezone(timezone: string): {
+    year: number
+    month: number
+    day: number
+    dayOfWeek: number
+  } {
+    const now = new Date()
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      weekday: 'short',
+    })
+
+    const parts = formatter.formatToParts(now)
+    const year = parseInt(
+      parts.find(p => p.type === 'year')?.value || String(now.getFullYear())
+    )
+    const month =
+      parseInt(parts.find(p => p.type === 'month')?.value || '1') - 1
+    const day = parseInt(parts.find(p => p.type === 'day')?.value || '1')
+
+    // Get day of week (0 = Sunday)
+    const weekdayStr = parts.find(p => p.type === 'weekday')?.value || 'Sun'
+    const weekdayMap: Record<string, number> = {
+      Sun: 0,
+      Mon: 1,
+      Tue: 2,
+      Wed: 3,
+      Thu: 4,
+      Fri: 5,
+      Sat: 6,
+    }
+    const dayOfWeek = weekdayMap[weekdayStr] ?? 0
+
+    return { year, month, day, dayOfWeek }
+  }
+
   private getDateRange(query: SpendingQueryDto): {
     startDate: Date
     endDate: Date
   } {
-    const now = new Date()
-    let startDate: Date
-    let endDate: Date = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-      23,
-      59,
-      59
-    )
+    // Use provided timezone or default to UTC
+    const tz = query.timezone || 'UTC'
 
-    switch (query.period) {
-      case TimePeriod.DAY:
-        startDate = new Date(
+    let startDate: Date
+    let endDate: Date
+
+    // For non-custom periods, calculate based on user's timezone
+    if (query.period !== TimePeriod.CUSTOM) {
+      try {
+        const userDate = this.getUserDateInTimezone(tz)
+        const { year, month, day, dayOfWeek } = userDate
+
+        // End of today in user's timezone
+        endDate = new Date(year, month, day, 23, 59, 59)
+
+        switch (query.period) {
+          case TimePeriod.DAY:
+            startDate = new Date(year, month, day, 0, 0, 0)
+            break
+          case TimePeriod.WEEK:
+            // Start of week (Sunday) in user's timezone
+            startDate = new Date(year, month, day - dayOfWeek, 0, 0, 0)
+            break
+          case TimePeriod.MONTH:
+            startDate = new Date(year, month, 1, 0, 0, 0)
+            break
+          case TimePeriod.YEAR:
+            startDate = new Date(year, 0, 1, 0, 0, 0)
+            break
+          default:
+            startDate = new Date(year, month, 1, 0, 0, 0)
+        }
+      } catch {
+        // Invalid timezone - fall back to server time with warning
+        this.logger.warn(`Invalid timezone: ${tz}, falling back to server time`)
+        const now = new Date()
+        endDate = new Date(
           now.getFullYear(),
           now.getMonth(),
           now.getDate(),
-          0,
-          0,
-          0
+          23,
+          59,
+          59
         )
-        break
-      case TimePeriod.WEEK:
-        startDate = new Date(now)
-        startDate.setDate(now.getDate() - now.getDay())
-        startDate.setHours(0, 0, 0, 0)
-        break
-      case TimePeriod.MONTH:
         startDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0)
-        break
-      case TimePeriod.YEAR:
-        startDate = new Date(now.getFullYear(), 0, 1, 0, 0, 0)
-        break
-      case TimePeriod.CUSTOM:
-        startDate = query.startDate ? new Date(query.startDate) : new Date(0)
-        endDate = query.endDate ? new Date(query.endDate) : new Date()
-        break
-      default:
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0)
+      }
+    } else {
+      // Custom period - use provided dates directly
+      startDate = query.startDate ? new Date(query.startDate) : new Date(0)
+      endDate = query.endDate ? new Date(query.endDate) : new Date()
     }
 
     return { startDate, endDate }
@@ -388,42 +456,64 @@ export class TransactionsService {
   /**
    * Invalidate all cache entries for a user
    * Uses cache versioning approach to avoid wildcard deletion complexity
+   * Includes retry logic with exponential backoff for transient failures
    */
   private async invalidateUserCache(userId: string): Promise<void> {
-    try {
-      // Invalidate all possible time period combinations
-      const periods = ['day', 'week', 'month', 'year', 'custom']
-      const now = new Date()
-      const ranges = [
-        // Today
-        {
-          start: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
-          end: now,
-        },
-        // This week
-        { start: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000), end: now },
-        // This month
-        { start: new Date(now.getFullYear(), now.getMonth(), 1), end: now },
-        // This year
-        { start: new Date(now.getFullYear(), 0, 1), end: now },
-      ]
+    const maxRetries = 2
 
-      const deletePromises = []
-      for (const period of periods) {
-        for (const range of ranges) {
-          const cacheKey = `spending-summary:${userId}:${period}:${range.start.toISOString()}:${range.end.toISOString()}`
-          deletePromises.push(this.cacheManager.del(cacheKey))
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        // Invalidate all possible time period combinations
+        const periods = ['day', 'week', 'month', 'year', 'custom']
+        const now = new Date()
+        const ranges = [
+          // Today
+          {
+            start: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
+            end: now,
+          },
+          // This week
+          {
+            start: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
+            end: now,
+          },
+          // This month
+          { start: new Date(now.getFullYear(), now.getMonth(), 1), end: now },
+          // This year
+          { start: new Date(now.getFullYear(), 0, 1), end: now },
+        ]
+
+        const deletePromises = []
+        for (const period of periods) {
+          for (const range of ranges) {
+            const cacheKey = `spending-summary:${userId}:${period}:${range.start.toISOString()}:${range.end.toISOString()}`
+            deletePromises.push(this.cacheManager.del(cacheKey))
+          }
+        }
+
+        // Also delete common patterns
+        deletePromises.push(
+          this.cacheManager.del(`transactions-list:${userId}`)
+        )
+        deletePromises.push(this.cacheManager.del(`categories:${userId}`))
+
+        await Promise.all(deletePromises)
+        return // Success, exit
+      } catch (error) {
+        if (attempt < maxRetries) {
+          // Wait before retry (exponential backoff: 100ms, 200ms)
+          await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)))
+          this.logger.warn(
+            `Cache invalidation retry ${attempt + 1}/${maxRetries} for user: ${userId}`
+          )
+        } else {
+          // All retries failed - log but don't throw (cache is non-critical)
+          this.logger.error(
+            `Cache invalidation failed after ${maxRetries + 1} attempts for user: ${userId}`,
+            error
+          )
         }
       }
-
-      // Also delete common patterns
-      deletePromises.push(this.cacheManager.del(`transactions-list:${userId}`))
-      deletePromises.push(this.cacheManager.del(`categories:${userId}`))
-
-      await Promise.all(deletePromises)
-    } catch (error) {
-      // Log error but don't throw - cache invalidation failure shouldn't break mutations
-      this.logger.error('Cache invalidation error:', error)
     }
   }
 }

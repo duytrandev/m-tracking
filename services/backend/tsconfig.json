@@ -6,6 +6,8 @@
     "outDir": "./dist",
     "composite": true,
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "declarationMap": false,
+    "sourceMap": false,
     "paths": {
       "@/*": ["./src/*"],
       "@gateway/*": ["src/gateway/*"],
@@ -15,7 +17,9 @@
       "@budgets/*": ["src/budgets/*"],
       "@notifications/*": ["src/notifications/*"],
       "@shared/*": ["src/shared/*"],
-      "@integrations/*": ["src/integrations/*"]
+      "@integrations/*": ["src/integrations/*"],
+      "@m-tracking/shared": ["../../libs/shared/src/index.ts"],
+      "@m-tracking/shared/*": ["../../libs/shared/src/*"]
     }
   },
   "include": ["src/**/*", "ormconfig.ts"],

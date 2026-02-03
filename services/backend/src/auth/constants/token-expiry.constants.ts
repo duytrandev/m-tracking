@@ -15,3 +15,19 @@ export const PASSWORD_SETUP_EXPIRY_MS = AUTH_EXPIRY.PASSWORD_SETUP_MS
 
 // Access token expiry (in seconds for JWT)
 export const ACCESS_TOKEN_EXPIRY_SECONDS = 900 // 15 minutes
+
+/**
+ * Token validation configuration
+ * Controls behavior when Redis is unavailable and clock skew tolerance
+ */
+export const TOKEN_CONFIG = {
+  // Clock skew buffer for distributed systems (in seconds)
+  // 5 seconds is conservative for multi-region deployments with NTP sync
+  CLOCK_SKEW_SECONDS: parseInt(process.env.TOKEN_CLOCK_SKEW_SECONDS || '5', 10),
+
+  // Strict mode: fail auth if Redis unavailable (security-critical in production)
+  // In dev mode, allows graceful degradation with warning
+  REDIS_STRICT_MODE:
+    process.env.TOKEN_REDIS_STRICT_MODE === 'true' ||
+    process.env.NODE_ENV === 'production',
+}

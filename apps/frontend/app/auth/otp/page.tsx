@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { ArrowLeft, Smartphone, AlertCircle } from 'lucide-react'
+import { GuestRoute } from '@/components/auth'
 import { AuthCard } from '@/features/auth/components/auth-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -89,140 +90,144 @@ export default function OtpLoginPage(): React.ReactElement {
   // Request Step
   if (step === 'request') {
     return (
-      <AuthCard
-        title="Sign in with SMS"
-        description="We'll text you a code to sign in"
-      >
-        <form
-          onSubmit={e => {
-            void handleSubmit(onSubmit)(e)
-          }}
-          className="space-y-6"
+      <GuestRoute>
+        <AuthCard
+          title="Sign in with SMS"
+          description="We'll text you a code to sign in"
         >
-          {requestError && (
-            <div
-              className="rounded-md bg-destructive/10 p-3 text-sm text-destructive"
-              role="alert"
-            >
-              {requestError.message}
-            </div>
-          )}
-
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
-            <Input
-              id="phone"
-              type="tel"
-              placeholder="+1 (555) 000-0000"
-              autoComplete="tel"
-              error={!!errors.phone}
-              {...register('phone')}
-            />
-            {errors.phone && (
-              <p className="text-sm text-destructive" role="alert">
-                {errors.phone.message}
-              </p>
+          <form
+            onSubmit={e => {
+              void handleSubmit(onSubmit)(e)
+            }}
+            className="space-y-6"
+          >
+            {requestError && (
+              <div
+                className="rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+                role="alert"
+              >
+                {requestError.message}
+              </div>
             )}
-          </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            isLoading={isRequesting}
-            loadingText="Sending..."
-          >
-            Send Code
-          </Button>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="+1 (555) 000-0000"
+                autoComplete="tel"
+                error={!!errors.phone}
+                {...register('phone')}
+              />
+              {errors.phone && (
+                <p className="text-sm text-destructive" role="alert">
+                  {errors.phone.message}
+                </p>
+              )}
+            </div>
 
-          <Link
-            href="/auth/login"
-            className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to login
-          </Link>
-        </form>
-      </AuthCard>
+            <Button
+              type="submit"
+              className="w-full"
+              isLoading={isRequesting}
+              loadingText="Sending..."
+            >
+              Send Code
+            </Button>
+
+            <Link
+              href="/auth/login"
+              className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to login
+            </Link>
+          </form>
+        </AuthCard>
+      </GuestRoute>
     )
   }
 
   // Verify Step
   return (
-    <AuthCard title="Enter verification code">
-      <div className="space-y-6">
-        <div className="text-center space-y-2">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-            <Smartphone className="h-8 w-8 text-primary" />
-          </div>
-          <p className="text-muted-foreground">
-            Enter the 6-digit code sent to{' '}
-            <span className="font-medium">{phone}</span>
-          </p>
-        </div>
-
-        {verifyError && (
-          <div
-            className="flex items-center gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive"
-            role="alert"
-          >
-            <AlertCircle className="h-4 w-4 shrink-0" />
-            <div>
-              {verifyError.message}
-              {attemptsRemaining !== null && (
-                <span className="block text-xs mt-1">
-                  {attemptsRemaining}{' '}
-                  {attemptsRemaining === 1 ? 'attempt' : 'attempts'} remaining
-                </span>
-              )}
+    <GuestRoute>
+      <AuthCard title="Enter verification code">
+        <div className="space-y-6">
+          <div className="text-center space-y-2">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+              <Smartphone className="h-8 w-8 text-primary" />
             </div>
+            <p className="text-muted-foreground">
+              Enter the 6-digit code sent to{' '}
+              <span className="font-medium">{phone}</span>
+            </p>
           </div>
-        )}
 
-        <CodeInput
-          value={code}
-          onChange={setCode}
-          onComplete={handleCodeComplete}
-          disabled={isVerifying}
-          error={!!verifyError}
-        />
+          {verifyError && (
+            <div
+              className="flex items-center gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+              role="alert"
+            >
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              <div>
+                {verifyError.message}
+                {attemptsRemaining !== null && (
+                  <span className="block text-xs mt-1">
+                    {attemptsRemaining}{' '}
+                    {attemptsRemaining === 1 ? 'attempt' : 'attempts'} remaining
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
 
-        <Button
-          type="button"
-          className="w-full"
-          onClick={() => handleCodeComplete(code)}
-          disabled={code.length !== 6}
-          isLoading={isVerifying}
-          loadingText="Verifying..."
-        >
-          Verify
-        </Button>
+          <CodeInput
+            value={code}
+            onChange={setCode}
+            onComplete={handleCodeComplete}
+            disabled={isVerifying}
+            error={!!verifyError}
+          />
 
-        <div className="text-center text-sm">
-          <p className="text-muted-foreground">Did not receive a code?</p>
           <Button
-            variant="link"
-            className="h-auto p-0"
-            onClick={handleResend}
-            disabled={resendCooldown > 0}
+            type="button"
+            className="w-full"
+            onClick={() => handleCodeComplete(code)}
+            disabled={code.length !== 6}
+            isLoading={isVerifying}
+            loadingText="Verifying..."
           >
-            {resendCooldown > 0
-              ? `Resend in ${resendCooldown}s`
-              : 'Resend code'}
+            Verify
           </Button>
-        </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            setStep('request')
-            setCode('')
-          }}
-          className="flex items-center justify-center gap-2 w-full text-sm text-muted-foreground hover:text-primary"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Change phone number
-        </button>
-      </div>
-    </AuthCard>
+          <div className="text-center text-sm">
+            <p className="text-muted-foreground">Did not receive a code?</p>
+            <Button
+              variant="link"
+              className="h-auto p-0"
+              onClick={handleResend}
+              disabled={resendCooldown > 0}
+            >
+              {resendCooldown > 0
+                ? `Resend in ${resendCooldown}s`
+                : 'Resend code'}
+            </Button>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setStep('request')
+              setCode('')
+            }}
+            className="flex items-center justify-center gap-2 w-full text-sm text-muted-foreground hover:text-primary"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Change phone number
+          </button>
+        </div>
+      </AuthCard>
+    </GuestRoute>
   )
 }

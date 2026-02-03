@@ -11,7 +11,6 @@ import {
   type Relation,
 } from 'typeorm'
 import { Role } from './role.entity'
-import type { Session } from './session.entity'
 import type { OAuthAccount } from './oauth-account.entity'
 import type { PasswordResetToken } from './password-reset-token.entity'
 import type { EmailVerificationToken } from './email-verification-token.entity'
@@ -81,9 +80,6 @@ export class User {
     inverseJoinColumn: { name: 'role_id', referencedColumnName: 'id' },
   })
   roles!: Role[]
-
-  @OneToMany('Session', 'user')
-  sessions!: Relation<Session[]>
 
   @OneToMany('OAuthAccount', 'user')
   oauthAccounts!: Relation<OAuthAccount[]>

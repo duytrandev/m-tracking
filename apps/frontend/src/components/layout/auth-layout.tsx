@@ -1,6 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
+import Link from 'next/link'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 
 interface AuthLayoutProps {
@@ -20,14 +21,17 @@ export function AuthLayout({ children }: AuthLayoutProps) {
       <div className="w-full lg:w-2/5 flex flex-col bg-white dark:bg-gray-900">
         {/* Logo/Branding */}
         <div className="px-8 py-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <Link
+            href="/"
+            className="flex items-center gap-3 transition-opacity hover:opacity-80"
+          >
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#5046E5] to-[#3730A3] flex items-center justify-center">
               <span className="text-white font-bold text-xl">M</span>
             </div>
             <span className="text-xl font-bold text-gray-900 dark:text-white">
               M-Tracking
             </span>
-          </div>
+          </Link>
           <ThemeToggle variant="minimal" size="sm" />
         </div>
 

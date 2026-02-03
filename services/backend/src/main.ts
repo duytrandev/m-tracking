@@ -16,14 +16,14 @@ import {
 } from './common'
 
 // Sentry configuration
-import { initializeSentry } from './shared/sentry/sentry.config'
+// import { initializeSentry } from './shared/sentry/sentry.config'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
   const configService = app.get(ConfigService)
 
   // Initialize Sentry FIRST (before any other middleware)
-  initializeSentry(configService)
+  // initializeSentry(configService)
 
   // Sentry request handler (MUST be first middleware)
   // app.use(Sentry.Handlers.requestHandler())
@@ -35,9 +35,18 @@ async function bootstrap() {
   app.use(cookieParser())
 
   // Session middleware for OAuth PKCE state management
+  // SECURITY: Require explicit SESSION_SECRET, no fallback to prevent predictable secrets
+  const sessionSecret = configService.get<string>('SESSION_SECRET')
+  if (!sessionSecret) {
+    throw new Error(
+      'SESSION_SECRET environment variable is required. ' +
+        "Generate with: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
+    )
+  }
+
   app.use(
     session({
-      secret: configService.get<string>('JWT_SECRET') || 'oauth-session-secret',
+      secret: sessionSecret,
       resave: false,
       saveUninitialized: false,
       cookie: {

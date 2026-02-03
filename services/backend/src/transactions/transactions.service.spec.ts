@@ -59,6 +59,7 @@ describe('TransactionsService', () => {
             findOne: vi.fn(),
             findAndCount: vi.fn(),
             remove: vi.fn(),
+            count: vi.fn(),
             createQueryBuilder: vi.fn(),
           },
         },
@@ -437,9 +438,13 @@ describe('TransactionsService', () => {
     it('should delete a category successfully', async () => {
       vi.spyOn(categoryRepository, 'findOne').mockResolvedValue(mockCategory)
       vi.spyOn(categoryRepository, 'remove').mockResolvedValue(mockCategory)
+      vi.spyOn(transactionRepository, 'count').mockResolvedValue(0)
 
       await service.deleteCategory(mockUserId, mockCategoryId)
 
+      expect(transactionRepository.count).toHaveBeenCalledWith({
+        where: { categoryId: mockCategoryId, userId: mockUserId },
+      })
       expect(categoryRepository.remove).toHaveBeenCalledWith(mockCategory)
     })
 
@@ -449,6 +454,15 @@ describe('TransactionsService', () => {
       await expect(
         service.deleteCategory(mockUserId, 'non-existent')
       ).rejects.toThrow(NotFoundException)
+    })
+
+    it('should throw ConflictException if category has transactions', async () => {
+      vi.spyOn(categoryRepository, 'findOne').mockResolvedValue(mockCategory)
+      vi.spyOn(transactionRepository, 'count').mockResolvedValue(5)
+
+      await expect(
+        service.deleteCategory(mockUserId, mockCategoryId)
+      ).rejects.toThrow('Cannot delete category: 5 transaction(s) are using it')
     })
   })
 

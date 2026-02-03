@@ -1,12 +1,8 @@
 import { useState, useCallback, useEffect } from 'react'
-import { useMutation } from '@tanstack/react-query'
 import { authApi } from '../api/auth-api'
-import { isApiError, getApiErrorCode } from '@/lib/api-client'
-import {
-  type AuthFailureInfo,
-  createAuthFailure,
-  GENERIC_ERROR_MESSAGE,
-} from '@m-tracking/shared'
+import type { AuthFailureInfo } from '@m-tracking/shared'
+import type { MessageResponse } from '@/types/api/auth'
+import { useAuthMutation } from './use-auth-mutation'
 
 // Cooldown period matches backend throttle (5 minutes)
 const COOLDOWN_MS = 5 * 60 * 1000
@@ -56,40 +52,26 @@ export function useAddPassword(): UseAddPasswordReturn {
     return () => clearInterval(interval)
   }, [cooldownEnd])
 
-  const mutation = useMutation({
-    mutationFn: authApi.requestAddPassword,
-    onSuccess: () => {
-      setEmailSent(true)
-      setCooldownEnd(Date.now() + COOLDOWN_MS)
+  const mutation = useAuthMutation<MessageResponse, undefined>(
+    {
+      mutationFn: authApi.requestAddPassword,
+      onSuccess: () => {
+        setEmailSent(true)
+        setCooldownEnd(Date.now() + COOLDOWN_MS)
+      },
     },
-  })
-
-  let error: AuthFailureInfo | null = null
-
-  if (mutation.error) {
-    let errorCode: string | null = null
-    let errorMessage = GENERIC_ERROR_MESSAGE
-
-    if (isApiError(mutation.error)) {
-      errorCode = getApiErrorCode(mutation.error) || null
-      errorMessage =
-        mutation.error.response?.data?.message || 'Failed to send setup email'
-    } else if (mutation.error instanceof Error) {
-      errorMessage = mutation.error.message || GENERIC_ERROR_MESSAGE
-    }
-
-    error = createAuthFailure(errorCode, errorMessage)
-  }
+    'Failed to send setup email'
+  )
 
   const requestAddPassword = useCallback(() => {
     if (cooldownSeconds > 0) return
-    mutation.mutate()
+    mutation.mutate(undefined)
   }, [mutation, cooldownSeconds])
 
   return {
     requestAddPassword,
     isLoading: mutation.isPending,
-    error,
+    error: mutation.error,
     emailSent,
     reset: () => {
       mutation.reset()

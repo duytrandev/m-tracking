@@ -3,6 +3,10 @@ import { PassportStrategy } from '@nestjs/passport'
 import { Strategy, Profile } from 'passport-github2'
 import { ConfigService } from '@nestjs/config'
 import { OAuthProfile } from '../services/oauth.service'
+import {
+  mapOAuthProfile,
+  toPassportProfile,
+} from '../utils/oauth-profile-mapper.util'
 
 interface GitHubEmail {
   value: string
@@ -25,6 +29,9 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
       callbackURL: configService.get<string>('GITHUB_CALLBACK_URL'),
       scope: ['user:email'],
       state: true,
+      // Note: GitHub OAuth doesn't support prompt=select_account like Google
+      // Users will need to manually log out of GitHub or use a different browser
+      // to switch accounts after logout
     })
   }
 
@@ -38,23 +45,18 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
     profile: Profile,
     done: DoneCallback
   ): void {
-    const { id, username, displayName, emails, photos } = profile
-    const typedEmails = emails as GitHubEmail[] | undefined
-
-    // GitHub primary email
-    const primaryEmail =
-      typedEmails?.find(e => e.primary)?.value || typedEmails?.[0]?.value || ''
-
-    const user: OAuthProfile = {
+    const passportProfile = toPassportProfile({
+      ...profile,
+      username: profile.username,
+    })
+    const user = mapOAuthProfile(accessToken, refreshToken, passportProfile, {
       provider: 'github',
-      providerId: id,
-      email: primaryEmail,
-      emailVerified: typedEmails?.find(e => e.primary)?.verified || false,
-      name: displayName || username || '',
-      avatar: photos?.[0]?.value || null,
-      accessToken,
-      refreshToken: refreshToken || null,
-    }
+      extractEmailVerified: p => {
+        const typedEmails = p.emails as GitHubEmail[] | undefined
+        return typedEmails?.find(e => e.primary)?.verified || false
+      },
+      extractName: p => p.displayName || p.username || '',
+    })
 
     done(null, user)
   }

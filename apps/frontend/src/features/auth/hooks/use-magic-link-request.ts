@@ -1,12 +1,8 @@
-import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { authApi } from '../api/auth-api'
-import { isApiError, getApiErrorCode } from '@/lib/api-client'
-import {
-  type AuthFailureInfo,
-  createAuthFailure,
-  GENERIC_ERROR_MESSAGE,
-} from '@m-tracking/shared'
+import type { AuthFailureInfo } from '@m-tracking/shared'
+import type { MessageResponse } from '@/types/api/auth'
+import { useAuthMutation } from './use-auth-mutation'
 
 interface UseMagicLinkRequestReturn {
   requestMagicLink: (email: string) => void
@@ -20,35 +16,21 @@ interface UseMagicLinkRequestReturn {
 export function useMagicLinkRequest(): UseMagicLinkRequestReturn {
   const [email, setEmail] = useState<string | null>(null)
 
-  const mutation = useMutation({
-    mutationFn: authApi.requestMagicLink,
-    onSuccess: (_, requestEmail) => {
-      setEmail(requestEmail)
+  const mutation = useAuthMutation<MessageResponse, string>(
+    {
+      mutationFn: authApi.requestMagicLink,
+      onSuccess: (_, requestEmail) => {
+        setEmail(requestEmail)
+      },
     },
-  })
-
-  let error: AuthFailureInfo | null = null
-
-  if (mutation.error) {
-    let errorCode: string | null = null
-    let errorMessage = GENERIC_ERROR_MESSAGE
-
-    if (isApiError(mutation.error)) {
-      errorCode = getApiErrorCode(mutation.error) || null
-      errorMessage =
-        mutation.error.response?.data?.message || 'Failed to send magic link'
-    } else if (mutation.error instanceof Error) {
-      errorMessage = mutation.error.message || GENERIC_ERROR_MESSAGE
-    }
-
-    error = createAuthFailure(errorCode, errorMessage)
-  }
+    'Failed to send magic link'
+  )
 
   return {
     requestMagicLink: mutation.mutate,
     isLoading: mutation.isPending,
     isSuccess: mutation.isSuccess,
-    error,
+    error: mutation.error,
     email,
     clearError: mutation.reset,
   }

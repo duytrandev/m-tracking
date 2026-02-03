@@ -1,31 +1,125 @@
 'use client'
 
+import { Suspense, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
-import { useSearchParams } from 'next/navigation'
-import { Mail, ArrowLeft } from 'lucide-react'
+import { useSearchParams, useRouter } from 'next/navigation'
+import {
+  Mail,
+  ArrowLeft,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+} from 'lucide-react'
 import { AuthCard } from '@/features/auth/components/auth-card'
 import { Button } from '@/components/ui/button'
-import { useState } from 'react'
+import { useVerifyEmail } from '@/features/auth/hooks/use-verify-email'
+import { useResendVerification } from '@/features/auth/hooks/use-resend-verification'
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const t = useTranslations('auth.verifyEmail')
   const searchParams = useSearchParams()
+  const router = useRouter()
+  const token = searchParams.get('token')
   const email = searchParams.get('email') || 'your@email.com'
-  const [countdown, setCountdown] = useState(0)
+
+  const { verifyEmail, isLoading, isSuccess, error } = useVerifyEmail()
+  const {
+    resendVerification,
+    isLoading: isResending,
+    countdown,
+    canResend,
+  } = useResendVerification()
+
+  // Automatically verify token when present in URL
+  useEffect(() => {
+    if (token) {
+      verifyEmail(token)
+    }
+  }, [token, verifyEmail])
 
   const handleResend = () => {
-    setCountdown(60)
-    const interval = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(interval)
-          return 0
-        }
-        return prev - 1
-      })
-    }, 1000)
+    if (canResend && email !== 'your@email.com') {
+      void resendVerification(email)
+    }
   }
 
+  // Token verification mode - show loading/success/error states
+  if (token) {
+    if (isLoading) {
+      return (
+        <AuthCard title={t('verifying') || 'Verifying Email'}>
+          <div className="flex flex-col items-center justify-center space-y-4 py-8">
+            <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+            <p className="text-muted-foreground">
+              {t('verifyingMessage') || 'Verifying your email address...'}
+            </p>
+          </div>
+        </AuthCard>
+      )
+    }
+
+    if (isSuccess) {
+      return (
+        <AuthCard title={t('successTitle') || 'Email Verified'}>
+          <div className="flex flex-col items-center justify-center space-y-6 py-8 text-center">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-50">
+              <CheckCircle2 className="h-10 w-10 text-green-600" />
+            </div>
+            <div className="space-y-2">
+              <p className="text-lg font-medium text-foreground">
+                {t('successMessage') ||
+                  'Your email has been verified successfully!'}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {t('successDescription') ||
+                  'You can now log in to your account.'}
+              </p>
+            </div>
+            <Button
+              onClick={() => router.push('/auth/login')}
+              className="w-full"
+            >
+              {t('continueToLogin') || 'Continue to Login'}
+            </Button>
+          </div>
+        </AuthCard>
+      )
+    }
+
+    if (error) {
+      return (
+        <AuthCard title={t('errorTitle') || 'Verification Failed'}>
+          <div className="flex flex-col items-center justify-center space-y-6 py-8 text-center">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-destructive/10">
+              <AlertCircle className="h-10 w-10 text-destructive" />
+            </div>
+            <div className="space-y-2">
+              <p className="text-lg font-medium text-foreground">
+                {t('errorMessage') || 'Email verification failed'}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {error.message ||
+                  t('errorDescription') ||
+                  'The verification link may be invalid or expired.'}
+              </p>
+            </div>
+            <div className="flex w-full flex-col gap-2">
+              <Button
+                variant="outline"
+                onClick={() => router.push('/auth/login')}
+                className="w-full"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                {t('backToLogin') || 'Back to Login'}
+              </Button>
+            </div>
+          </div>
+        </AuthCard>
+      )
+    }
+  }
+
+  // No token - show instructions to check email
   return (
     <AuthCard title={t('title')}>
       <div className="space-y-6 text-center">
@@ -50,12 +144,14 @@ export default function VerifyEmailPage() {
               •{' '}
               <button
                 onClick={handleResend}
-                disabled={countdown > 0}
+                disabled={!canResend || isResending}
                 className="text-primary hover:underline disabled:text-muted-foreground disabled:no-underline"
               >
-                {countdown > 0
-                  ? t('resendAvailable', { seconds: countdown })
-                  : t('resend')}
+                {isResending
+                  ? t('sending') || 'Sending...'
+                  : countdown > 0
+                    ? t('resendAvailable', { seconds: countdown })
+                    : t('resend')}
               </button>
             </li>
           </ul>
@@ -69,5 +165,24 @@ export default function VerifyEmailPage() {
         </Button>
       </div>
     </AuthCard>
+  )
+}
+
+function VerifyEmailLoading() {
+  return (
+    <AuthCard title="Verifying...">
+      <div className="flex flex-col items-center justify-center space-y-4 py-12">
+        <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    </AuthCard>
+  )
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<VerifyEmailLoading />}>
+      <VerifyEmailContent />
+    </Suspense>
   )
 }

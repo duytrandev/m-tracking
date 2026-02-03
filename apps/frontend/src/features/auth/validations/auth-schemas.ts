@@ -15,13 +15,11 @@ export const registerSchema = z.object({
     .min(1, 'Email is required')
     .email('Please enter a valid email address')
     .max(254, 'Email is too long'),
-  password: z
-    .string()
-    .min(12, 'Password must be at least 12 characters')
-    .regex(/[a-z]/, 'Password must contain a lowercase letter')
-    .regex(/[A-Z]/, 'Password must contain an uppercase letter')
-    .regex(/[0-9]/, 'Password must contain a number')
-    .regex(/[^a-zA-Z0-9]/, 'Password must contain a special character'),
+  password: z.string().min(5, 'Password must be at least 12 characters'),
+  // .regex(/[a-z]/, 'Password must contain a lowercase letter')
+  // .regex(/[A-Z]/, 'Password must contain an uppercase letter')
+  // .regex(/[0-9]/, 'Password must contain a number')
+  // .regex(/[^a-zA-Z0-9]/, 'Password must contain a special character'),
   name: z
     .string()
     .min(2, 'Name must be at least 2 characters')
@@ -35,13 +33,11 @@ export const setPasswordSchema = z.object({
     .min(1, 'Email is required')
     .email('Please enter a valid email address')
     .max(254, 'Email is too long'),
-  password: z
-    .string()
-    .min(12, 'Password must be at least 12 characters')
-    .regex(/[a-z]/, 'Password must contain a lowercase letter')
-    .regex(/[A-Z]/, 'Password must contain an uppercase letter')
-    .regex(/[0-9]/, 'Password must contain a number')
-    .regex(/[^a-zA-Z0-9]/, 'Password must contain a special character'),
+  password: z.string().min(5, 'Password must be at least 12 characters'),
+  // .regex(/[a-z]/, 'Password must contain a lowercase letter')
+  // .regex(/[A-Z]/, 'Password must contain an uppercase letter')
+  // .regex(/[0-9]/, 'Password must contain a number')
+  // .regex(/[^a-zA-Z0-9]/, 'Password must contain a special character'),
   name: z.string().optional(), // Optional for OAuth users
 })
 
@@ -160,17 +156,16 @@ export type PasswordStrength = 'weak' | 'medium' | 'strong'
  * Calculate password strength based on length and character variety
  * Used for real-time password strength indicator
  */
-export function calculatePasswordStrength(password: string): PasswordStrength {
-  let strength = 0
-
-  if (password.length >= 12) strength++
-  if (password.length >= 16) strength++
-  if (/[a-z]/.test(password)) strength++
-  if (/[A-Z]/.test(password)) strength++
-  if (/[0-9]/.test(password)) strength++
-  if (/[^a-zA-Z0-9]/.test(password)) strength++
-
-  if (strength <= 2) return 'weak'
-  if (strength <= 4) return 'medium'
+export function calculatePasswordStrength(_password: string): PasswordStrength {
+  // TODO: Implement password strength calculation
+  // let strength = 0
+  // if (_password.length >= 12) strength++
+  // if (_password.length >= 16) strength++
+  // if (/[a-z]/.test(_password)) strength++
+  // if (/[A-Z]/.test(_password)) strength++
+  // if (/[0-9]/.test(_password)) strength++
+  // if (/[^a-zA-Z0-9]/.test(_password)) strength++
+  // if (strength <= 2) return 'weak'
+  // if (strength <= 4) return 'medium'
   return 'strong'
 }

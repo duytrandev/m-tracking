@@ -94,7 +94,16 @@ class TokenService {
           })
         }
       }, refreshIn)
+    } else if (expiresInSeconds > 0) {
+      // Token expires within buffer window - refresh immediately
+      // This handles edge case where token has <60 seconds lifetime
+      if (this.refreshCallback) {
+        this.refreshCallback().catch(() => {
+          // Immediate refresh failed - token will expire
+        })
+      }
     }
+    // If expiresInSeconds <= 0, token already expired, don't schedule
   }
 
   /**

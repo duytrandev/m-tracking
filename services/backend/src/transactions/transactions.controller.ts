@@ -8,8 +8,10 @@ import {
   Param,
   Query,
   Request,
+  UseGuards,
 } from '@nestjs/common'
 import { Request as ExpressRequest } from 'express'
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { TransactionsService } from './transactions.service'
 import { CreateTransactionDto } from './dto/create-transaction.dto'
 import { UpdateTransactionDto } from './dto/update-transaction.dto'
@@ -27,6 +29,7 @@ interface AuthenticatedRequest extends ExpressRequest {
 }
 
 @Controller('transactions')
+@UseGuards(JwtAuthGuard)
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 

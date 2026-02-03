@@ -44,7 +44,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           )}
         </Button>
         <div className="flex-1">
-          <span className="font-semibold">M-Tracking</span>
+          <Link
+            href="/dashboard"
+            className="font-semibold hover:opacity-80 transition-opacity"
+          >
+            M-Tracking
+          </Link>
         </div>
         <ThemeToggle variant="minimal" size="sm" />
       </header>

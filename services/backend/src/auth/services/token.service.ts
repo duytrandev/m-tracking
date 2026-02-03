@@ -1,10 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { AuthExceptions } from '../../common/exceptions'
+import { AuthException, AuthExceptions } from '../../common/exceptions'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
 import { RedisService } from '../../shared/redis/redis.service'
 import { CryptoService } from '../../shared/crypto/crypto.service'
 import { User } from '../entities/user.entity'
+import { TOKEN_CONFIG } from '../constants/token-expiry.constants'
 import * as fs from 'fs'
 
 export interface TokenPayload {
@@ -107,6 +108,8 @@ export class TokenService {
 
   /**
    * Verify access token (RS256 with public key)
+   * Strict mode (production): fails if Redis unavailable - prevents blacklist bypass
+   * Graceful mode (dev): logs warning but allows token - for local development
    */
   async verifyAccessToken(token: string): Promise<TokenPayload> {
     try {
@@ -118,22 +121,30 @@ export class TokenService {
         }
       )
 
-      // Check if token is blacklisted
-      // Graceful degradation: if Redis unavailable, allow auth to continue with warning
-      let isBlacklisted = false
+      // Check if token is blacklisted with strict Redis enforcement
+      const tokenHash = this.cryptoService.hashToken(token)
       try {
-        isBlacklisted = await this.redisService.isTokenBlacklisted(
-          this.cryptoService.hashToken(token)
-        )
+        const isBlacklisted =
+          await this.redisService.isTokenBlacklisted(tokenHash)
+        if (isBlacklisted) {
+          this.logger.warn('Access token is blacklisted')
+          throw AuthExceptions.tokenRevoked()
+        }
       } catch (error) {
-        this.logger.warn(
-          `Redis unavailable for blacklist check, allowing token: ${(error as Error).message}`
-        )
-      }
+        // Re-throw token revoked errors
+        if (this.isTokenRevokedException(error)) throw error
 
-      if (isBlacklisted) {
-        this.logger.warn('Access token is blacklisted')
-        throw AuthExceptions.tokenRevoked()
+        // Redis unavailable - apply strict mode policy
+        if (TOKEN_CONFIG.REDIS_STRICT_MODE) {
+          this.logger.error(
+            `Redis unavailable - rejecting token (strict mode): ${(error as Error).message}`
+          )
+          throw AuthExceptions.serviceUnavailable()
+        }
+        // Graceful mode (dev only): log warning but allow
+        this.logger.warn(
+          `Redis unavailable - allowing token (dev mode): ${(error as Error).message}`
+        )
       }
 
       // Check if all user tokens have been invalidated (logout from all devices)
@@ -150,12 +161,15 @@ export class TokenService {
 
       return decoded
     } catch (error) {
-      if (
-        (error as { name?: string }).name === 'TokenRevokedException' ||
-        (error as { message?: string }).message?.includes('revoked')
-      ) {
-        throw error
+      // Re-throw known auth exceptions
+      if (this.isTokenRevokedException(error)) throw error
+      if (this.isServiceUnavailableException(error)) throw error
+
+      // Handle JWT library errors
+      if (error instanceof Error && error.name === 'TokenExpiredError') {
+        throw AuthExceptions.tokenExpired()
       }
+
       this.logger.error(
         `Access token verification failed: ${(error as Error).message}`
       )
@@ -165,6 +179,8 @@ export class TokenService {
 
   /**
    * Verify refresh token (HS256 with secret)
+   * Strict mode (production): fails if Redis unavailable - prevents blacklist bypass
+   * Graceful mode (dev): logs warning but allows token - for local development
    */
   async verifyRefreshToken(token: string): Promise<RefreshTokenPayload> {
     try {
@@ -176,21 +192,30 @@ export class TokenService {
         algorithms: ['HS256'],
       })
 
-      // Check if token is blacklisted
-      // Graceful degradation: if Redis unavailable, allow auth to continue with warning
+      // Check if token is blacklisted with strict Redis enforcement
       const tokenHash = this.cryptoService.hashToken(token)
-      let isBlacklisted = false
       try {
-        isBlacklisted = await this.redisService.isTokenBlacklisted(tokenHash)
+        const isBlacklisted =
+          await this.redisService.isTokenBlacklisted(tokenHash)
+        if (isBlacklisted) {
+          this.logger.warn('Refresh token is blacklisted')
+          throw AuthExceptions.tokenRevoked()
+        }
       } catch (error) {
-        this.logger.warn(
-          `Redis unavailable for refresh token blacklist check, allowing token: ${(error as Error).message}`
-        )
-      }
+        // Re-throw token revoked errors
+        if (this.isTokenRevokedException(error)) throw error
 
-      if (isBlacklisted) {
-        this.logger.warn('Refresh token is blacklisted')
-        throw AuthExceptions.tokenRevoked()
+        // Redis unavailable - apply strict mode policy
+        if (TOKEN_CONFIG.REDIS_STRICT_MODE) {
+          this.logger.error(
+            `Redis unavailable - rejecting refresh token (strict mode): ${(error as Error).message}`
+          )
+          throw AuthExceptions.serviceUnavailable()
+        }
+        // Graceful mode (dev only): log warning but allow
+        this.logger.warn(
+          `Redis unavailable - allowing refresh token (dev mode): ${(error as Error).message}`
+        )
       }
 
       // Check if all user tokens have been invalidated (logout from all devices)
@@ -207,12 +232,15 @@ export class TokenService {
 
       return decoded
     } catch (error) {
-      if (
-        (error as { name?: string }).name === 'TokenRevokedException' ||
-        (error as { message?: string }).message?.includes('revoked')
-      ) {
-        throw error
+      // Re-throw known auth exceptions
+      if (this.isTokenRevokedException(error)) throw error
+      if (this.isServiceUnavailableException(error)) throw error
+
+      // Handle JWT library errors
+      if (error instanceof Error && error.name === 'TokenExpiredError') {
+        throw AuthExceptions.tokenExpired()
       }
+
       this.logger.error(
         `Refresh token verification failed: ${(error as Error).message}`
       )
@@ -256,7 +284,7 @@ export class TokenService {
 
   /**
    * Check if token was issued before user's token invalidation time
-   * Includes 2-second clock skew buffer for distributed system timing
+   * Uses configurable clock skew buffer for distributed system timing (default: 5s)
    */
   async isTokenInvalidated(
     userId: string,
@@ -267,8 +295,41 @@ export class TokenService {
     if (!invalidationTime) return false
     // Token is invalid if issued before invalidation time
     // tokenIssuedAt is in seconds (JWT iat), invalidationTime is in milliseconds
-    // Add 2-second clock skew buffer for distributed systems
-    const CLOCK_SKEW_MS = 2000
+    // Clock skew buffer for multi-region deployments (5s default)
+    const CLOCK_SKEW_MS = TOKEN_CONFIG.CLOCK_SKEW_SECONDS * 1000
     return tokenIssuedAt * 1000 < invalidationTime - CLOCK_SKEW_MS
+  }
+
+  /**
+   * Check if error is a token revoked exception
+   * Eliminates fragile type coercion patterns
+   */
+  private isTokenRevokedException(error: unknown): boolean {
+    if (error instanceof AuthException) {
+      const response = error.getResponse()
+      return (
+        typeof response === 'object' &&
+        response !== null &&
+        'code' in response &&
+        (response.code === 'TOKEN_REVOKED' || response.code === 'TOKEN_EXPIRED')
+      )
+    }
+    return false
+  }
+
+  /**
+   * Check if error is a service unavailable exception
+   */
+  private isServiceUnavailableException(error: unknown): boolean {
+    if (error instanceof AuthException) {
+      const response = error.getResponse()
+      return (
+        typeof response === 'object' &&
+        response !== null &&
+        'code' in response &&
+        response.code === 'SERVICE_UNAVAILABLE'
+      )
+    }
+    return false
   }
 }

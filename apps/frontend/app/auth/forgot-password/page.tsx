@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeft, AlertCircle } from 'lucide-react'
+import { GuestRoute } from '@/components/auth'
 import { AuthCard } from '@/features/auth/components/auth-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -46,61 +47,63 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <AuthCard title={t('title')} description={t('subtitle')}>
-      <form
-        onSubmit={e => {
-          void handleSubmit(onSubmit)(e)
-        }}
-        className="space-y-6"
-      >
-        {error && (
-          <div
-            className="flex items-center gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive"
-            role="alert"
-          >
-            <AlertCircle className="h-4 w-4" />
-            {error.message}
-          </div>
-        )}
-
-        <div className="space-y-2">
-          <Label htmlFor="email">{t('email')}</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="your.email@example.com"
-            autoComplete="email"
-            error={!!errors.email}
-            aria-describedby={errors.email ? 'email-error' : undefined}
-            {...register('email')}
-          />
-          {errors.email && (
-            <p
-              id="email-error"
-              className="text-sm text-destructive"
+    <GuestRoute>
+      <AuthCard title={t('title')} description={t('subtitle')}>
+        <form
+          onSubmit={e => {
+            void handleSubmit(onSubmit)(e)
+          }}
+          className="space-y-6"
+        >
+          {error && (
+            <div
+              className="flex items-center gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive"
               role="alert"
             >
-              {errors.email.message}
-            </p>
+              <AlertCircle className="h-4 w-4" />
+              {error.message}
+            </div>
           )}
-        </div>
 
-        <Button
-          type="submit"
-          className="w-full"
-          isLoading={isLoading}
-          loadingText="Sending..."
-        >
-          {t('sendLink')}
-        </Button>
+          <div className="space-y-2">
+            <Label htmlFor="email">{t('email')}</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="your.email@example.com"
+              autoComplete="email"
+              error={!!errors.email}
+              aria-describedby={errors.email ? 'email-error' : undefined}
+              {...register('email')}
+            />
+            {errors.email && (
+              <p
+                id="email-error"
+                className="text-sm text-destructive"
+                role="alert"
+              >
+                {errors.email.message}
+              </p>
+            )}
+          </div>
 
-        <Button variant="ghost" asChild className="w-full">
-          <a href="/auth/login">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            {t('backToLogin')}
-          </a>
-        </Button>
-      </form>
-    </AuthCard>
+          <Button
+            type="submit"
+            className="w-full"
+            isLoading={isLoading}
+            loadingText="Sending..."
+          >
+            {t('sendLink')}
+          </Button>
+
+          <Button variant="ghost" asChild className="w-full">
+            <a href="/auth/login">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              {t('backToLogin')}
+            </a>
+          </Button>
+        </form>
+      </AuthCard>
+    </GuestRoute>
   )
 }
